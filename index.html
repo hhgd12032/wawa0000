@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wealth OS">
+<meta name="theme-color" content="#f0ece3">
+<title>Personal Wealth OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></symbol>
+  <symbol id="ic-gem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M6 3l4 6m4 0l4-6"/></symbol>
+  <symbol id="ic-flow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></symbol>
+  <symbol id="ic-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-5 4 3 4-6"/></symbol>
+  <symbol id="ic-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></symbol>
+  <symbol id="ic-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="ic-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5m-7 7l7-7 7 7"/></symbol>
+  <symbol id="ic-arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m7-7l-7 7-7-7"/></symbol>
+  <symbol id="ic-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 4v6c0 5-4 9-9 10C7 21 3 17 3 12V6l9-4z"/></symbol>
+  <symbol id="ic-bank" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></symbol>
+  <symbol id="ic-trending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 9-9"/><path d="M15 7h5v5"/></symbol>
+  <symbol id="ic-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z"/><circle cx="16" cy="14" r="1" fill="currentColor"/></symbol>
+  <symbol id="ic-repeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></symbol>
+  <symbol id="ic-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8C8 10 5.9 16.17 3.82 19.34A1 1 0 004.8 21C8.15 19.3 16 16 20 8c-2.89 2.22-6 3.44-9 4"/><path d="M3 21l5-5"/></symbol>
+  <symbol id="ic-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="ic-currency" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9h1.5a2.5 2.5 0 010 5H9m0-5v5m3-5h3m-3 5h3"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></symbol>
+  <symbol id="ic-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></symbol>
+  <symbol id="ic-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="ic-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+  <symbol id="ic-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></symbol>
+  <symbol id="ic-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></symbol>
+  <symbol id="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></symbol>
+  <symbol id="ic-pie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></symbol>
+  <symbol id="ic-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></symbol>
+  <symbol id="ic-sun-fill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
+  <symbol id="ic-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+</svg>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --cream:#f0ece3;--cream2:#e8e2d6;--fog:#ddd8cc;--mist:#c8c2b4;
+  --stone:#968e7e;--ink-light:#6a6154;--ink:#3b3529;--ink-deep:#1c1810;
+  --green:#2a4238;--green-mid:#3a5c4e;--green-soft:#4e7a68;
+  --green-mist:#c4d5cf;--green-pale:#eaf1ee;
+  --amber:#b87c32;--amber-soft:#ecdcb8;--amber-pale:#faf3e4;
+  --red-soft:#c46860;--red-pale:#f5e4e2;
+  --blue-soft:#5270a0;--blue-pale:#dde4f0;
+  --paper:#faf8f4;
+  --r-sm:10px;--r:16px;--r-lg:22px;--r-xl:28px;
+  --sh-xs:0 1px 4px rgba(30,20,10,.06);
+  --sh-sm:0 2px 10px rgba(30,20,10,.07);
+  --sh:0 4px 24px rgba(30,20,10,.09);
+  --nav:68px;--safe:env(safe-area-inset-bottom,0px);
+  --font-serif:'Shippori Mincho','Georgia',serif;
+  --font-sans:'DM Sans',-apple-system,sans-serif;
+}
+html,body{
+  height:100%;width:100%;
+  font-family:var(--font-sans);
+  background:var(--cream);color:var(--ink);
+  font-size:15px;line-height:1.55;
+  overflow-x:hidden;
+  -webkit-text-size-adjust:100%;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;
+}
+.app{
+  width:100%;max-width:480px;
+  margin:0 auto;min-height:100dvh;
+  position:relative;background:var(--cream);
+  overflow-x:hidden;
+}
+.page{
+  display:none;
+  padding:0 0 calc(var(--nav) + var(--safe) + 16px);
+  min-height:100dvh;width:100%;
+  animation:fadeUp .28s cubic-bezier(.4,0,.2,1);
+  overflow-x:hidden;
+}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* helpers */
+.ic{display:inline-block;width:20px;height:20px;vertical-align:middle;flex-shrink:0}
+.ic-sm{width:16px;height:16px;flex-shrink:0}
+.ic-lg{width:24px;height:24px;flex-shrink:0}
+.ic-xl{width:28px;height:28px;flex-shrink:0}
+
+/* topbar */
+.topbar{padding:52px 18px 12px;display:flex;justify-content:space-between;align-items:flex-start;width:100%}
+.topbar-title{font-family:var(--font-serif);font-size:24px;color:var(--ink-deep);letter-spacing:.2px;font-weight:500}
+.topbar-sub{font-size:12px;color:var(--stone);margin-top:3px;letter-spacing:.3px}
+
+/* section header */
+.sec-hd{display:flex;justify-content:space-between;align-items:center;padding:0 18px;margin-bottom:9px}
+.sec-title{font-family:var(--font-serif);font-size:14px;font-weight:500;color:var(--ink);display:flex;align-items:center;gap:5px}
+.sec-link{font-size:12px;color:var(--green-soft);font-weight:500;background:none;border:none;cursor:pointer}
+
+/* hero card */
+.hero-card{
+  margin:4px 18px 12px;
+  background:var(--green);border-radius:var(--r-xl);
+  padding:24px 22px 20px;color:white;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 32px rgba(42,66,56,.3);
+  width:calc(100% - 36px);
+}
+.hero-card::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(100deg,transparent 0,transparent 3px,rgba(255,255,255,.015) 3px,rgba(255,255,255,.015) 4px);pointer-events:none}
+.hero-card::after{content:'';position:absolute;top:-70px;right:-70px;width:200px;height:200px;background:radial-gradient(circle,rgba(255,255,255,.07) 0%,transparent 70%)}
+.hero-label{font-size:11px;color:rgba(255,255,255,.55);letter-spacing:1px;text-transform:uppercase;font-weight:500;position:relative;z-index:1}
+.hero-amount{font-family:var(--font-serif);font-size:40px;letter-spacing:-1px;margin:5px 0 3px;line-height:1;position:relative;z-index:1}
+.hero-amount .cur{font-family:var(--font-sans);font-size:17px;opacity:.6;font-weight:300;vertical-align:super}
+.hero-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.12);border-radius:99px;padding:3px 10px;font-size:12px;margin-top:7px;position:relative;z-index:1}
+.hero-row{display:flex;gap:8px;margin-top:16px;position:relative;z-index:1}
+.hero-mini{flex:1;min-width:0;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:9px 10px}
+.hero-mini-label{font-size:10px;color:rgba(255,255,255,.5);margin-bottom:3px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-mini-val{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* coverage */
+.cov-card{margin:0 18px 12px;background:var(--paper);border:1px solid var(--fog);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh-xs);width:calc(100% - 36px)}
+.cov-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px}
+.cov-title{font-size:13px;font-weight:500;color:var(--ink);display:flex;align-items:center;gap:5px}
+.cov-pct{font-family:var(--font-serif);font-size:21px;color:var(--green-soft)}
+.cov-bar-bg{height:5px;background:var(--fog);border-radius:99px;overflow:hidden}
+.cov-bar-fill{height:100%;background:linear-gradient(90deg,var(--green-mid),var(--green-soft));border-radius:99px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.cov-desc{font-size:11.5px;color:var(--stone);margin-top:7px}
+
+/* insights */
+.insights{padding:0 18px;display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.insight-card{display:flex;align-items:flex-start;gap:9px;background:var(--paper);border:1px solid var(--fog);border-radius:var(--r-sm);padding:11px 13px;box-shadow:var(--sh-xs)}
+.ins-dot{width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.dot-g{background:var(--green-soft)}.dot-a{background:var(--amber)}.dot-r{background:var(--red-soft)}.dot-b{background:var(--blue-soft)}
+.insight-text{font-size:12.5px;color:var(--ink-light);line-height:1.55}
+.insight-text strong{color:var(--ink);font-weight:600}
+
+/* tx list */
+.tx-wrap{padding:0 18px}
+.tx-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--fog)}
+.tx-item:last-child{border-bottom:none}
+.tx-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tx-icon.inc{background:var(--green-pale);color:var(--green-soft)}
+.tx-icon.exp{background:var(--red-pale);color:var(--red-soft)}
+.tx-icon.sub{background:var(--amber-pale);color:var(--amber)}
+.tx-info{flex:1;min-width:0}
+.tx-name{font-size:13.5px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-date{font-size:11px;color:var(--stone);margin-top:1px}
+.tx-amt{font-size:13.5px;font-weight:600;white-space:nowrap;margin-left:4px}
+.tx-amt.pos{color:var(--green-soft)}.tx-amt.neg{color:var(--red-soft)}
+.tx-actions{display:flex;gap:2px;flex-shrink:0}
+.icon-btn{background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:var(--mist);transition:color .15s;display:flex;align-items:center;justify-content:center}
+.icon-btn:hover{color:var(--ink-light)}
+.icon-btn.del:hover{color:var(--red-soft)}
+
+/* sub chips */
+.sub-chips{padding:0 18px;display:flex;flex-direction:column;gap:7px}
+.sub-chip{display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--fog);border-radius:var(--r-sm);padding:10px 12px;box-shadow:var(--sh-xs)}
+.sub-chip-icon{width:32px;height:32px;border-radius:8px;background:var(--amber-pale);color:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sub-chip-name{font-size:13px;font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-chip-date{font-size:11px;color:var(--stone);white-space:nowrap}
+.sub-chip-amt{font-size:13px;font-weight:600;color:var(--amber);white-space:nowrap}
+.due-badge{background:var(--amber-soft);color:var(--amber);border-radius:99px;padding:2px 7px;font-size:10.5px;font-weight:600;border:1px solid rgba(184,124,50,.2);white-space:nowrap}
+
+/* asset cards */
+.asset-cards{padding:0 18px;display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.asset-card{background:var(--paper);border:1px solid var(--fog);border-radius:var(--r);padding:13px 14px;box-shadow:var(--sh-xs);display:flex;align-items:center;gap:12px}
+.asset-card-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.asset-card-info{flex:1;min-width:0}
+.asset-card-name{font-size:13.5px;font-weight:500}
+.asset-card-sub{font-size:11px;color:var(--stone);margin-top:1px}
+.asset-bar{height:3px;background:var(--fog);border-radius:99px;margin-top:7px;overflow:hidden}
+.asset-bar-fill{height:100%;border-radius:99px}
+.asset-card-amt{font-family:var(--font-serif);font-size:15px;font-weight:600;text-align:right;white-space:nowrap}
+
+/* chart card */
+.chart-card{margin:0 18px 12px;background:var(--paper);border:1px solid rgba(78,122,104,.22);border-radius:var(--r-lg);padding:0;box-shadow:var(--sh-xs);overflow:hidden}
+.chart-card-head{padding:14px 16px 0;border-left:3px solid var(--green-soft)}
+.chart-title{font-family:var(--font-serif);font-size:14px;color:var(--ink);margin-bottom:2px}
+.chart-sub{font-size:11px;color:var(--stone);margin-bottom:12px}
+.chart-body{padding:0 16px 14px}
+
+/* metrics */
+.metrics-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 18px 12px}
+.metric-card{background:var(--paper);border:1px solid rgba(78,122,104,.22);border-radius:var(--r);padding:0;box-shadow:var(--sh-xs);overflow:hidden}
+.metric-card-inner{padding:13px 14px;border-left:3px solid var(--green-soft)}
+.metric-icon{margin-bottom:7px;color:var(--green-soft)}
+.metric-label{font-size:10px;color:var(--stone);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.metric-val{font-family:var(--font-serif);font-size:19px;color:var(--ink-deep);margin-top:3px}
+.metric-sub{font-size:11px;color:var(--stone);margin-top:2px}
+
+/* cashflow summary */
+.cf-summary{margin:4px 18px 12px;background:var(--green);border-radius:var(--r-xl);padding:20px 22px;color:white;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(42,66,56,.28);width:calc(100% - 36px)}
+.cf-summary::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(100deg,transparent 0,transparent 3px,rgba(255,255,255,.015) 3px,rgba(255,255,255,.015) 4px);pointer-events:none}
+.cf-title{font-size:11px;color:rgba(255,255,255,.55);letter-spacing:1px;text-transform:uppercase;position:relative;z-index:1}
+.cf-val{font-family:var(--font-serif);font-size:32px;margin:4px 0;position:relative;z-index:1}
+.cf-row{display:flex;gap:12px;margin-top:12px;position:relative;z-index:1}
+.cf-mini{flex:1;min-width:0}
+.cf-mini-label{font-size:10px;color:rgba(255,255,255,.5)}
+.cf-mini-val{font-size:14px;font-weight:500;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* tab bar */
+.cf-tabs{display:flex;gap:6px;padding:0 18px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.cf-tabs::-webkit-scrollbar{display:none}
+.cf-tab{padding:6px 14px;border-radius:99px;font-size:12.5px;font-weight:500;border:1.5px solid var(--fog);background:var(--cream);color:var(--stone);cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.cf-tab.on{background:var(--green);border-color:var(--green);color:white}
+
+/* sub list */
+.sub-list{padding:0 18px;display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.sub-item{background:var(--paper);border:1px solid var(--fog);border-radius:var(--r-sm);padding:11px 13px;box-shadow:var(--sh-xs);display:flex;align-items:center;gap:10px}
+.sub-item-icon{width:34px;height:34px;border-radius:8px;background:var(--amber-pale);color:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sub-item-left{flex:1;min-width:0}
+.sub-item-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-item-meta{font-size:11px;color:var(--stone);margin-top:2px}
+.sub-item-amt{font-size:13.5px;font-weight:600;white-space:nowrap}
+.badge{font-size:10.5px;padding:2px 7px;border-radius:99px;background:var(--fog);color:var(--ink-light);font-weight:500;white-space:nowrap;flex-shrink:0}
+
+/* passive list */
+.passive-list{padding:0 18px;display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.passive-item{background:var(--paper);border:1px solid var(--fog);border-radius:var(--r-sm);padding:11px 13px;box-shadow:var(--sh-xs);display:flex;align-items:center;gap:10px}
+.passive-icon{width:34px;height:34px;border-radius:8px;background:var(--green-pale);color:var(--green-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.passive-left{flex:1;min-width:0}
+.passive-name{font-size:13px;font-weight:500}
+.passive-meta{font-size:11px;color:var(--stone);margin-top:2px}
+.passive-amt{font-size:13.5px;font-weight:600;color:var(--green-soft);white-space:nowrap}
+
+/* add form */
+.add-form{background:var(--paper);border:1px solid var(--fog);border-radius:var(--r);padding:13px 14px;box-shadow:var(--sh-xs);margin:0 18px 12px;width:calc(100% - 36px)}
+.add-form-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.add-form-toggle-title{font-size:13px;font-weight:500;color:var(--green-soft);display:flex;align-items:center;gap:5px}
+.add-form-body{margin-top:12px;display:none}
+.add-form-body.open{display:block}
+
+/* forms */
+.form-group{margin-bottom:11px}
+.form-label{font-size:11px;font-weight:500;color:var(--stone);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.4px}
+.form-input{width:100%;padding:10px 12px;border:1.5px solid var(--fog);border-radius:var(--r-sm);font-size:14px;font-family:inherit;background:var(--cream);color:var(--ink);outline:none;transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none}
+.form-input:focus{border-color:var(--green-soft);background:white}
+select.form-input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23968e7e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.type-tabs{display:flex;gap:7px;margin-bottom:12px}
+.type-tab{flex:1;padding:8px 6px;border-radius:var(--r-sm);border:1.5px solid var(--fog);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;background:var(--cream);color:var(--ink-light);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.type-tab.ai{background:var(--green-pale);border-color:var(--green-soft);color:var(--green)}
+.type-tab.ae{background:var(--red-pale);border-color:var(--red-soft);color:var(--red-soft)}
+.btn-primary{width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;transition:opacity .15s}
+.btn-primary:active{opacity:.85}
+.btn-row{display:flex;gap:7px;margin-top:10px}
+.btn-sm{padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;border:none;display:flex;align-items:center;gap:4px}
+.btn-p{background:var(--green);color:white}
+.btn-g{background:var(--fog);color:var(--ink-light)}
+.btn-d{background:var(--red-pale);color:var(--red-soft);border:1px solid rgba(196,104,96,.2)}
+
+/* search bar */
+.search-bar{margin:0 18px 10px;display:flex;align-items:center;gap:8px;background:var(--paper);border:1.5px solid var(--fog);border-radius:var(--r-sm);padding:8px 12px;width:calc(100% - 36px);isolation:isolate}
+.search-bar svg{color:var(--stone);flex-shrink:0}
+.search-bar input{flex:1;background:var(--paper);border:none;outline:none;font-size:13.5px;font-family:inherit;color:var(--ink);min-width:0}
+.search-bar input::placeholder{color:var(--mist)}
+.filter-row{display:flex;gap:6px;padding:0 18px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-chip{padding:5px 12px;border-radius:99px;font-size:12px;font-weight:500;border:1.5px solid var(--fog);background:var(--cream);color:var(--stone);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s}
+.filter-chip.on{background:var(--green);border-color:var(--green);color:white}
+
+/* settings */
+.profile-card{background:var(--green);border-radius:var(--r-lg);padding:16px 18px;margin:0 18px 16px;display:flex;align-items:center;gap:12px;color:white;box-shadow:0 4px 20px rgba(42,66,56,.25);width:calc(100% - 36px)}
+.profile-avatar{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0}
+.profile-name{font-family:var(--font-serif);font-size:15px;font-weight:500}
+.settings-section{padding:0 18px;margin-bottom:18px}
+.settings-label{font-size:10.5px;font-weight:500;color:var(--stone);letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px;padding-left:2px}
+.settings-group{background:var(--paper);border:1px solid var(--fog);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-xs)}
+.settings-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--fog);cursor:pointer;transition:background .12s}
+.settings-row:last-child{border-bottom:none}
+.settings-row:active{background:var(--cream2)}
+.settings-row-icon{color:var(--green-soft);flex-shrink:0}
+.settings-row-text{flex:1;min-width:0}
+.settings-row-name{font-size:13.5px;font-weight:500}
+.settings-row-desc{font-size:11.5px;color:var(--stone);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.settings-chevron{color:var(--mist);flex-shrink:0}
+
+/* toggle */
+.toggle{position:relative;width:42px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--fog);border-radius:99px;cursor:pointer;transition:background .2s}
+.toggle-track::before{content:'';position:absolute;left:3px;top:3px;width:18px;height:18px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.toggle input:checked+.toggle-track{background:var(--green-soft)}
+.toggle input:checked+.toggle-track::before{transform:translateX(18px)}
+
+/* donut */
+.chart-wrap{position:relative;width:160px;height:160px;margin:0 auto}
+.chart-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+.chart-center-val{font-family:var(--font-serif);font-size:17px;color:var(--ink-deep)}
+.chart-center-label{font-size:10px;color:var(--stone);margin-top:2px}
+.legend{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.legend-item{display:flex;align-items:center;gap:9px}
+.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.legend-name{font-size:13px;flex:1;min-width:0}
+.legend-pct{font-size:11.5px;color:var(--stone);width:32px;text-align:right}
+.legend-amt{font-size:13px;font-weight:600;white-space:nowrap}
+
+/* empty state */
+.empty{text-align:center;padding:36px 20px;color:var(--stone)}
+.empty-icon{margin-bottom:10px;color:var(--mist)}
+.empty-text{font-size:13px;line-height:1.65}
+
+/* bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(240,236,227,.94);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(0,0,0,.07);padding:7px 0 calc(7px + var(--safe));display:flex;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;cursor:pointer;border:none;background:none;transition:transform .15s;color:var(--stone)}
+.nav-item:active{transform:scale(.88)}
+.nav-label{font-size:9.5px;font-weight:500;color:var(--stone);transition:color .2s;letter-spacing:.2px}
+.nav-item.active{color:var(--green)}
+.nav-item.active .nav-label{color:var(--green)}
+
+/* fab */
+.fab{position:fixed;bottom:calc(var(--nav) + var(--safe) + 16px);right:max(18px,calc((100vw - 480px)/2 + 18px));width:48px;height:48px;border-radius:50%;background:var(--green);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(42,66,56,.42);z-index:90;transition:transform .18s,box-shadow .18s}
+.fab:active{transform:scale(.9)}
+.fab-hidden{display:none}
+
+/* asset add highlight */
+.asset-add-highlight{background:var(--green-pale);border:2px solid var(--green-soft);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{border-color:var(--green-soft)}50%{border-color:var(--green-mid)}}
+
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(28,24,16,.45);backdrop-filter:blur(3px);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-sheet{background:var(--paper);border-radius:24px 24px 0 0;padding:9px 20px calc(24px + var(--safe));width:100%;max-width:480px;animation:slideUp .28s cubic-bezier(.4,0,.2,1);max-height:92dvh;overflow-y:auto;position:relative}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.sheet-handle{width:32px;height:4px;background:var(--fog);border-radius:99px;margin:5px auto 16px}
+.sheet-title{font-family:var(--font-serif);font-size:17px;color:var(--ink-deep);margin-bottom:16px;font-weight:500}
+.mt-12{margin-top:12px}
+.mt-8{margin-top:8px}
+
+/* ══════ SEARCH BAR FIX ══════ */
+/* prevent noise texture showing through transparent input */
+.search-bar { isolation: isolate; }
+.search-bar input { background: transparent; }
+
+/* ══════ LIGHT MODE — green accent borders ══════ */
+/* cards with green border accent for section separation */
+.hero-card, .cf-summary { border: none; }
+.cov-card { border: 1.5px solid rgba(78,122,104,.25); }
+.insight-card { border: 1px solid rgba(78,122,104,.15); }
+.sub-chip  { border: 1px solid rgba(78,122,104,.15); }
+.asset-card { border: 1px solid rgba(78,122,104,.18); }
+.chart-card { border: 1px solid rgba(78,122,104,.22); }
+.chart-card-head { border-left: 3px solid rgba(78,122,104,.7); }
+.metric-card { border: 1px solid rgba(78,122,104,.22); }
+.metric-card-inner { border-left: 3px solid rgba(78,122,104,.7); }
+.add-form { border: 1.5px solid rgba(78,122,104,.2); }
+.settings-group { border: 1px solid rgba(78,122,104,.2); }
+.search-bar { border: 1.5px solid rgba(78,122,104,.22); }
+.sub-item { border: 1px solid rgba(78,122,104,.15); }
+.passive-item { border: 1px solid rgba(78,122,104,.18); }
+
+/* ══════ DARK MODE ══════ */
+html[data-theme='dark'] {
+  --cream:      #1c1a16;
+  --cream2:     #242119;
+  --fog:        #32302a;
+  --mist:       #423e36;
+  --stone:      #80786c;
+  --ink-light:  #b0a898;
+  --ink:        #d4ccbe;
+  --ink-deep:   #ece4d8;
+  --green:      #2a4238;
+  --green-mid:  #3a5c4e;
+  --green-soft: #60967e;
+  --green-mist: #1e3028;
+  --green-pale: #1c2e22;
+  --amber:      #c4903a;
+  --amber-soft: #3c3018;
+  --amber-pale: #2c2214;
+  --red-soft:   #c87070;
+  --red-pale:   #301e1c;
+  --blue-soft:  #6080b0;
+  --blue-pale:  #1c2232;
+  --paper:      #232018;
+}
+html[data-theme='dark'] body { background: var(--cream); color: var(--ink); }
+/* fix noise texture on dark — make it invisible */
+html[data-theme='dark'] body::before { opacity: 0; }
+/* search bar fix — solid background so no bleed-through */
+html[data-theme='dark'] .search-bar { background: var(--paper); }
+html[data-theme='dark'] .search-bar input { background: transparent; color: var(--ink); }
+html[data-theme='dark'] .form-input { background: var(--cream2); color: var(--ink); border-color: var(--fog); }
+html[data-theme='dark'] .form-input:focus { background: #2e2c24; border-color: var(--green-soft); }
+html[data-theme='dark'] .bottom-nav { background: rgba(28,26,22,.96); border-top-color: rgba(255,255,255,.06); }
+html[data-theme='dark'] .modal-sheet { background: #2a2820; }
+html[data-theme='dark'] .modal-overlay { background: rgba(0,0,0,.7); }
+html[data-theme='dark'] .settings-row:active { background: var(--cream2); }
+html[data-theme='dark'] select.form-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2380786c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-color: var(--cream2);
+}
+html[data-theme='dark'] .toggle-track::before { box-shadow: 0 1px 4px rgba(0,0,0,.5); }
+
+/* dark mode — green accent borders (brighter green, slightly higher opacity) */
+html[data-theme='dark'] .cov-card { border: 1.5px solid rgba(96,150,126,.3); background: var(--paper); }
+html[data-theme='dark'] .insight-card { border: 1px solid rgba(96,150,126,.22); background: var(--paper); }
+html[data-theme='dark'] .sub-chip { border: 1px solid rgba(96,150,126,.2); background: var(--paper); }
+html[data-theme='dark'] .asset-card { border: 1px solid rgba(96,150,126,.22); background: var(--paper); }
+/* analytics page — dark mode chart cards with strong green accent */
+html[data-theme='dark'] .chart-card {
+  border: 1px solid rgba(96,150,126,.32);
+  background: #201e18;
+  box-shadow: 0 2px 16px rgba(0,0,0,.25), inset 0 0 0 1px rgba(96,150,126,.08);
+}
+html[data-theme='dark'] .chart-card-head {
+  border-left: 3px solid rgba(96,150,126,.9);
+  background: rgba(28,46,36,.45);
+  padding-bottom: 12px;
+}
+html[data-theme='dark'] .chart-body {
+  border-top: 1px solid rgba(96,150,126,.12);
+}
+html[data-theme='dark'] .chart-title { color: var(--ink-deep); }
+html[data-theme='dark'] .metric-card {
+  border: 1px solid rgba(96,150,126,.32);
+  background: #201e18;
+  box-shadow: 0 2px 12px rgba(0,0,0,.2);
+}
+html[data-theme='dark'] .metric-card-inner {
+  border-left: 3px solid rgba(96,150,126,.85);
+  background: rgba(28,46,36,.3);
+}
+html[data-theme='dark'] .metric-val { color: var(--ink-deep); }
+/* analytics selectors dark */
+html[data-theme='dark'] .an-select {
+  background-color: #201e18;
+  border-color: rgba(96,150,126,.35);
+  color: var(--ink);
+}
+/* analytics page overall background tint */
+html[data-theme='dark'] #page-analytics {
+  background: linear-gradient(180deg, rgba(24,38,30,.35) 0%, transparent 180px);
+}
+html[data-theme='dark'] .add-form { border: 1.5px solid rgba(96,150,126,.28); background: var(--paper); }
+html[data-theme='dark'] .settings-group { border: 1px solid rgba(96,150,126,.22); background: var(--paper); }
+html[data-theme='dark'] .search-bar { border: 1.5px solid rgba(96,150,126,.28); }
+html[data-theme='dark'] .sub-item { border: 1px solid rgba(96,150,126,.2); background: var(--paper); }
+html[data-theme='dark'] .passive-item { border: 1px solid rgba(96,150,126,.22); background: var(--paper); }
+html[data-theme='dark'] .tx-item { border-bottom-color: rgba(96,150,126,.12); }
+
+/* dark mode — green-tinted section backgrounds for depth */
+html[data-theme='dark'] .cov-card { background: rgba(30,48,40,.7); }
+html[data-theme='dark'] .insight-card { background: rgba(28,42,32,.5); }
+html[data-theme='dark'] .asset-add-highlight { border-color: var(--green-soft); background: rgba(28,46,34,.6); }
+
+/* smooth theme transition — only color props, not layout */
+html, body, .app, .page, div, span, button, input, select, nav, a {
+  transition: background-color .25s ease, border-color .25s ease, color .2s ease, box-shadow .25s ease;
+}
+/* exclude animation-heavy elements */
+.cov-bar-fill, @keyframes fadeUp, .fab { transition: none !important; }
+
+/* theme toggle button in settings */
+.theme-toggle-row { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border-bottom: 1px solid var(--fog); }
+.theme-options { display: flex; gap: 6px; margin-left: auto; }
+.theme-btn {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  border: 1.5px solid var(--fog);
+  background: var(--cream2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--stone);
+  font-size: 15px;
+  transition: all .2s !important;
+}
+.theme-btn.active {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="greeting">早安 ☀</div>
+      <div class="topbar-sub" id="today-date"></div>
+    </div>
+  </div>
+  <div class="hero-card">
+    <div class="hero-label">我的總資產</div>
+    <div class="hero-amount"><span class="cur">NT$</span><span id="dash-total">0</span></div>
+    <div class="hero-badge">
+      <svg class="ic-sm" id="growth-ic"><use href="#ic-arrow-up"/></svg>
+      <span id="growth-txt">本月 +0</span>
+    </div>
+    <div class="hero-row">
+      <div class="hero-mini"><div class="hero-mini-label">本月收入</div><div class="hero-mini-val" id="dash-inc">NT$0</div></div>
+      <div class="hero-mini"><div class="hero-mini-label">本月支出</div><div class="hero-mini-val" id="dash-exp">NT$0</div></div>
+      <div class="hero-mini"><div class="hero-mini-label">存下來</div><div class="hero-mini-val" id="dash-saved">NT$0</div></div>
+    </div>
+  </div>
+  <div class="cov-card">
+    <div class="cov-top">
+      <div>
+        <div class="cov-title"><svg class="ic-sm" style="color:var(--green-soft)"><use href="#ic-shield"/></svg> 被動收入覆蓋率</div>
+        <div class="cov-desc" id="cov-desc">用被動收入抵銷固定支出</div>
+      </div>
+      <div class="cov-pct" id="cov-pct">0%</div>
+    </div>
+    <div class="cov-bar-bg"><div class="cov-bar-fill" id="cov-bar" style="width:0%"></div></div>
+  </div>
+  <div class="sec-hd"><div class="sec-title"><svg class="ic-sm" style="color:var(--amber)"><use href="#ic-info"/></svg> 財務小觀察</div></div>
+  <div class="insights" id="insights"></div>
+  <div class="sec-hd mt-8"><div class="sec-title">最近記錄</div><button class="sec-link" onclick="switchPage('cashflow')">查看全部</button></div>
+  <div class="tx-wrap" id="recent-tx"><div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-wallet"/></svg></div><div class="empty-text">還沒有記錄<br>點右下角 ＋ 開始記帳</div></div></div>
+  <div class="sec-hd mt-12"><div class="sec-title"><svg class="ic-sm" style="color:var(--amber)"><use href="#ic-bell"/></svg> 即將扣款</div><button class="sec-link" onclick="switchPage('cashflow')">管理訂閱</button></div>
+  <div class="sub-chips" id="upcoming-subs"><div style="padding:4px 0 10px;color:var(--stone);font-size:13px;text-align:center">還沒有設定訂閱</div></div>
+  <div style="height:6px"></div>
+</div>
+
+<!-- ═══════════ ASSETS ═══════════ -->
+<div class="page" id="page-assets">
+  <div class="topbar">
+    <div><div class="topbar-title">我的資產</div><div class="topbar-sub">資產結構總覽</div></div>
+  </div>
+  <div style="padding:0 18px;margin-bottom:12px">
+    <div style="background:var(--paper);border:1px solid var(--fog);border-radius:var(--r-lg);padding:18px;box-shadow:var(--sh-xs)">
+      <div style="text-align:center;font-size:11px;color:var(--stone);margin-bottom:8px;letter-spacing:.4px;text-transform:uppercase">資產配置</div>
+      <div class="chart-wrap"><canvas id="donut-chart"></canvas><div class="chart-center"><div class="chart-center-val" id="donut-total">NT$0</div><div class="chart-center-label">總資產</div></div></div>
+      <div class="legend" id="asset-legend"><div style="text-align:center;color:var(--stone);font-size:13px;padding:8px 0">新增資產後顯示配置</div></div>
+    </div>
+  </div>
+  <div class="sec-hd"><div class="sec-title">資產明細</div></div>
+  <div class="asset-cards" id="asset-cards"></div>
+  <!-- highlighted add form -->
+  <div class="add-form asset-add-highlight" id="add-asset-form">
+    <div class="add-form-toggle" onclick="toggleForm('add-asset-body')">
+      <span class="add-form-toggle-title"><svg class="ic-sm"><use href="#ic-plus"/></svg> 點這裡新增資產</span>
+      <svg class="ic-sm" style="color:var(--stone)"><use href="#ic-chevron-right"/></svg>
+    </div>
+    <div class="add-form-body" id="add-asset-body">
+      <div class="form-group"><label class="form-label">資產名稱</label><input class="form-input" id="asset-name" placeholder="例：台新銀行、台積電、VOO"></div>
+      <div class="form-group"><label class="form-label">類別</label>
+        <select class="form-input" id="asset-type">
+          <option value="bank">銀行存款</option><option value="tw-stock">台股 / 基金</option>
+          <option value="us-stock">美股 ETF</option><option value="insurance">保險</option>
+          <option value="crypto">加密貨幣</option><option value="real-estate">不動產</option>
+          <option value="cash">現金 / 其他</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">金額 (NT$)</label><input class="form-input numfmt" id="asset-amount" type="text" inputmode="numeric" placeholder="0"></div>
+      <div class="btn-row">
+        <button class="btn-sm btn-p" onclick="addAsset()"><svg class="ic-sm"><use href="#ic-check"/></svg> 新增</button>
+        <button class="btn-sm btn-g" onclick="toggleForm('add-asset-body')">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CASHFLOW ═══════════ -->
+<div class="page" id="page-cashflow">
+  <div class="topbar">
+    <div><div class="topbar-title">收支管理</div><div class="topbar-sub">訂閱 · 被動收入 · 每日記錄</div></div>
+  </div>
+  <div class="cf-summary">
+    <div class="cf-title">本月現金流</div>
+    <div class="cf-val" id="cf-net">NT$0</div>
+    <div class="cf-row">
+      <div class="cf-mini"><div class="cf-mini-label">固定支出/月</div><div class="cf-mini-val" id="cf-fixed">NT$0</div></div>
+      <div class="cf-mini"><div class="cf-mini-label">被動收入/月</div><div class="cf-mini-val" id="cf-passive">NT$0</div></div>
+      <div class="cf-mini"><div class="cf-mini-label">覆蓋率</div><div class="cf-mini-val" id="cf-cov">0%</div></div>
+    </div>
+  </div>
+  <div class="cf-tabs">
+    <button class="cf-tab on" id="cf-tab-rec" onclick="cfTab('rec')">日常記錄</button>
+    <button class="cf-tab" id="cf-tab-sub" onclick="cfTab('sub')">訂閱</button>
+    <button class="cf-tab" id="cf-tab-pas" onclick="cfTab('pas')">被動收入</button>
+  </div>
+
+  <!-- Record panel -->
+  <div id="cf-panel-rec">
+    <!-- search & filter -->
+    <div class="search-bar">
+      <svg class="ic-sm"><use href="#ic-search"/></svg>
+      <input type="text" id="rec-search" placeholder="搜尋記錄..." oninput="renderRecords()">
+    </div>
+    <div class="filter-row" id="filter-row">
+      <button class="filter-chip on" data-val="all" onclick="setFilter('all')">全部</button>
+      <button class="filter-chip" data-val="income" onclick="setFilter('income')">收入</button>
+      <button class="filter-chip" data-val="expense" onclick="setFilter('expense')">支出</button>
+    </div>
+    <!-- month/year selector -->
+    <div style="display:flex;gap:8px;padding:0 18px;margin-bottom:10px">
+      <select class="form-input" id="filter-year" onchange="renderRecords()" style="flex:1"></select>
+      <select class="form-input" id="filter-month" onchange="renderRecords()" style="flex:1">
+        <option value="all">全年</option>
+        <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option>
+        <option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
+        <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option>
+        <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+      </select>
+    </div>
+    <div class="tx-wrap" id="all-records"></div>
+  </div>
+
+  <!-- Sub panel -->
+  <div id="cf-panel-sub" style="display:none">
+    <div class="sub-list" id="sub-list"></div>
+    <div class="add-form">
+      <div class="add-form-toggle" onclick="toggleForm('add-sub-body')">
+        <span class="add-form-toggle-title"><svg class="ic-sm"><use href="#ic-plus"/></svg> 新增訂閱</span>
+        <svg class="ic-sm" style="color:var(--stone)"><use href="#ic-chevron-right"/></svg>
+      </div>
+      <div class="add-form-body" id="add-sub-body">
+        <div class="form-group"><label class="form-label">訂閱名稱</label><input class="form-input" id="sub-name" placeholder="Netflix、Spotify..."></div>
+        <div class="form-group"><label class="form-label">週期</label>
+          <select class="form-input" id="sub-cycle"><option value="monthly">每月</option><option value="yearly">每年</option><option value="quarterly">每季</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">金額 (NT$)</label><input class="form-input numfmt" id="sub-amount" type="text" inputmode="numeric" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">下次扣款日（選填）</label><input class="form-input" id="sub-date" type="date"></div>
+        <div class="btn-row">
+          <button class="btn-sm btn-p" onclick="addSub()"><svg class="ic-sm"><use href="#ic-check"/></svg> 新增</button>
+          <button class="btn-sm btn-g" onclick="toggleForm('add-sub-body')">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Passive panel -->
+  <div id="cf-panel-pas" style="display:none">
+    <div class="passive-list" id="passive-list"></div>
+    <div class="add-form">
+      <div class="add-form-toggle" onclick="toggleForm('add-pas-body')">
+        <span class="add-form-toggle-title"><svg class="ic-sm"><use href="#ic-plus"/></svg> 新增被動收入</span>
+        <svg class="ic-sm" style="color:var(--stone)"><use href="#ic-chevron-right"/></svg>
+      </div>
+      <div class="add-form-body" id="add-pas-body">
+        <div class="form-group"><label class="form-label">名稱</label><input class="form-input" id="pas-name" placeholder="台積電股息、定存利息..."></div>
+        <div class="form-group"><label class="form-label">類型</label>
+          <select class="form-input" id="pas-type"><option value="dividend">股息</option><option value="interest">利息</option><option value="rent">租金</option><option value="royalty">版稅/授權</option><option value="other">其他</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">每月金額 (NT$)</label><input class="form-input numfmt" id="pas-amount" type="text" inputmode="numeric" placeholder="0"></div>
+        <div class="btn-row">
+          <button class="btn-sm btn-p" onclick="addPassive()"><svg class="ic-sm"><use href="#ic-check"/></svg> 新增</button>
+          <button class="btn-sm btn-g" onclick="toggleForm('add-pas-body')">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ANALYTICS ═══════════ -->
+<div class="page" id="page-analytics">
+  <div class="topbar">
+    <div><div class="topbar-title">財務成長</div><div class="topbar-sub">趨勢 · 支出佔比 · 年度總覽</div></div>
+  </div>
+  <!-- month/year picker for analytics -->
+  <div style="display:flex;gap:8px;padding:0 18px;margin-bottom:12px">
+    <select class="form-input an-select" id="an-year" onchange="renderCharts()" style="flex:1"></select>
+    <select class="form-input" id="an-month" onchange="renderCharts()" style="flex:1">
+      <option value="all">全年</option>
+      <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option>
+      <option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
+      <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option>
+      <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+    </select>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div class="chart-title">每月收支趨勢</div>
+      <div class="chart-sub">近 6 個月</div>
+    </div>
+    <div class="chart-body">
+      <div style="position:relative;height:170px"><canvas id="expense-chart"></canvas></div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div class="chart-title">支出類別佔比</div>
+      <div class="chart-sub">依類別分析花費比重</div>
+    </div>
+    <div class="chart-body">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="position:relative;width:140px;height:140px;flex-shrink:0"><canvas id="cat-chart"></canvas><div class="chart-center"><div class="chart-center-val" id="cat-total">NT$0</div><div class="chart-center-label">總支出</div></div></div>
+        <div id="cat-legend" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:7px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div class="chart-title">資產成長曲線</div>
+      <div class="chart-sub">累積資產推估</div>
+    </div>
+    <div class="chart-body">
+      <div style="position:relative;height:160px"><canvas id="asset-chart"></canvas></div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div class="chart-title">被動收入覆蓋率</div>
+      <div class="chart-sub">逐月推估</div>
+    </div>
+    <div class="chart-body">
+      <div style="position:relative;height:140px"><canvas id="coverage-chart"></canvas></div>
+    </div>
+  </div>
+  <div class="metrics-row">
+    <div class="metric-card"><div class="metric-card-inner"><div class="metric-icon"><svg class="ic"><use href="#ic-trending"/></svg></div><div class="metric-label">平均存款率</div><div class="metric-val" id="avg-save">—</div><div class="metric-sub">近 6 個月</div></div></div>
+    <div class="metric-card"><div class="metric-card-inner"><div class="metric-icon"><svg class="ic" style="color:var(--amber)"><use href="#ic-repeat"/></svg></div><div class="metric-label">固定支出佔比</div><div class="metric-val" id="fix-ratio">—</div><div class="metric-sub">佔總支出</div></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ SETTINGS ═══════════ -->
+<div class="page" id="page-settings">
+  <div class="topbar">
+    <div><div class="topbar-title">設定</div><div class="topbar-sub">個人化你的財務 OS</div></div>
+  </div>
+  <div class="profile-card">
+    <div class="profile-avatar"><svg class="ic-lg"><use href="#ic-user"/></svg></div>
+    <div><div class="profile-name" id="profile-name">我的帳號</div><div style="font-size:11.5px;color:rgba(255,255,255,.6);margin-top:2px">Personal Wealth OS · 個人版</div></div>
+    <button onclick="openModal('modal-profile')" style="background:none;border:none;cursor:pointer;margin-left:auto"><svg class="ic" style="color:rgba(255,255,255,.7)"><use href="#ic-edit"/></svg></button>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-label">個人設定</div>
+    <div class="settings-group">
+      <div class="settings-row" onclick="openModal('modal-profile')">
+        <div class="settings-row-icon"><svg class="ic"><use href="#ic-user"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name">暱稱</div><div class="settings-row-desc" id="set-name-desc">設定你的名字</div></div>
+        <svg class="ic-sm settings-chevron"><use href="#ic-chevron-right"/></svg>
+      </div>
+      <div class="settings-row" onclick="openModal('modal-goal')">
+        <div class="settings-row-icon"><svg class="ic"><use href="#ic-target"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name">本月存款目標</div><div class="settings-row-desc" id="set-goal-desc">尚未設定</div></div>
+        <svg class="ic-sm settings-chevron"><use href="#ic-chevron-right"/></svg>
+      </div>
+      <div class="settings-row" onclick="openModal('modal-debit')">
+        <div class="settings-row-icon"><svg class="ic"><use href="#ic-calendar"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name">固定扣款目標日</div><div class="settings-row-desc" id="set-debit-desc">尚未設定</div></div>
+        <svg class="ic-sm settings-chevron"><use href="#ic-chevron-right"/></svg>
+      </div>
+      <div class="settings-row" onclick="openModal('modal-currency')">
+        <div class="settings-row-icon"><svg class="ic"><use href="#ic-currency"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name">主要幣別</div><div class="settings-row-desc" id="set-cur-desc">TWD 新台幣</div></div>
+        <svg class="ic-sm settings-chevron"><use href="#ic-chevron-right"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-label">外觀</div>
+    <div class="settings-group">
+      <div class="theme-toggle-row">
+        <div class="settings-row-icon"><svg class="ic" style="color:var(--green-soft)"><use href="#ic-sun-fill"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name">介面主題</div><div class="settings-row-desc" id="theme-desc">日間模式</div></div>
+        <div class="theme-options">
+          <button class="theme-btn active" id="theme-btn-light" onclick="setTheme('light')" title="日間">
+            <svg class="ic-sm"><use href="#ic-sun-fill"/></svg>
+          </button>
+          <button class="theme-btn" id="theme-btn-dark" onclick="setTheme('dark')" title="深色">
+            <svg class="ic-sm"><use href="#ic-moon"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-label">提醒通知</div>
+    <div class="settings-group">
+      <div class="settings-row">
+        <div class="settings-row-icon"><svg class="ic"><use href="#ic-bell"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name">訂閱扣款提醒</div><div class="settings-row-desc">提前 3 天通知</div></div>
+        <label class="toggle"><input type="checkbox" id="tog-notify" onchange="saveToggle('notify',this.checked)" checked><span class="toggle-track"></span></label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-icon"><svg class="ic"><use href="#ic-sun"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name">每月財務回顧</div><div class="settings-row-desc">月底自動生成摘要</div></div>
+        <label class="toggle"><input type="checkbox" id="tog-review" onchange="saveToggle('review',this.checked)" checked><span class="toggle-track"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-label">資料管理</div>
+    <div class="settings-group">
+      <div class="settings-row" onclick="exportCSV()">
+        <div class="settings-row-icon"><svg class="ic"><use href="#ic-download"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name">完整備份（JSON + CSV）</div><div class="settings-row-desc">包含所有記錄、訂閱、資產、設定</div></div>
+        <svg class="ic-sm settings-chevron"><use href="#ic-chevron-right"/></svg>
+      </div>
+      <div class="settings-row" onclick="document.getElementById('import-file').click()">
+        <div class="settings-row-icon"><svg class="ic"><use href="#ic-upload"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name">還原備份</div><div class="settings-row-desc">支援 .json 完整備份 或 .csv 記帳記錄</div></div>
+        <svg class="ic-sm settings-chevron"><use href="#ic-chevron-right"/></svg>
+      </div>
+      <input type="file" id="import-file" accept=".json,.csv" style="display:none" onchange="importCSV(this)">
+      <div class="settings-row" onclick="clearAllData()">
+        <div class="settings-row-icon"><svg class="ic" style="color:var(--red-soft)"><use href="#ic-trash"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name" style="color:var(--red-soft)">清除所有資料</div><div class="settings-row-desc">重新開始，不可復原</div></div>
+        <svg class="ic-sm settings-chevron"><use href="#ic-chevron-right"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-label">關於</div>
+    <div class="settings-group">
+      <div class="settings-row" style="cursor:default">
+        <div class="settings-row-icon"><svg class="ic" style="color:var(--amber)"><use href="#ic-leaf"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-name">Personal Wealth OS</div><div class="settings-row-desc">v1.1 · 個人財務管理</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="height:8px"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-dashboard" onclick="switchPage('dashboard')"><svg class="ic"><use href="#ic-home"/></svg><div class="nav-label">首頁</div></button>
+  <button class="nav-item" id="nav-assets" onclick="switchPage('assets')"><svg class="ic"><use href="#ic-gem"/></svg><div class="nav-label">資產</div></button>
+  <button class="nav-item" id="nav-cashflow" onclick="switchPage('cashflow')"><svg class="ic"><use href="#ic-flow"/></svg><div class="nav-label">收支</div></button>
+  <button class="nav-item" id="nav-analytics" onclick="switchPage('analytics')"><svg class="ic"><use href="#ic-chart"/></svg><div class="nav-label">分析</div></button>
+  <button class="nav-item" id="nav-settings" onclick="switchPage('settings')"><svg class="ic"><use href="#ic-settings"/></svg><div class="nav-label">設定</div></button>
+</nav>
+
+<!-- FAB — only on cashflow & dashboard -->
+<button class="fab" id="fab-btn" onclick="openModal('modal-add')"><svg class="ic-lg"><use href="#ic-plus"/></svg></button>
+
+<!-- ═══════════ MODALS ═══════════ -->
+<!-- Add Record -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">新增一筆記錄</div>
+    <div class="type-tabs">
+      <button class="type-tab ai" id="rt-inc" onclick="setRecType('income')"><svg class="ic-sm"><use href="#ic-arrow-up"/></svg> 收入</button>
+      <button class="type-tab" id="rt-exp" onclick="setRecType('expense')"><svg class="ic-sm"><use href="#ic-arrow-down"/></svg> 支出</button>
+    </div>
+    <div class="form-group"><label class="form-label">類別</label><select class="form-input" id="rec-cat"></select></div>
+    <div class="form-group"><label class="form-label">名稱</label><input class="form-input" id="rec-name" placeholder="這筆錢是什麼？"></div>
+    <div class="form-group"><label class="form-label">金額 (NT$)</label><input class="form-input numfmt" id="rec-amount" type="text" inputmode="numeric" placeholder="0"></div>
+    <div class="form-group"><label class="form-label">日期</label><input class="form-input" id="rec-date" type="date"></div>
+    <div class="form-group"><label class="form-label">備註（選填）</label><input class="form-input" id="rec-note" placeholder="..."></div>
+    <button class="btn-primary" onclick="addRecord()"><svg class="ic-sm"><use href="#ic-check"/></svg> 記下來</button>
+  </div>
+</div>
+
+<!-- Edit Record -->
+<div class="modal-overlay" id="modal-edit-rec">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">編輯記錄</div>
+    <input type="hidden" id="edit-rec-id">
+    <div class="type-tabs">
+      <button class="type-tab ai" id="ert-inc" onclick="setERT('income')"><svg class="ic-sm"><use href="#ic-arrow-up"/></svg> 收入</button>
+      <button class="type-tab" id="ert-exp" onclick="setERT('expense')"><svg class="ic-sm"><use href="#ic-arrow-down"/></svg> 支出</button>
+    </div>
+    <div class="form-group"><label class="form-label">類別</label><select class="form-input" id="edit-rec-cat"></select></div>
+    <div class="form-group"><label class="form-label">名稱</label><input class="form-input" id="edit-rec-name"></div>
+    <div class="form-group"><label class="form-label">金額 (NT$)</label><input class="form-input numfmt" id="edit-rec-amount" type="text" inputmode="numeric"></div>
+    <div class="form-group"><label class="form-label">日期</label><input class="form-input" id="edit-rec-date" type="date"></div>
+    <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="edit-rec-note"></div>
+    <button class="btn-primary" onclick="saveEditRecord()"><svg class="ic-sm"><use href="#ic-check"/></svg> 儲存</button>
+  </div>
+</div>
+
+<!-- Edit Sub -->
+<div class="modal-overlay" id="modal-edit-sub">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">編輯訂閱</div>
+    <input type="hidden" id="edit-sub-id">
+    <div class="form-group"><label class="form-label">名稱</label><input class="form-input" id="edit-sub-name"></div>
+    <div class="form-group"><label class="form-label">週期</label><select class="form-input" id="edit-sub-cycle"><option value="monthly">每月</option><option value="yearly">每年</option><option value="quarterly">每季</option></select></div>
+    <div class="form-group"><label class="form-label">金額 (NT$)</label><input class="form-input numfmt" id="edit-sub-amount" type="text" inputmode="numeric"></div>
+    <div class="form-group"><label class="form-label">扣款日（選填）</label><input class="form-input" id="edit-sub-date" type="date"></div>
+    <button class="btn-primary" onclick="saveEditSub()"><svg class="ic-sm"><use href="#ic-check"/></svg> 儲存</button>
+  </div>
+</div>
+
+<!-- Edit Passive -->
+<div class="modal-overlay" id="modal-edit-pas">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">編輯被動收入</div>
+    <input type="hidden" id="edit-pas-id">
+    <div class="form-group"><label class="form-label">名稱</label><input class="form-input" id="edit-pas-name"></div>
+    <div class="form-group"><label class="form-label">類型</label><select class="form-input" id="edit-pas-type"><option value="dividend">股息</option><option value="interest">利息</option><option value="rent">租金</option><option value="royalty">版稅/授權</option><option value="other">其他</option></select></div>
+    <div class="form-group"><label class="form-label">每月金額 (NT$)</label><input class="form-input numfmt" id="edit-pas-amount" type="text" inputmode="numeric"></div>
+    <button class="btn-primary" onclick="saveEditPassive()"><svg class="ic-sm"><use href="#ic-check"/></svg> 儲存</button>
+  </div>
+</div>
+
+<!-- Edit Asset -->
+<div class="modal-overlay" id="modal-edit-asset">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">編輯資產</div>
+    <input type="hidden" id="edit-asset-id">
+    <div class="form-group"><label class="form-label">名稱</label><input class="form-input" id="edit-asset-name"></div>
+    <div class="form-group"><label class="form-label">類別</label><select class="form-input" id="edit-asset-type"><option value="bank">銀行存款</option><option value="tw-stock">台股/基金</option><option value="us-stock">美股 ETF</option><option value="insurance">保險</option><option value="crypto">加密貨幣</option><option value="real-estate">不動產</option><option value="cash">現金/其他</option></select></div>
+    <div class="form-group"><label class="form-label">金額 (NT$)</label><input class="form-input numfmt" id="edit-asset-amount" type="text" inputmode="numeric"></div>
+    <button class="btn-primary" onclick="saveEditAsset()"><svg class="ic-sm"><use href="#ic-check"/></svg> 儲存</button>
+  </div>
+</div>
+
+<!-- Settings modals -->
+<div class="modal-overlay" id="modal-profile">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div><div class="sheet-title">編輯暱稱</div>
+    <div class="form-group"><label class="form-label">你的名字</label><input class="form-input" id="inp-name" placeholder="輸入名字或暱稱"></div>
+    <button class="btn-primary" onclick="saveProfile()"><svg class="ic-sm"><use href="#ic-check"/></svg> 儲存</button>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-goal">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div><div class="sheet-title">本月存款目標</div>
+    <div class="form-group"><label class="form-label">目標金額 (NT$)</label><input class="form-input numfmt" id="inp-goal" type="text" inputmode="numeric" placeholder="20,000"></div>
+    <div class="form-group"><label class="form-label">說明（選填）</label><input class="form-input" id="inp-goal-note" placeholder="存旅遊基金..."></div>
+    <button class="btn-primary" onclick="saveGoal()"><svg class="ic-sm"><use href="#ic-check"/></svg> 設定</button>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-debit">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div><div class="sheet-title">固定扣款目標日</div>
+    <div style="font-size:13px;color:var(--stone);margin-bottom:14px;line-height:1.6">設定每月幾號要完成所有固定扣款，系統會在 Dashboard 提醒你還差多少天</div>
+    <div class="form-group"><label class="form-label">每月幾號（1-31）</label><input class="form-input" id="inp-debit-day" type="number" min="1" max="31" placeholder="例：15"></div>
+    <div class="form-group"><label class="form-label">備註（選填）</label><input class="form-input" id="inp-debit-note" placeholder="例：薪水入帳後統一扣款"></div>
+    <button class="btn-primary" onclick="saveDebit()"><svg class="ic-sm"><use href="#ic-check"/></svg> 設定</button>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-currency">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div><div class="sheet-title">主要幣別</div>
+    <div class="form-group"><label class="form-label">選擇幣別</label>
+      <select class="form-input" id="inp-currency">
+        <option value="TWD">TWD — 新台幣</option><option value="USD">USD — 美元</option>
+        <option value="JPY">JPY — 日圓</option><option value="EUR">EUR — 歐元</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="saveCurrency()"><svg class="ic-sm"><use href="#ic-check"/></svg> 儲存</button>
+  </div>
+</div>
+
+</div><!-- end .app -->
+<script>
+// ══════ DATA ══════
+const KEY = 'wealthos_v3'; // same key → preserves existing data
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||def()}catch{return def()}}
+function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
+function def(){return{records:[],assets:[],subs:[],passives:[],settings:{name:'',currency:'TWD',goal:0,goalNote:'',debitDay:0,debitNote:'',notify:true,review:true}}}
+
+let D=load();
+// migration: ensure settings sub-keys exist
+D.settings=Object.assign({name:'',currency:'TWD',goal:0,goalNote:'',debitDay:0,debitNote:'',notify:true,review:true,theme:'light'},D.settings||{});
+save(D);
+
+// Apply saved theme immediately (before DOMContentLoaded to avoid flash)
+(function(){
+  const t = D.settings.theme || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', t === 'dark' ? '#1a1814' : '#f0ece3');
+})();
+
+let recType='income', editRecType='income', recFilter='all';
+let charts={donut:null,expense:null,cat:null,asset:null,coverage:null};
+const CAT_INC=['salary','bonus','side','other-income'];
+const CAT_EXP=['food','veggie','transport','shopping','health','entertainment','electric','travel','daily','other-expense'];
+const CAT_LABELS={salary:'薪水',bonus:'獎金',side:'副業',food:'餐飲',veggie:'蔬菜',transport:'交通',shopping:'購物',health:'醫療',entertainment:'娛樂',electric:'電費',travel:'旅遊',daily:'日常用品',rent:'租金',royalty:'版稅','other-income':'其他收入','other-expense':'其他支出'};
+const CAT_IC={salary:'ic-bank',bonus:'ic-trending',side:'ic-leaf',food:'ic-wallet',veggie:'ic-leaf',transport:'ic-flow',shopping:'ic-wallet',health:'ic-shield',entertainment:'ic-sun',electric:'ic-bell',travel:'ic-target',daily:'ic-wallet',rent:'ic-bank',royalty:'ic-leaf','other-income':'ic-trending','other-expense':'ic-wallet'};
+const ASSET_INFO={bank:{label:'銀行存款',ic:'ic-bank',color:'#5270a0',bg:'var(--blue-pale)'},'tw-stock':{label:'台股/基金',ic:'ic-trending',color:'#2a4238',bg:'var(--green-pale)'},'us-stock':{label:'美股 ETF',ic:'ic-trending',color:'#4e7a68',bg:'var(--green-mist)'},insurance:{label:'保險',ic:'ic-shield',color:'#b87c32',bg:'var(--amber-pale)'},crypto:{label:'加密貨幣',ic:'ic-target',color:'#7a6040',bg:'#f5edda'},'real-estate':{label:'不動產',ic:'ic-target',color:'#5a7240',bg:'#eef3e4'},cash:{label:'現金/其他',ic:'ic-wallet',color:'#9e9890',bg:'var(--cream2)'}};
+
+// ══════ INIT ══════
+document.addEventListener('DOMContentLoaded',()=>{
+  setGreeting();setDate();
+  initYearSelectors();
+  initNumFmt();
+  applySettings();
+  setRecType('income');
+  renderAll();
+  // Bind overlay-click-to-close (must run after DOM ready)
+  document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+    overlay.addEventListener('click',function(e){
+      if(e.target===overlay) closeModal(overlay.id);
+    });
+  });
+});
+
+function setGreeting(){
+  const h=new Date().getHours();
+  const g=h<12?'早安':h<17?'午安':'晚安';
+  const n=D.settings.name;
+  document.getElementById('greeting').textContent=g+(n?'，'+n:'')+' ☀';
+}
+function setDate(){
+  const d=new Date();
+  const days=['日','一','二','三','四','五','六'];
+  document.getElementById('today-date').textContent=`${d.getFullYear()} / ${d.getMonth()+1} / ${d.getDate()} · 週${days[d.getDay()]}`;
+}
+function initYearSelectors(){
+  const now=new Date();
+  const yrs=new Set();
+  D.records.forEach(r=>{if(r.date)yrs.add(r.date.slice(0,4))});
+  yrs.add(String(now.getFullYear()));
+  const sorted=[...yrs].sort((a,b)=>b-a);
+  ['filter-year','an-year'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.innerHTML=sorted.map(y=>`<option value="${y}"${y===String(now.getFullYear())?'selected':''}>${y}年</option>`).join('');
+  });
+  const fm=document.getElementById('filter-month');
+  if(fm)fm.value=String(now.getMonth()+1).padStart(2,'0');
+}
+
+function initNumFmt(){
+  document.querySelectorAll('.numfmt').forEach(el=>{
+    el.addEventListener('input',function(){
+      const raw=this.value.replace(/[^0-9]/g,'');
+      const num=parseInt(raw)||0;
+      if(raw===''){this.value='';return}
+      this.value=num.toLocaleString();
+    });
+  });
+}
+function getNum(id){
+  const v=(document.getElementById(id)||{}).value||'';
+  return parseFloat(v.replace(/,/g,''))||0;
+}
+function setNumField(id,val){
+  const el=document.getElementById(id);
+  if(el)el.value=val?Math.round(val).toLocaleString():'';
+}
+
+// ══════ NAV ══════
+function switchPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('nav-'+page).classList.add('active');
+  // fab: show only on dashboard & cashflow
+  const fab=document.getElementById('fab-btn');
+  fab.style.display=(page==='dashboard'||page==='cashflow')?'flex':'none';
+  if(page==='analytics'){initYearSelectors();renderCharts()}
+  if(page==='assets')renderDonut();
+  window.scrollTo(0,0);
+}
+
+// ══════ MODAL ══════
+function openModal(id){
+  const overlay=document.getElementById(id);
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow='';
+}
+function toggleForm(id){document.getElementById(id).classList.toggle('open')}
+
+
+
+// ══════ REC TYPE ══════
+function setRecType(t){
+  recType=t;
+  const cats=t==='income'?CAT_INC:CAT_EXP;
+  document.getElementById('rec-cat').innerHTML=cats.map(c=>`<option value="${c}">${CAT_LABELS[c]||c}</option>`).join('');
+  document.getElementById('rt-inc').className='type-tab'+(t==='income'?' ai':'');
+  document.getElementById('rt-exp').className='type-tab'+(t==='expense'?' ae':'');
+  // set today
+  const de=document.getElementById('rec-date');
+  if(de&&!de.value)de.value=new Date().toISOString().split('T')[0];
+}
+function setERT(t){
+  editRecType=t;
+  const cats=t==='income'?CAT_INC:CAT_EXP;
+  document.getElementById('edit-rec-cat').innerHTML=cats.map(c=>`<option value="${c}">${CAT_LABELS[c]||c}</option>`).join('');
+  document.getElementById('ert-inc').className='type-tab'+(t==='income'?' ai':'');
+  document.getElementById('ert-exp').className='type-tab'+(t==='expense'?' ae':'');
+}
+
+// ══════ CF TABS ══════
+function cfTab(t){
+  ['rec','sub','pas'].forEach(x=>{
+    const p=document.getElementById('cf-panel-'+x);
+    const b=document.getElementById('cf-tab-'+x);
+    if(p)p.style.display=x===t?'block':'none';
+    if(b)b.className='cf-tab'+(x===t?' on':'');
+  });
+}
+
+// ══════ FILTER ══════
+let filterVal='all';
+function setFilter(v){
+  filterVal=v;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.val===v));
+  renderRecords();
+}
+
+// ══════ CALCULATIONS ══════
+function getMonthStr(y,m){return`${y}-${String(m).padStart(2,'0')}`}
+function getThisMonthData(){
+  const now=new Date();
+  return getMonthDataFor(now.getFullYear(),now.getMonth()+1);
+}
+function getMonthDataFor(yr,mo){
+  const ms=getMonthStr(yr,mo);
+  const recs=D.records.filter(r=>r.date&&r.date.startsWith(ms));
+  const inc=recs.filter(r=>r.type==='income').reduce((s,r)=>s+r.amount,0);
+  const exp=recs.filter(r=>r.type==='expense').reduce((s,r)=>s+r.amount,0);
+  return{inc,exp,net:inc-exp};
+}
+function getMonthlyFixed(){return D.subs.reduce((s,x)=>s+(x.cycle==='monthly'?x.amount:x.cycle==='yearly'?x.amount/12:x.cycle==='quarterly'?x.amount/3:0),0)}
+function getTotalPassive(){return D.passives.reduce((s,p)=>s+p.amount,0)}
+function getTotalAssets(){return D.assets.reduce((s,a)=>s+a.amount,0)}
+function fmt(n){if(n>=1000000)return`NT$${(n/10000).toFixed(1)}萬`;return`NT$${Math.round(n).toLocaleString()}`}
+
+// ══════ RENDER ALL ══════
+function renderAll(){
+  renderDashboard();
+  renderRecords();
+  renderSubList();
+  renderPassiveList();
+  renderAssetCards();
+}
+
+// ══════ DASHBOARD ══════
+function renderDashboard(){
+  const{inc,exp,net}=getThisMonthData();
+  const passive=getTotalPassive(),fixed=getMonthlyFixed(),total=getTotalAssets();
+  const cov=fixed>0?Math.min(Math.round((passive/fixed)*100),200):0;
+
+  document.getElementById('dash-total').textContent=Math.round(total).toLocaleString();
+  document.getElementById('dash-inc').textContent=fmt(inc);
+  document.getElementById('dash-exp').textContent=fmt(exp);
+  document.getElementById('dash-saved').textContent=fmt(net);
+
+  document.getElementById('growth-ic').querySelector('use').setAttribute('href',net>=0?'#ic-arrow-up':'#ic-arrow-down');
+  document.getElementById('growth-txt').textContent=net>=0?`本月 +${fmt(net)}`:`本月 ${fmt(Math.abs(net))}`;
+
+  document.getElementById('cov-pct').textContent=cov+'%';
+  document.getElementById('cov-bar').style.width=Math.min(cov,100)+'%';
+  document.getElementById('cov-desc').textContent=
+    cov>=100?'被動收入已完整覆蓋固定支出 🎉':
+    cov>=60?`再差 ${100-cov}% 就完全覆蓋了，加油！`:
+    passive>0?`被動收入 ${fmt(passive)}，持續累積中`:'新增被動收入，看看能覆蓋多少固定支出';
+
+  // recent tx
+  const el=document.getElementById('recent-tx');
+  if(!D.records.length){el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-wallet"/></svg></div><div class="empty-text">還沒有記錄<br>點右下角 ＋ 開始記帳</div></div>`;return}
+  el.innerHTML=D.records.slice(0,5).map(r=>txHTML(r,false)).join('');
+
+  // upcoming subs
+  const su=document.getElementById('upcoming-subs');
+  const up=D.subs.filter(s=>s.date).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,3);
+  if(!up.length){su.innerHTML=`<div style="padding:4px 0 10px;color:var(--stone);font-size:13px;text-align:center">還沒有設定訂閱</div>`;return}
+  su.innerHTML=up.map(s=>{
+    const dl=Math.round((new Date(s.date)-new Date())/86400000);
+    const badge=dl<=3?`<span class="due-badge">快到了</span>`:`<span class="sub-chip-date">${s.date}</span>`;
+    return`<div class="sub-chip"><div class="sub-chip-icon"><svg class="ic-sm"><use href="#ic-repeat"/></svg></div><div class="sub-chip-name">${s.name}</div>${badge}<div class="sub-chip-amt">${fmt(s.amount)}</div></div>`;
+  }).join('');
+
+  // insights
+  renderInsights({inc,exp,net,passive,fixed,cov,total});
+}
+
+function renderInsights({inc,exp,net,passive,fixed,cov,total}){
+  const ins=[];
+  if(!D.records.length&&!D.assets.length){
+    ins.push({c:'dot-b',t:'還沒有記錄，點右下角 <strong>＋</strong> 開始記帳 😊'});
+  } else {
+    if(net>0)ins.push({c:'dot-g',t:`本月目前淨存下 <strong>${fmt(net)}</strong>，繼續保持！`});
+    else if(net<0&&inc>0)ins.push({c:'dot-r',t:`本月支出比收入多 <strong>${fmt(Math.abs(net))}</strong>，注意一下花費喔`});
+    if(cov>=100)ins.push({c:'dot-g',t:`被動收入已完整覆蓋固定支出，財務很穩 🏆`});
+    else if(cov>=50)ins.push({c:'dot-a',t:`被動收入覆蓋率 <strong>${cov}%</strong>，再努力就破百了！`});
+    else if(passive>0)ins.push({c:'dot-b',t:`被動收入每月 <strong>${fmt(passive)}</strong>，持續累積中 📈`});
+    if(fixed>0&&inc>0&&fixed/inc>0.4)ins.push({c:'dot-a',t:`固定支出佔收入 <strong>${Math.round(fixed/inc*100)}%</strong>，可以檢視一下訂閱清單`});
+    const{goal,goalNote,debitDay}=D.settings;
+    if(goal>0){const diff=goal-net;if(diff>0)ins.push({c:'dot-b',t:`距離本月目標還差 <strong>${fmt(diff)}</strong>，加油！`});else ins.push({c:'dot-g',t:`本月目標達成！比目標多存了 <strong>${fmt(Math.abs(diff))}</strong> 🎉`});}
+    if(debitDay>0){const today=new Date().getDate();const left=debitDay-today;if(left>0&&left<=5)ins.push({c:'dot-a',t:`固定扣款日還有 <strong>${left} 天</strong>（${debitDay}號），記得確認帳戶餘額`});}
+  }
+  document.getElementById('insights').innerHTML=ins.slice(0,3).map(i=>`<div class="insight-card"><div class="ins-dot ${i.c}"></div><div class="insight-text">${i.t}</div></div>`).join('')||`<div class="insight-card"><div class="ins-dot dot-b"></div><div class="insight-text">繼續記錄，就會看到更多觀察</div></div>`;
+}
+
+// ══════ TX HTML ══════
+function txHTML(r,showActions=true){
+  const ic=CAT_IC[r.cat]||'ic-wallet';
+  const cls=r.type==='income'?'inc':'exp';
+  const sign=r.type==='income'?'+':'-';
+  const actions=showActions?`<div class="tx-actions">
+    <button class="icon-btn" onclick="openEditRecord(${r.id})" title="編輯"><svg class="ic-sm"><use href="#ic-edit"/></svg></button>
+    <button class="icon-btn del" onclick="delRecord(${r.id})" title="刪除"><svg class="ic-sm"><use href="#ic-close"/></svg></button>
+  </div>`:'';
+  return`<div class="tx-item">
+    <div class="tx-icon ${cls}"><svg class="ic-sm"><use href="#${ic}"/></svg></div>
+    <div class="tx-info"><div class="tx-name">${r.name}</div><div class="tx-date">${r.date}${r.note?' · '+r.note:''}</div></div>
+    <div class="tx-amt ${r.type==='income'?'pos':'neg'}">${sign}${fmt(r.amount)}</div>
+    ${actions}
+  </div>`;
+}
+
+// ══════ RECORDS ══════
+function renderRecords(){
+  const yr=document.getElementById('filter-year')?.value||String(new Date().getFullYear());
+  const mo=document.getElementById('filter-month')?.value||'all';
+  const q=(document.getElementById('rec-search')?.value||'').trim().toLowerCase();
+  let recs=D.records.filter(r=>{
+    if(!r.date)return false;
+    if(!r.date.startsWith(yr))return false;
+    if(mo!=='all'&&!r.date.startsWith(yr+'-'+mo))return false;
+    if(filterVal!=='all'&&r.type!==filterVal)return false;
+    if(q&&!r.name.toLowerCase().includes(q)&&!r.date.includes(q))return false;
+    return true;
+  });
+  const el=document.getElementById('all-records');
+  if(!recs.length){el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-flow"/></svg></div><div class="empty-text">找不到符合的記錄</div></div>`;return}
+  el.innerHTML=recs.map(r=>txHTML(r,true)).join('');
+}
+
+function addRecord(){
+  const name=document.getElementById('rec-name').value.trim();
+  const amount=getNum('rec-amount');
+  const date=document.getElementById('rec-date').value;
+  const cat=document.getElementById('rec-cat').value;
+  const note=document.getElementById('rec-note').value.trim();
+  if(!name||!amount||!date){alert('請填寫名稱、金額和日期！');return}
+  D.records.unshift({id:Date.now(),type:recType,name,amount,date,cat,note});
+  save(D);
+  // clear
+  document.getElementById('rec-name').value='';
+  document.getElementById('rec-amount').value='';
+  document.getElementById('rec-note').value='';
+  closeModal('modal-add');
+  initYearSelectors();
+  renderAll();
+}
+
+function openEditRecord(id){
+  const r=D.records.find(x=>x.id===id);if(!r)return;
+  document.getElementById('edit-rec-id').value=id;
+  setERT(r.type);
+  // set cat after setERT populates options
+  setTimeout(()=>{const el=document.getElementById('edit-rec-cat');if(el)el.value=r.cat},0);
+  document.getElementById('edit-rec-name').value=r.name;
+  setNumField('edit-rec-amount',r.amount);
+  document.getElementById('edit-rec-date').value=r.date;
+  document.getElementById('edit-rec-note').value=r.note||'';
+  openModal('modal-edit-rec');
+}
+function saveEditRecord(){
+  const id=parseInt(document.getElementById('edit-rec-id').value);
+  const i=D.records.findIndex(x=>x.id===id);if(i<0)return;
+  const name=document.getElementById('edit-rec-name').value.trim();
+  const amount=getNum('edit-rec-amount');
+  const date=document.getElementById('edit-rec-date').value;
+  const cat=document.getElementById('edit-rec-cat').value;
+  const note=document.getElementById('edit-rec-note').value.trim();
+  if(!name||!amount||!date){alert('請填寫名稱、金額和日期！');return}
+  D.records[i]={...D.records[i],type:editRecType,name,amount,date,cat,note};
+  save(D);closeModal('modal-edit-rec');renderAll();
+}
+function delRecord(id){if(!confirm('確定刪除？'))return;D.records=D.records.filter(r=>r.id!==id);save(D);renderAll()}
+
+// ══════ SUBS ══════
+function renderSubList(){
+  const el=document.getElementById('sub-list');
+  if(!D.subs.length){el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-repeat"/></svg></div><div class="empty-text">還沒有訂閱</div></div>`;return}
+  const cl={monthly:'每月',yearly:'每年',quarterly:'每季'};
+  el.innerHTML=D.subs.map(s=>`<div class="sub-item">
+    <div class="sub-item-icon"><svg class="ic-sm"><use href="#ic-repeat"/></svg></div>
+    <div class="sub-item-left"><div class="sub-item-name">${s.name}</div><div class="sub-item-meta">${s.date?'下次：'+s.date:''}</div></div>
+    <span class="badge">${cl[s.cycle]||s.cycle}</span>
+    <div class="sub-item-amt">${fmt(s.amount)}</div>
+    <div class="tx-actions">
+      <button class="icon-btn" onclick="openEditSub(${s.id})"><svg class="ic-sm"><use href="#ic-edit"/></svg></button>
+      <button class="icon-btn del" onclick="delSub(${s.id})"><svg class="ic-sm"><use href="#ic-close"/></svg></button>
+    </div>
+  </div>`).join('');
+}
+function addSub(){
+  const name=document.getElementById('sub-name').value.trim();
+  const cycle=document.getElementById('sub-cycle').value;
+  const amount=getNum('sub-amount');
+  const date=document.getElementById('sub-date').value;
+  if(!name||!amount){alert('請填寫名稱和金額！');return}
+  D.subs.push({id:Date.now(),name,cycle,amount,date});
+  save(D);
+  document.getElementById('sub-name').value='';
+  document.getElementById('sub-amount').value='';
+  document.getElementById('sub-date').value='';
+  toggleForm('add-sub-body');renderAll();
+}
+function openEditSub(id){
+  const s=D.subs.find(x=>x.id===id);if(!s)return;
+  document.getElementById('edit-sub-id').value=id;
+  document.getElementById('edit-sub-name').value=s.name;
+  document.getElementById('edit-sub-cycle').value=s.cycle;
+  setNumField('edit-sub-amount',s.amount);
+  document.getElementById('edit-sub-date').value=s.date||'';
+  openModal('modal-edit-sub');
+}
+function saveEditSub(){
+  const id=parseInt(document.getElementById('edit-sub-id').value);
+  const i=D.subs.findIndex(x=>x.id===id);if(i<0)return;
+  const name=document.getElementById('edit-sub-name').value.trim();
+  const cycle=document.getElementById('edit-sub-cycle').value;
+  const amount=getNum('edit-sub-amount');
+  const date=document.getElementById('edit-sub-date').value;
+  if(!name||!amount){alert('請填寫名稱和金額！');return}
+  D.subs[i]={...D.subs[i],name,cycle,amount,date};
+  save(D);closeModal('modal-edit-sub');renderAll();
+}
+function delSub(id){if(!confirm('確定刪除？'))return;D.subs=D.subs.filter(s=>s.id!==id);save(D);renderAll()}
+
+// ══════ PASSIVE ══════
+function renderPassiveList(){
+  const el=document.getElementById('passive-list');
+  if(!D.passives.length){el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-leaf"/></svg></div><div class="empty-text">新增被動收入，讓錢為你工作</div></div>`;return}
+  const ti={dividend:'ic-trending',interest:'ic-bank',rent:'ic-bank',royalty:'ic-leaf',other:'ic-leaf'};
+  const tl={dividend:'股息',interest:'利息',rent:'租金',royalty:'版稅',other:'其他'};
+  el.innerHTML=D.passives.map(p=>`<div class="passive-item">
+    <div class="passive-icon"><svg class="ic-sm"><use href="#${ti[p.type]||'ic-leaf'}"/></svg></div>
+    <div class="passive-left"><div class="passive-name">${p.name}</div><div class="passive-meta">${tl[p.type]||'其他'} · 每月</div></div>
+    <div class="passive-amt">${fmt(p.amount)}</div>
+    <div class="tx-actions">
+      <button class="icon-btn" onclick="openEditPassive(${p.id})"><svg class="ic-sm"><use href="#ic-edit"/></svg></button>
+      <button class="icon-btn del" onclick="delPassive(${p.id})"><svg class="ic-sm"><use href="#ic-close"/></svg></button>
+    </div>
+  </div>`).join('');
+}
+function addPassive(){
+  const name=document.getElementById('pas-name').value.trim();
+  const type=document.getElementById('pas-type').value;
+  const amount=getNum('pas-amount');
+  if(!name||!amount){alert('請填寫名稱和金額！');return}
+  D.passives.push({id:Date.now(),name,type,amount});
+  save(D);document.getElementById('pas-name').value='';document.getElementById('pas-amount').value='';
+  toggleForm('add-pas-body');renderAll();
+}
+function openEditPassive(id){
+  const p=D.passives.find(x=>x.id===id);if(!p)return;
+  document.getElementById('edit-pas-id').value=id;
+  document.getElementById('edit-pas-name').value=p.name;
+  document.getElementById('edit-pas-type').value=p.type;
+  setNumField('edit-pas-amount',p.amount);
+  openModal('modal-edit-pas');
+}
+function saveEditPassive(){
+  const id=parseInt(document.getElementById('edit-pas-id').value);
+  const i=D.passives.findIndex(x=>x.id===id);if(i<0)return;
+  const name=document.getElementById('edit-pas-name').value.trim();
+  const type=document.getElementById('edit-pas-type').value;
+  const amount=getNum('edit-pas-amount');
+  if(!name||!amount){alert('請填寫！');return}
+  D.passives[i]={...D.passives[i],name,type,amount};
+  save(D);closeModal('modal-edit-pas');renderAll();
+}
+function delPassive(id){if(!confirm('確定刪除？'))return;D.passives=D.passives.filter(p=>p.id!==id);save(D);renderAll()}
+
+// ══════ ASSETS ══════
+function renderAssetCards(){
+  const total=getTotalAssets();
+  const grouped={};
+  D.assets.forEach(a=>{if(!grouped[a.type])grouped[a.type]={amt:0,items:[]};grouped[a.type].amt+=a.amount;grouped[a.type].items.push(a)});
+  const el=document.getElementById('asset-cards');
+  if(!Object.keys(grouped).length){el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl" style="color:var(--mist)"><use href="#ic-gem"/></svg></div><div class="empty-text">還沒有資產<br>點下方新增資產</div></div>`;return}
+  el.innerHTML=Object.entries(grouped).sort((a,b)=>b[1].amt-a[1].amt).map(([type,info])=>{
+    const ti=ASSET_INFO[type]||{label:type,ic:'ic-wallet',color:'#9e9890',bg:'var(--cream2)'};
+    const pct=total>0?Math.round(info.amt/total*100):0;
+    const items=info.items.map(a=>`<div style="display:flex;align-items:center;gap:6px;margin-top:5px;justify-content:flex-end">
+      <span style="font-size:11.5px;color:var(--stone);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px">${a.name}</span>
+      <span style="font-size:12px;font-weight:600;white-space:nowrap">${fmt(a.amount)}</span>
+      <div class="tx-actions">
+        <button class="icon-btn" onclick="openEditAsset(${a.id})"><svg class="ic-sm"><use href="#ic-edit"/></svg></button>
+        <button class="icon-btn del" onclick="delAsset(${a.id})"><svg class="ic-sm"><use href="#ic-close"/></svg></button>
+      </div>
+    </div>`).join('');
+    return`<div class="asset-card">
+      <div class="asset-card-icon" style="background:${ti.bg};color:${ti.color}"><svg class="ic"><use href="#${ti.ic}"/></svg></div>
+      <div class="asset-card-info">
+        <div class="asset-card-name">${ti.label}</div>
+        <div class="asset-card-sub">${info.items.length} 筆 · ${pct}%</div>
+        <div class="asset-bar"><div class="asset-bar-fill" style="width:${pct}%;background:${ti.color}"></div></div>
+        ${items}
+      </div>
+      <div class="asset-card-amt">${fmt(info.amt)}</div>
+    </div>`;
+  }).join('');
+}
+function addAsset(){
+  const name=document.getElementById('asset-name').value.trim();
+  const type=document.getElementById('asset-type').value;
+  const amount=getNum('asset-amount');
+  if(!name||!amount){alert('請填寫名稱和金額！');return}
+  D.assets.push({id:Date.now(),name,type,amount});
+  save(D);renderAll();renderDonut();
+  document.getElementById('asset-name').value='';document.getElementById('asset-amount').value='';
+  toggleForm('add-asset-body');
+}
+function openEditAsset(id){
+  const a=D.assets.find(x=>x.id===id);if(!a)return;
+  document.getElementById('edit-asset-id').value=id;
+  document.getElementById('edit-asset-name').value=a.name;
+  document.getElementById('edit-asset-type').value=a.type;
+  setNumField('edit-asset-amount',a.amount);
+  openModal('modal-edit-asset');
+}
+function saveEditAsset(){
+  const id=parseInt(document.getElementById('edit-asset-id').value);
+  const i=D.assets.findIndex(x=>x.id===id);if(i<0)return;
+  const name=document.getElementById('edit-asset-name').value.trim();
+  const type=document.getElementById('edit-asset-type').value;
+  const amount=getNum('edit-asset-amount');
+  if(!name||!amount){alert('請填寫！');return}
+  D.assets[i]={...D.assets[i],name,type,amount};
+  save(D);closeModal('modal-edit-asset');renderAll();renderDonut();
+}
+function delAsset(id){if(!confirm('確定刪除？'))return;D.assets=D.assets.filter(a=>a.id!==id);save(D);renderAll();renderDonut()}
+
+// ══════ DONUT ══════
+function renderDonut(){
+  const total=getTotalAssets();
+  const grouped={};
+  D.assets.forEach(a=>{grouped[a.type]=(grouped[a.type]||0)+a.amount});
+  document.getElementById('donut-total').textContent=total>0?fmt(total):'NT$0';
+  const leg=document.getElementById('asset-legend');
+  const ctx=document.getElementById('donut-chart').getContext('2d');
+  if(charts.donut)charts.donut.destroy();
+  if(!Object.keys(grouped).length){
+    leg.innerHTML=`<div style="text-align:center;color:var(--stone);font-size:13px;padding:8px 0">新增資產後顯示配置</div>`;
+    charts.donut=new Chart(ctx,{type:'doughnut',data:{labels:['尚無'],datasets:[{data:[1],backgroundColor:['#ddd8cc'],borderWidth:0}]},options:{cutout:'70%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:400}}});return;
+  }
+  const labels=Object.keys(grouped).map(t=>ASSET_INFO[t]?.label||t);
+  const values=Object.values(grouped);
+  const colors=Object.keys(grouped).map(t=>ASSET_INFO[t]?.color||'#9e9890');
+  leg.innerHTML=labels.map((l,i)=>{const pct=total>0?Math.round(values[i]/total*100):0;return`<div class="legend-item"><div class="legend-dot" style="background:${colors[i]}"></div><div class="legend-name">${l}</div><div class="legend-pct">${pct}%</div><div class="legend-amt">${fmt(values[i])}</div></div>`}).join('');
+  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:values,backgroundColor:colors,borderWidth:0,hoverOffset:3}]},options:{cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}`}}},animation:{duration:400}}});
+}
+
+// ══════ CHARTS ══════
+function renderCharts(){
+  const anYr=document.getElementById('an-year')?.value||String(new Date().getFullYear());
+  const anMo=document.getElementById('an-month')?.value||'all';
+  const now=new Date();
+  // build 6 months
+  const months=Array.from({length:6},(_,i)=>{
+    const d=new Date(parseInt(anYr),anMo==='all'?now.getMonth()-5+i:parseInt(anMo)-1,1);
+    return{label:`${d.getMonth()+1}月`,key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
+  });
+  const expD=months.map(m=>D.records.filter(r=>r.type==='expense'&&r.date?.startsWith(m.key)).reduce((s,r)=>s+r.amount,0));
+  const incD=months.map(m=>D.records.filter(r=>r.type==='income'&&r.date?.startsWith(m.key)).reduce((s,r)=>s+r.amount,0));
+
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const tickColor=isDark?'#7a7268':'#968e7e';
+  const gridColor=isDark?'rgba(255,255,255,.04)':'rgba(60,53,41,.05)';
+  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tickColor,font:{size:10}}},y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},callback:v=>v>=1000?`${(v/1000).toFixed(1)}k`:v}}}};
+
+  // expense/income bar
+  const ec=document.getElementById('expense-chart').getContext('2d');
+  if(charts.expense)charts.expense.destroy();
+  charts.expense=new Chart(ec,{type:'bar',data:{labels:months.map(m=>m.label),datasets:[{label:'支出',data:expD,backgroundColor:'rgba(196,104,96,.18)',borderColor:'rgba(196,104,96,.65)',borderWidth:1.5,borderRadius:5,borderSkipped:false},{label:'收入',data:incD,backgroundColor:'rgba(78,122,104,.15)',borderColor:'rgba(78,122,104,.6)',borderWidth:1.5,borderRadius:5,borderSkipped:false}]},options:{...base,plugins:{legend:{display:true,labels:{color:isDark?'#a89f92':'#6a6154',font:{size:10.5},boxWidth:10,boxHeight:10}}}}});
+
+  // category pie — filter by selected month/year
+  const filterKey=anMo==='all'?anYr:`${anYr}-${anMo}`;
+  const expRecs=D.records.filter(r=>r.type==='expense'&&r.date&&r.date.startsWith(filterKey));
+  const catMap={};
+  expRecs.forEach(r=>{catMap[r.cat]=(catMap[r.cat]||0)+r.amount});
+  const catTotal=Object.values(catMap).reduce((s,v)=>s+v,0);
+  document.getElementById('cat-total').textContent=fmt(catTotal);
+  const CAT_COLORS=['#c46860','#b87c32','#5270a0','#4e7a68','#7a6040','#5a7240','#2a4238','#968e7e','#8b6b9e','#3a7080','#c4873a'];
+  const catLabels=Object.keys(catMap).map(c=>CAT_LABELS[c]||c);
+  const catVals=Object.values(catMap);
+  const catColors=Object.keys(catMap).map((_,i)=>CAT_COLORS[i%CAT_COLORS.length]);
+  const cc=document.getElementById('cat-chart').getContext('2d');
+  if(charts.cat)charts.cat.destroy();
+  if(!catVals.length){
+    document.getElementById('cat-legend').innerHTML=`<div style="color:var(--stone);font-size:12px">沒有支出記錄</div>`;
+    charts.cat=new Chart(cc,{type:'doughnut',data:{labels:['無'],datasets:[{data:[1],backgroundColor:['#ddd8cc'],borderWidth:0}]},options:{cutout:'65%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:400}}});
+  } else {
+    document.getElementById('cat-legend').innerHTML=catLabels.map((l,i)=>{
+      const pct=catTotal>0?Math.round(catVals[i]/catTotal*100):0;
+      return`<div class="legend-item"><div class="legend-dot" style="background:${catColors[i]}"></div><div class="legend-name" style="font-size:12px">${l}</div><div class="legend-pct">${pct}%</div><div class="legend-amt" style="font-size:12px">${fmt(catVals[i])}</div></div>`;
+    }).join('');
+    charts.cat=new Chart(cc,{type:'doughnut',data:{labels:catLabels,datasets:[{data:catVals,backgroundColor:catColors,borderWidth:0,hoverOffset:3}]},options:{cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)} (${Math.round(c.raw/catTotal*100)}%)`}}},animation:{duration:400}}});
+  }
+
+  // asset line
+  const ta=getTotalAssets();
+  const aD=months.map((_,i)=>Math.max(0,ta*(0.86+i*0.028)));aD[5]=ta;
+  const ac=document.getElementById('asset-chart').getContext('2d');
+  if(charts.asset)charts.asset.destroy();
+  charts.asset=new Chart(ac,{type:'line',data:{labels:months.map(m=>m.label),datasets:[{data:aD,borderColor:'#2a4238',backgroundColor:'rgba(42,66,56,.05)',fill:true,tension:.45,pointRadius:3,pointBackgroundColor:'#2a4238',borderWidth:1.8}]},options:base});
+
+  // coverage line
+  const fixed=getMonthlyFixed(),passive=getTotalPassive();
+  const cov=fixed>0?Math.min(passive/fixed*100,100):0;
+  const covD=months.map((_,i)=>Math.max(0,cov*(0.7+i*0.06)));covD[5]=cov;
+  const vc=document.getElementById('coverage-chart').getContext('2d');
+  if(charts.coverage)charts.coverage.destroy();
+  charts.coverage=new Chart(vc,{type:'line',data:{labels:months.map(m=>m.label),datasets:[{data:covD,borderColor:'#4e7a68',backgroundColor:'rgba(78,122,104,.07)',fill:true,tension:.45,pointRadius:3,pointBackgroundColor:'#4e7a68',borderWidth:1.8}]},options:{...base,scales:{...base.scales,y:{...base.scales.y,max:100,ticks:{callback:v=>v+'%',color:tickColor,font:{size:10}}}}}});
+
+  // stats
+  const ti2=incD.reduce((s,v)=>s+v,0),te2=expD.reduce((s,v)=>s+v,0);
+  document.getElementById('avg-save').textContent=ti2>0?Math.round((ti2-te2)/ti2*100)+'%':'—';
+  document.getElementById('fix-ratio').textContent=te2>0?Math.round(fixed/te2*100)+'%':'—';
+
+  // update cashflow summary too
+  renderCFSummary();
+}
+
+function renderCFSummary(){
+  const{inc,exp,net}=getThisMonthData();
+  const fixed=getMonthlyFixed(),passive=getTotalPassive();
+  const cov=fixed>0?Math.round(passive/fixed*100):0;
+  document.getElementById('cf-net').textContent=fmt(net);
+  document.getElementById('cf-fixed').textContent=fmt(fixed);
+  document.getElementById('cf-passive').textContent=fmt(passive);
+  document.getElementById('cf-cov').textContent=cov+'%';
+}
+
+// ══════ SETTINGS ══════
+function applySettings(){
+  const s=D.settings;
+  if(s.name){
+    document.getElementById('profile-name').textContent=s.name;
+    document.getElementById('set-name-desc').textContent=s.name;
+    setGreeting();
+  }
+  if(s.goal>0)document.getElementById('set-goal-desc').textContent=`NT$${s.goal.toLocaleString()}${s.goalNote?' · '+s.goalNote:''}`;
+  if(s.debitDay>0)document.getElementById('set-debit-desc').textContent=`每月 ${s.debitDay} 號${s.debitNote?' · '+s.debitNote:''}`;
+  document.getElementById('set-cur-desc').textContent=({TWD:'TWD 新台幣',USD:'USD 美元',JPY:'JPY 日圓',EUR:'EUR 歐元'})[s.currency]||s.currency;
+  document.getElementById('tog-notify').checked=s.notify!==false;
+  document.getElementById('tog-review').checked=s.review!==false;
+  // apply theme
+  const t=s.theme||'light';
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelector('meta[name="theme-color"]').setAttribute('content',t==='dark'?'#1a1814':'#f0ece3');
+  document.getElementById('theme-btn-light').classList.toggle('active',t==='light');
+  document.getElementById('theme-btn-dark').classList.toggle('active',t==='dark');
+  document.getElementById('theme-desc').textContent=t==='dark'?'深色模式':'日間模式';
+  if(s.name)document.getElementById('inp-name').value=s.name;
+  if(s.goal)setNumField('inp-goal',s.goal);
+  if(s.goalNote)document.getElementById('inp-goal-note').value=s.goalNote;
+  if(s.debitDay)document.getElementById('inp-debit-day').value=s.debitDay;
+  if(s.debitNote)document.getElementById('inp-debit-note').value=s.debitNote;
+  const ce=document.getElementById('inp-currency');if(ce)ce.value=s.currency||'TWD';
+}
+function saveProfile(){
+  const n=document.getElementById('inp-name').value.trim();
+  if(!n){alert('請輸入名字！');return}
+  D.settings.name=n;save(D);applySettings();closeModal('modal-profile');
+}
+function saveGoal(){
+  const g=getNum('inp-goal');const note=document.getElementById('inp-goal-note').value.trim();
+  if(!g){alert('請輸入金額！');return}
+  D.settings.goal=g;D.settings.goalNote=note;save(D);applySettings();closeModal('modal-goal');renderDashboard();
+}
+function saveDebit(){
+  const day=parseInt(document.getElementById('inp-debit-day').value)||0;
+  const note=document.getElementById('inp-debit-note').value.trim();
+  if(!day||day<1||day>31){alert('請輸入 1–31 的日期！');return}
+  D.settings.debitDay=day;D.settings.debitNote=note;save(D);applySettings();closeModal('modal-debit');
+}
+function saveCurrency(){
+  const c=document.getElementById('inp-currency').value;
+  D.settings.currency=c;save(D);applySettings();closeModal('modal-currency');
+}
+function saveToggle(k,v){D.settings[k]=v;save(D)}
+
+// ══════ FULL BACKUP EXPORT (JSON) ══════
+function exportCSV(){
+  // Export complete backup: records + subs + passives + assets + settings
+  const backup = {
+    _version: 2,
+    _exportedAt: new Date().toISOString(),
+    records:  D.records,
+    subs:     D.subs,
+    passives: D.passives,
+    assets:   D.assets,
+    settings: D.settings
+  };
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], {type:'application/json;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  const ts = new Date().toISOString().slice(0,10);
+  a.download = `wealth_os_backup_${ts}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  // also export records as CSV for human-readable reference
+  if(D.records.length){
+    const rows=[['日期','類型','類別','名稱','金額','備註']];
+    D.records.forEach(r=>rows.push([r.date,r.type==='income'?'收入':'支出',r.cat,r.name,r.amount,r.note||'']));
+    const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const b2=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+    const u2=URL.createObjectURL(b2);
+    const a2=document.createElement('a');a2.href=u2;a2.download=`wealth_os_records_${ts}.csv`;
+    setTimeout(()=>{a2.click();URL.revokeObjectURL(u2);},400);
+  }
+  alert('備份完成！\n已下載：\n① wealth_os_backup_*.json（完整備份，包含所有資料）\n② wealth_os_records_*.csv（記帳明細，方便用 Excel 查看）');
+}
+
+// ══════ FULL BACKUP IMPORT (JSON or legacy CSV) ══════
+function importCSV(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const text=e.target.result.replace(/^\uFEFF/,'');
+
+    // ── JSON backup ──
+    if(file.name.endsWith('.json')||text.trimStart().startsWith('{')){
+      try{
+        const backup=JSON.parse(text);
+        let msg=[];
+
+        // records — merge, skip duplicates
+        if(Array.isArray(backup.records)&&backup.records.length){
+          const existing=new Set(D.records.map(r=>`${r.date}|${r.name}|${r.amount}`));
+          let added=0;
+          backup.records.forEach((r,i)=>{
+            const key=`${r.date}|${r.name}|${r.amount}`;
+            if(!existing.has(key)){
+              D.records.push({...r, id:r.id||Date.now()+i});
+              existing.add(key); added++;
+            }
+          });
+          D.records.sort((a,b)=>b.date.localeCompare(a.date));
+          msg.push(`記帳記錄：新增 ${added} 筆`);
+        }
+
+        // subs — merge by name+cycle+amount
+        if(Array.isArray(backup.subs)&&backup.subs.length){
+          const existing=new Set(D.subs.map(s=>`${s.name}|${s.cycle}|${s.amount}`));
+          let added=0;
+          backup.subs.forEach((s,i)=>{
+            const key=`${s.name}|${s.cycle}|${s.amount}`;
+            if(!existing.has(key)){D.subs.push({...s,id:s.id||Date.now()+i});existing.add(key);added++;}
+          });
+          msg.push(`訂閱項目：新增 ${added} 筆`);
+        }
+
+        // passives — merge by name+amount
+        if(Array.isArray(backup.passives)&&backup.passives.length){
+          const existing=new Set(D.passives.map(p=>`${p.name}|${p.amount}`));
+          let added=0;
+          backup.passives.forEach((p,i)=>{
+            const key=`${p.name}|${p.amount}`;
+            if(!existing.has(key)){D.passives.push({...p,id:p.id||Date.now()+i});existing.add(key);added++;}
+          });
+          msg.push(`被動收入：新增 ${added} 筆`);
+        }
+
+        // assets — merge by name+type+amount
+        if(Array.isArray(backup.assets)&&backup.assets.length){
+          const existing=new Set(D.assets.map(a=>`${a.name}|${a.type}|${a.amount}`));
+          let added=0;
+          backup.assets.forEach((a,i)=>{
+            const key=`${a.name}|${a.type}|${a.amount}`;
+            if(!existing.has(key)){D.assets.push({...a,id:a.id||Date.now()+i});existing.add(key);added++;}
+          });
+          msg.push(`資產：新增 ${added} 筆`);
+        }
+
+        // settings — restore only if not already configured
+        if(backup.settings){
+          const s=backup.settings;
+          if(!D.settings.name&&s.name)D.settings.name=s.name;
+          if(!D.settings.goal&&s.goal)D.settings.goal=s.goal;
+          if(s.goalNote)D.settings.goalNote=s.goalNote;
+          if(!D.settings.debitDay&&s.debitDay)D.settings.debitDay=s.debitDay;
+          if(s.debitNote)D.settings.debitNote=s.debitNote;
+          if(s.currency)D.settings.currency=s.currency;
+          msg.push('設定：已還原');
+        }
+
+        save(D);initYearSelectors();applySettings();renderAll();
+        alert('✅ 備份還原完成！\n\n'+msg.join('\n'));
+      } catch(err){
+        alert('JSON 格式錯誤，請確認是 Wealth OS 匯出的備份檔案');
+      }
+      input.value='';return;
+    }
+
+    // ── Legacy CSV (records only) ──
+    const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);
+    if(lines.length<2){alert('檔案格式不正確');input.value='';return}
+    const header=parseCSVLine(lines[0]);
+    const di=header.indexOf('日期'),ti=header.indexOf('類型'),ci=header.indexOf('類別'),ni=header.indexOf('名稱'),ai=header.indexOf('金額'),ri=header.indexOf('備註');
+    if(di<0||ni<0||ai<0){alert('CSV 欄位不符');input.value='';return}
+    let added=0,skipped=0;
+    const existing=new Set(D.records.map(r=>`${r.date}|${r.name}|${r.amount}`));
+    for(let i=1;i<lines.length;i++){
+      const cols=parseCSVLine(lines[i]);if(cols.length<5)continue;
+      const date=(cols[di]||'').trim(),typRaw=(cols[ti]||'').trim();
+      const cat=(cols[ci]||'').trim()||'other-income';
+      const name=(cols[ni]||'').trim();
+      const amount=parseFloat((cols[ai]||'0').replace(/,/g,''));
+      const note=(ri>=0?cols[ri]||'':'').trim();
+      const type=typRaw==='收入'?'income':'expense';
+      if(!date||!name||!amount){skipped++;continue}
+      const key=`${date}|${name}|${amount}`;
+      if(existing.has(key)){skipped++;continue}
+      D.records.push({id:Date.now()+i,type,name,amount,date,cat,note});
+      existing.add(key);added++;
+    }
+    D.records.sort((a,b)=>b.date.localeCompare(a.date));
+    save(D);initYearSelectors();renderAll();
+    alert(`CSV 匯入完成！新增 ${added} 筆，略過重複 ${skipped} 筆`);
+    input.value='';
+  };
+  reader.readAsText(file,'utf-8');
+}
+
+function parseCSVLine(line){
+  const result=[];let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++}else inQ=!inQ}
+    else if(c===','&&!inQ){result.push(cur);cur=''}
+    else cur+=c;
+  }
+  result.push(cur);return result;
+}
+
+function setTheme(t){
+  D.settings.theme=t;
+  save(D);
+  // animate the transition
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelector('meta[name="theme-color"]').setAttribute('content',t==='dark'?'#1a1814':'#f0ece3');
+  document.getElementById('theme-btn-light').classList.toggle('active',t==='light');
+  document.getElementById('theme-btn-dark').classList.toggle('active',t==='dark');
+  document.getElementById('theme-desc').textContent=t==='dark'?'深色模式':'日間模式';
+  // re-render charts with correct colors
+  const onAnalytics=document.getElementById('page-analytics').classList.contains('active');
+  if(onAnalytics)renderCharts();
+  const onAssets=document.getElementById('page-assets').classList.contains('active');
+  if(onAssets)renderDonut();
+}
+function clearAllData(){
+  if(!confirm('確定要清除所有資料嗎？這個動作無法復原。'))return;
+  const s={...D.settings};localStorage.removeItem(KEY);D=def();D.settings=s;save(D);
+  Object.values(charts).forEach(c=>{if(c)c.destroy()});
+  Object.keys(charts).forEach(k=>charts[k]=null);
+  renderAll();alert('已清除！');
+}
+</script>
+</body>
+</html>
