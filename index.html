@@ -60,13 +60,14 @@
   --red-soft:#c46860;--red-pale:#f5e4e2;
   --blue-soft:#5270a0;--blue-pale:#dde4f0;
   --paper:#faf8f4;
-  --r-sm:10px;--r:16px;--r-lg:22px;--r-xl:28px;
-  --sh-xs:0 1px 4px rgba(30,20,10,.06);
-  --sh-sm:0 2px 10px rgba(30,20,10,.07);
-  --sh:0 4px 24px rgba(30,20,10,.09);
+  --r-sm:14px;--r:18px;--r-lg:22px;--r-xl:28px;
+  --sh-xs:0 2px 8px rgba(30,20,10,.06);
+  --sh-sm:0 4px 16px rgba(30,20,10,.08);
+  --sh:0 6px 28px rgba(30,20,10,.10);
   --nav:68px;--safe:env(safe-area-inset-bottom,0px);
   --font-serif:'Shippori Mincho','Georgia',serif;
   --font-sans:'DM Sans',-apple-system,sans-serif;
+  --gap:20px;
 }
 html,body{
   height:100%;width:100%;
@@ -402,8 +403,32 @@ html[data-theme='dark'] .modal-sheet { background: #2a2820; }
 html[data-theme='dark'] .modal-overlay { background: rgba(0,0,0,.7); }
 html[data-theme='dark'] .settings-row:active { background: var(--cream2); }
 html[data-theme='dark'] select.form-input {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2380786c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-color: var(--cream2);
+  /* solid dark bg — prevents noise texture from bleeding through */
+  background-color: #2a2820 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2380786c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  isolation: isolate;
+  color: var(--ink);
+}
+html[data-theme='dark'] select.form-input option {
+  background-color: #2a2820;
+  color: #d4ccbe;
+}
+
+/* analytics + filter selects: slightly different shade for context */
+html[data-theme='dark'] .an-select {
+  background-color: #242118 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2380786c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  border-color: rgba(96,150,126,.35);
+  color: var(--ink);
+  isolation: isolate;
+}
+html[data-theme='dark'] .an-select option {
+  background-color: #242118;
+  color: #d4ccbe;
 }
 html[data-theme='dark'] .toggle-track::before { box-shadow: 0 1px 4px rgba(0,0,0,.5); }
 
@@ -437,12 +462,7 @@ html[data-theme='dark'] .metric-card-inner {
   background: rgba(28,46,36,.3);
 }
 html[data-theme='dark'] .metric-val { color: var(--ink-deep); }
-/* analytics selectors dark */
-html[data-theme='dark'] .an-select {
-  background-color: #201e18;
-  border-color: rgba(96,150,126,.35);
-  color: var(--ink);
-}
+/* analytics selectors — handled above */
 /* analytics page overall background tint */
 html[data-theme='dark'] #page-analytics {
   background: linear-gradient(180deg, rgba(24,38,30,.35) 0%, transparent 180px);
@@ -465,6 +485,165 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
 }
 /* exclude animation-heavy elements */
 .cov-bar-fill, @keyframes fadeUp, .fab { transition: none !important; }
+/* ══ WEALTH TIME MACHINE ══ */
+.time-machine{margin:0 0 0;padding:0;position:relative}
+.time-machine-header{display:flex;align-items:center;justify-content:space-between;padding:52px 22px 14px}
+.time-machine-greeting{font-family:var(--font-serif);font-size:24px;color:var(--ink-deep);font-weight:500}
+.time-machine-date{font-size:12px;color:var(--stone);margin-top:3px}
+
+/* horizontal scroll card strip */
+.card-strip-wrap{
+  position:relative;
+  margin:0 22px;
+  overflow:hidden;
+  border-radius:24px;
+}
+/* pager: one full-width card at a time, gap via padding trick */
+.card-strip{
+  display:flex;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  padding:0;
+  gap:0;
+}
+.card-strip::-webkit-scrollbar{display:none}
+
+/* wrapper per card: adds the visual gap between cards */
+.time-card-outer{
+  flex-shrink:0;
+  width:100%;
+  scroll-snap-align:start;
+  padding-right:12px;      /* gap between cards */
+  box-sizing:border-box;
+}
+/* last card has no right gap */
+.time-card-outer:last-child{ padding-right:0; }
+
+/* the actual visible card */
+.time-card{
+  width:100%;
+  background:var(--green);
+  border-radius:24px;
+  padding:24px 22px 20px;
+  color:white;
+  position:relative;overflow:hidden;
+  box-shadow:none;
+  user-select:none;
+  display:block;
+}
+.time-card.current{
+  background:linear-gradient(145deg,#2a4238 0%,#3a5c4e 100%);
+}
+.time-card::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(105deg,transparent 0,transparent 4px,rgba(255,255,255,.012) 4px,rgba(255,255,255,.012) 5px);
+  pointer-events:none;
+}
+.time-card::after{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:180px;height:180px;
+  background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);
+}
+.tc-month{font-size:11px;color:rgba(255,255,255,.55);letter-spacing:1.2px;text-transform:uppercase;font-weight:500;position:relative;z-index:1}
+.tc-label{font-size:12px;color:rgba(255,255,255,.5);margin-top:16px;position:relative;z-index:1;letter-spacing:.3px}
+.tc-amount{font-family:var(--font-serif);font-size:36px;letter-spacing:-1px;line-height:1.1;position:relative;z-index:1;margin-top:4px}
+.tc-amount .tc-cur{font-family:var(--font-sans);font-size:16px;opacity:.6;font-weight:300;vertical-align:super}
+.tc-change{display:inline-flex;align-items:center;gap:5px;margin-top:10px;position:relative;z-index:1;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:4px 12px;font-size:12.5px;font-weight:500}
+.tc-row{display:flex;gap:8px;margin-top:16px;position:relative;z-index:1}
+.tc-mini{flex:1;min-width:0;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:9px 11px}
+.tc-mini-label{font-size:10px;color:rgba(255,255,255,.5);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-mini-val{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* time filter tabs */
+.time-tabs{display:flex;gap:6px;padding:2px 22px 16px;overflow-x:auto;scrollbar-width:none}
+.time-tabs::-webkit-scrollbar{display:none}
+.time-tab{padding:6px 14px;border-radius:99px;font-size:12px;font-weight:500;border:1.5px solid var(--fog);background:var(--cream);color:var(--stone);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.time-tab.on{background:var(--green);border-color:var(--green);color:white}
+
+/* dot indicator + nav row */
+.strip-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 22px 4px}
+.strip-nav-btn{
+  background:none;border:none;cursor:pointer;
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--stone);transition:all .15s;
+}
+.strip-nav-btn:active{background:var(--fog);transform:scale(.9)}
+.strip-dots{display:flex;justify-content:center;align-items:center;gap:5px;flex:1}
+.strip-dot{width:5px;height:5px;border-radius:50%;background:var(--mist);transition:all .3s cubic-bezier(.4,0,.2,1);cursor:pointer;border:none;padding:0}
+.strip-dot.on{background:var(--green-soft);width:16px;border-radius:99px}
+.strip-month-label{font-size:11.5px;color:var(--stone);font-weight:500;text-align:center;min-width:80px}
+
+/* ══ SNAPSHOT CARD ══ */
+.snapshot-card{
+  margin:0 22px 20px;
+  background:var(--paper);
+  border:1.5px solid rgba(78,122,104,.25);
+  border-radius:20px;
+  padding:18px 20px;
+  box-shadow:var(--sh-xs);
+}
+.snapshot-title{font-size:12px;font-weight:600;color:var(--green-soft);letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.snapshot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.snapshot-item{background:var(--cream);border-radius:12px;padding:11px 13px;border:1px solid var(--fog)}
+.snapshot-item-label{font-size:10.5px;color:var(--stone);margin-bottom:4px;letter-spacing:.2px}
+.snapshot-item-val{font-family:var(--font-serif);font-size:16px;color:var(--ink-deep);font-weight:500}
+.snapshot-item-sub{font-size:10.5px;color:var(--stone);margin-top:2px}
+
+/* ══ HEALTH LIGHT ══ */
+.health-section{padding:0 22px;margin-bottom:20px}
+.health-title{font-size:12px;font-weight:600;color:var(--stone);letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px}
+.health-lights{display:flex;flex-direction:column;gap:8px}
+.health-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--paper);border-radius:14px;
+  padding:12px 16px;
+  border:1px solid var(--fog);
+  box-shadow:var(--sh-xs);
+}
+.health-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px currentColor}
+.health-dot.g{background:#4caf7d;color:#4caf7d}
+.health-dot.y{background:#e8a838;color:#e8a838}
+.health-dot.r{background:#e05c5c;color:#e05c5c}
+.health-text{font-size:13px;color:var(--ink);flex:1;line-height:1.4}
+.health-badge{font-size:10.5px;padding:2px 8px;border-radius:99px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.health-badge.g{background:#e8f5ee;color:#3a8c5c}
+.health-badge.y{background:#fef3e2;color:#b87c32}
+.health-badge.r{background:#fceaea;color:#c46860}
+
+/* sub summary card */
+.sub-summary{
+  margin:0 22px 20px;
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.sub-sum-card{
+  background:var(--paper);border-radius:16px;
+  padding:14px 16px;
+  border:1px solid rgba(78,122,104,.2);
+  box-shadow:var(--sh-xs);
+}
+.sub-sum-label{font-size:10.5px;color:var(--stone);letter-spacing:.3px;margin-bottom:5px}
+.sub-sum-val{font-family:var(--font-serif);font-size:18px;color:var(--ink-deep)}
+.sub-sum-sub{font-size:10.5px;color:var(--stone);margin-top:3px}
+
+/* dark mode additions */
+html[data-theme='dark'] .time-card{box-shadow:none}
+html[data-theme='dark'] .time-card.current{background:linear-gradient(145deg,#1e3028 0%,#2a4a3a 100%);box-shadow:none}
+html[data-theme='dark'] .snapshot-card{background:var(--paper);border-color:rgba(96,150,126,.28)}
+html[data-theme='dark'] .snapshot-item{background:var(--cream2);border-color:var(--fog)}
+html[data-theme='dark'] .health-item{background:var(--paper);border-color:rgba(96,150,126,.2)}
+html[data-theme='dark'] .health-badge.g{background:rgba(76,175,125,.15);color:#6dcc9a}
+html[data-theme='dark'] .health-badge.y{background:rgba(232,168,56,.15);color:#e8a838}
+html[data-theme='dark'] .health-badge.r{background:rgba(224,92,92,.15);color:#e07070}
+html[data-theme='dark'] .sub-sum-card{background:var(--paper);border-color:rgba(96,150,126,.22)}
+html[data-theme='dark'] .time-tab.on{background:var(--green-soft)}
+html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
+
+/* coverage card update */
+.cov-card{margin:0 22px 20px;background:var(--paper);border:1.5px solid rgba(78,122,104,.25);border-radius:20px;padding:16px 18px;box-shadow:var(--sh-xs)}
+
 
 /* theme toggle button in settings */
 .theme-toggle-row { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border-bottom: 1px solid var(--fog); }
@@ -493,25 +672,36 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
 
 <!-- ═══════════ DASHBOARD ═══════════ -->
 <div class="page active" id="page-dashboard">
-  <div class="topbar">
+
+  <!-- Time Machine Header -->
+  <div class="time-machine-header">
     <div>
-      <div class="topbar-title" id="greeting">早安 ☀</div>
-      <div class="topbar-sub" id="today-date"></div>
+      <div class="time-machine-greeting" id="greeting">早安 ☀</div>
+      <div class="time-machine-date" id="today-date"></div>
     </div>
   </div>
-  <div class="hero-card">
-    <div class="hero-label">我的總資產</div>
-    <div class="hero-amount"><span class="cur">NT$</span><span id="dash-total">0</span></div>
-    <div class="hero-badge">
-      <svg class="ic-sm" id="growth-ic"><use href="#ic-arrow-up"/></svg>
-      <span id="growth-txt">本月 +0</span>
-    </div>
-    <div class="hero-row">
-      <div class="hero-mini"><div class="hero-mini-label">本月收入</div><div class="hero-mini-val" id="dash-inc">NT$0</div></div>
-      <div class="hero-mini"><div class="hero-mini-label">本月支出</div><div class="hero-mini-val" id="dash-exp">NT$0</div></div>
-      <div class="hero-mini"><div class="hero-mini-label">存下來</div><div class="hero-mini-val" id="dash-saved">NT$0</div></div>
-    </div>
+
+  <!-- 財富時光機 card strip -->
+  <div class="card-strip-wrap">
+    <div class="card-strip" id="card-strip"></div>
   </div>
+
+  <!-- nav row: arrow + dots + arrow -->
+  <div class="strip-nav">
+    <button class="strip-nav-btn" onclick="navCard(-1)" id="nav-prev" style="transform:scaleX(-1)">
+      <svg class="ic-sm"><use href="#ic-chevron-right"/></svg>
+    </button>
+    <div class="strip-dots" id="strip-dots"></div>
+    <button class="strip-nav-btn" onclick="navCard(1)" id="nav-next">
+      <svg class="ic-sm"><use href="#ic-chevron-right"/></svg>
+    </button>
+  </div>
+
+  <!-- 訂閱快覽 (compact) -->
+  <div style="display:flex;gap:10px;padding:0 22px;margin-bottom:16px" id="sub-quick-row">
+  </div>
+
+  <!-- 被動收入覆蓋率 -->
   <div class="cov-card">
     <div class="cov-top">
       <div>
@@ -522,13 +712,19 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
     </div>
     <div class="cov-bar-bg"><div class="cov-bar-fill" id="cov-bar" style="width:0%"></div></div>
   </div>
-  <div class="sec-hd"><div class="sec-title"><svg class="ic-sm" style="color:var(--amber)"><use href="#ic-info"/></svg> 財務小觀察</div></div>
+
+  <!-- 財務小觀察 -->
+  <div style="padding:0 22px 8px"><div style="font-size:12px;font-weight:600;color:var(--stone);letter-spacing:.6px;text-transform:uppercase;display:flex;align-items:center;gap:6px"><svg class="ic-sm" style="color:var(--amber)"><use href="#ic-info"/></svg> 財務小觀察</div></div>
   <div class="insights" id="insights"></div>
+
+  <!-- 最近記錄 -->
   <div class="sec-hd mt-8"><div class="sec-title">最近記錄</div><button class="sec-link" onclick="switchPage('cashflow')">查看全部</button></div>
   <div class="tx-wrap" id="recent-tx"><div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-wallet"/></svg></div><div class="empty-text">還沒有記錄<br>點右下角 ＋ 開始記帳</div></div></div>
+
+  <!-- 即將扣款 -->
   <div class="sec-hd mt-12"><div class="sec-title"><svg class="ic-sm" style="color:var(--amber)"><use href="#ic-bell"/></svg> 即將扣款</div><button class="sec-link" onclick="switchPage('cashflow')">管理訂閱</button></div>
   <div class="sub-chips" id="upcoming-subs"><div style="padding:4px 0 10px;color:var(--stone);font-size:13px;text-align:center">還沒有設定訂閱</div></div>
-  <div style="height:6px"></div>
+  <div style="height:8px"></div>
 </div>
 
 <!-- ═══════════ ASSETS ═══════════ -->
@@ -543,8 +739,45 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
       <div class="legend" id="asset-legend"><div style="text-align:center;color:var(--stone);font-size:13px;padding:8px 0">新增資產後顯示配置</div></div>
     </div>
   </div>
-  <div class="sec-hd"><div class="sec-title">資產明細</div></div>
-  <div class="asset-cards" id="asset-cards"></div>
+  <!-- Credit card bills section -->
+  <div class="sec-hd" style="margin-top:4px">
+    <div class="sec-title">
+      <svg class="ic-sm" style="color:var(--amber)"><use href="#ic-wallet"/></svg> 信用卡帳單
+    </div>
+  </div>
+  <!-- add cc form at top -->
+  <div class="add-form" style="border-color:rgba(78,122,104,.25)">
+    <div class="add-form-toggle" onclick="toggleForm('add-cc-body')">
+      <span class="add-form-toggle-title"><svg class="ic-sm"><use href="#ic-plus"/></svg> 新增本月帳單</span>
+      <svg class="ic-sm" style="color:var(--stone)"><use href="#ic-chevron-right"/></svg>
+    </div>
+    <div class="add-form-body" id="add-cc-body">
+      <div style="font-size:12px;color:var(--stone);margin-bottom:10px;line-height:1.6">純記錄用，不影響資產計算</div>
+      <div class="form-group"><label class="form-label">卡片名稱</label>
+        <input class="form-input" id="cc-card" placeholder="例：玉山 Ubear、國泰 CUBE">
+      </div>
+      <div class="form-group"><label class="form-label">帳單月份</label>
+        <input class="form-input" id="cc-month" type="month">
+      </div>
+      <div class="form-group"><label class="form-label">帳單金額 (NT$)</label>
+        <input class="form-input numfmt" id="cc-amount" type="text" inputmode="numeric" placeholder="0">
+      </div>
+      <div class="form-group"><label class="form-label">備註（選填）</label>
+        <input class="form-input" id="cc-note" placeholder="...">
+      </div>
+      <div class="btn-row">
+        <button class="btn-sm btn-p" onclick="addCC()"><svg class="ic-sm"><use href="#ic-check"/></svg> 記錄</button>
+        <button class="btn-sm btn-g" onclick="toggleForm('add-cc-body')">取消</button>
+      </div>
+    </div>
+  </div>
+  <div class="sub-list" id="cc-list" style="margin-bottom:16px"></div>
+
+  <div class="sec-hd">
+    <div class="sec-title">
+      <svg class="ic-sm" style="color:var(--green-soft)"><use href="#ic-gem"/></svg> 資產明細
+    </div>
+  </div>
   <!-- highlighted add form -->
   <div class="add-form asset-add-highlight" id="add-asset-form">
     <div class="add-form-toggle" onclick="toggleForm('add-asset-body')">
@@ -568,6 +801,7 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
       </div>
     </div>
   </div>
+  <div class="asset-cards" id="asset-cards"></div>
 </div>
 
 <!-- ═══════════ CASHFLOW ═══════════ -->
@@ -586,7 +820,8 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
   </div>
   <div class="cf-tabs">
     <button class="cf-tab on" id="cf-tab-rec" onclick="cfTab('rec')">日常記錄</button>
-    <button class="cf-tab" id="cf-tab-sub" onclick="cfTab('sub')">訂閱</button>
+    <button class="cf-tab" id="cf-tab-sub" onclick="cfTab('sub')">訂閱項目</button>
+    <button class="cf-tab" id="cf-tab-bill" onclick="cfTab('bill')">每月雜費</button>
     <button class="cf-tab" id="cf-tab-pas" onclick="cfTab('pas')">被動收入</button>
   </div>
 
@@ -604,8 +839,8 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
     </div>
     <!-- month/year selector -->
     <div style="display:flex;gap:8px;padding:0 18px;margin-bottom:10px">
-      <select class="form-input" id="filter-year" onchange="renderRecords()" style="flex:1"></select>
-      <select class="form-input" id="filter-month" onchange="renderRecords()" style="flex:1">
+      <select class="form-input an-select" id="filter-year" onchange="renderRecords()" style="flex:1"></select>
+      <select class="form-input an-select" id="filter-month" onchange="renderRecords()" style="flex:1">
         <option value="all">全年</option>
         <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option>
         <option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
@@ -618,7 +853,6 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
 
   <!-- Sub panel -->
   <div id="cf-panel-sub" style="display:none">
-    <div class="sub-list" id="sub-list"></div>
     <div class="add-form">
       <div class="add-form-toggle" onclick="toggleForm('add-sub-body')">
         <span class="add-form-toggle-title"><svg class="ic-sm"><use href="#ic-plus"/></svg> 新增訂閱</span>
@@ -637,11 +871,62 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
         </div>
       </div>
     </div>
+    <div class="sub-list" id="sub-list"></div>
   </div>
+
+  <!-- Bill panel (每月雜費) -->
+  <div id="cf-panel-bill" style="display:none">
+    <div class="add-form">
+      <div class="add-form-toggle" onclick="toggleForm('add-bill-body')">
+        <span class="add-form-toggle-title"><svg class="ic-sm"><use href="#ic-plus"/></svg> 新增雜費項目</span>
+        <svg class="ic-sm" style="color:var(--stone)"><use href="#ic-chevron-right"/></svg>
+      </div>
+      <div class="add-form-body" id="add-bill-body">
+        <div class="form-group"><label class="form-label">項目名稱</label>
+          <select class="form-input" id="bill-name-preset" onchange="billPresetChange(this.value)">
+            <option value="">— 選擇項目 —</option>
+            <option value="水費">水費</option>
+            <option value="電費">電費</option>
+            <option value="瓦斯費">瓦斯費</option>
+            <option value="電話費">電話費</option>
+            <option value="健保費">健保費</option>
+            <option value="國民年金">國民年金</option>
+            <option value="保險費">保險費</option>
+            <option value="管理費">管理費</option>
+            <option value="網路費">網路費</option>
+            <option value="custom">自訂…</option>
+          </select>
+        </div>
+        <div class="form-group" id="bill-custom-wrap" style="display:none">
+          <label class="form-label">自訂名稱</label>
+          <input class="form-input" id="bill-name-custom" placeholder="自訂項目名稱">
+        </div>
+        <div class="form-group"><label class="form-label">週期</label>
+          <select class="form-input" id="bill-cycle">
+            <option value="monthly">每月</option>
+            <option value="bimonthly">每兩個月</option>
+            <option value="quarterly">每季（每三個月）</option>
+            <option value="yearly">每年</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">金額 (NT$)</label>
+          <input class="form-input numfmt" id="bill-amount" type="text" inputmode="numeric" placeholder="0">
+        </div>
+        <div class="form-group"><label class="form-label">下次繳費日（選填）</label>
+          <input class="form-input" id="bill-date" type="date">
+        </div>
+        <div class="btn-row">
+          <button class="btn-sm btn-p" onclick="addBill()"><svg class="ic-sm"><use href="#ic-check"/></svg> 新增</button>
+          <button class="btn-sm btn-g" onclick="toggleForm('add-bill-body')">取消</button>
+        </div>
+      </div>
+    </div>
+    <div class="sub-list" id="bill-list"></div>
+  </div>
+
 
   <!-- Passive panel -->
   <div id="cf-panel-pas" style="display:none">
-    <div class="passive-list" id="passive-list"></div>
     <div class="add-form">
       <div class="add-form-toggle" onclick="toggleForm('add-pas-body')">
         <span class="add-form-toggle-title"><svg class="ic-sm"><use href="#ic-plus"/></svg> 新增被動收入</span>
@@ -659,6 +944,7 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
         </div>
       </div>
     </div>
+    <div class="passive-list" id="passive-list"></div>
   </div>
 </div>
 
@@ -670,7 +956,7 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
   <!-- month/year picker for analytics -->
   <div style="display:flex;gap:8px;padding:0 18px;margin-bottom:12px">
     <select class="form-input an-select" id="an-year" onchange="renderCharts()" style="flex:1"></select>
-    <select class="form-input" id="an-month" onchange="renderCharts()" style="flex:1">
+    <select class="form-input an-select" id="an-month" onchange="renderCharts()" style="flex:1">
       <option value="all">全年</option>
       <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option>
       <option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
@@ -962,11 +1248,29 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
 const KEY = 'wealthos_v3'; // same key → preserves existing data
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||def()}catch{return def()}}
 function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
-function def(){return{records:[],assets:[],subs:[],passives:[],settings:{name:'',currency:'TWD',goal:0,goalNote:'',debitDay:0,debitNote:'',notify:true,review:true}}}
+function def(){return{records:[],assets:[],subs:[],passives:[],bills:[],ccRecords:[],settings:{name:"",currency:"TWD",goal:0,goalNote:"",debitDay:0,debitNote:"",notify:true,review:true,theme:"light"}}}
 
 let D=load();
+// ── Seed default data if localStorage is empty ──
+(function seedIfEmpty(){
+  const isEmpty=!D.records.length&&!D.subs.length&&!D.assets.length&&!D.passives.length;
+  if(isEmpty){
+    const seed='{\n  "records": [\n    {"id":1780933846913,"type":"expense","name":"高鐵 台北台南","amount":1350,"date":"2026-06-08","cat":"travel","note":""},\n    {"id":1780930723159,"type":"expense","name":"涼鞋&褲子","amount":2600,"date":"2026-06-07","cat":"shopping","note":""},\n    {"id":1780930723158,"type":"expense","name":"全聯","amount":1031,"date":"2026-06-06","cat":"shopping","note":""},\n    {"id":1780930723160,"type":"expense","name":"Ikea洋芋片","amount":250,"date":"2026-06-06","cat":"food","note":""},\n    {"id":1780930723161,"type":"expense","name":"泰式午餐","amount":420,"date":"2026-06-06","cat":"food","note":"韓佳融"},\n    {"id":1780930723162,"type":"expense","name":"染頭髮","amount":2800,"date":"2026-06-05","cat":"daily","note":""}\n  ],\n  "subs": [\n    {"id":1780933488640,"name":"iCloud 2TB","cycle":"monthly","amount":300,"date":""},\n    {"id":1780933506070,"name":"Netflix","cycle":"yearly","amount":1398,"date":""},\n    {"id":1780933526394,"name":"Disney+","cycle":"yearly","amount":832,"date":""},\n    {"id":1780933561668,"name":"HBO","cycle":"quarterly","amount":485,"date":""},\n    {"id":1780933579501,"name":"Uber","cycle":"monthly","amount":120,"date":""},\n    {"id":1780933595651,"name":"Hami","cycle":"yearly","amount":1111,"date":""},\n    {"id":1780933611649,"name":"愛奇藝","cycle":"yearly","amount":595,"date":""},\n    {"id":1780933626642,"name":"Line 貼圖","cycle":"yearly","amount":600,"date":""},\n    {"id":1780933642464,"name":"F1","cycle":"yearly","amount":820,"date":""},\n    {"id":1780933654950,"name":"Remini","cycle":"yearly","amount":1190,"date":""},\n    {"id":1780933675608,"name":"Claude","cycle":"monthly","amount":600,"date":""},\n    {"id":1780933694875,"name":"Hafh","cycle":"monthly","amount":745,"date":""}\n  ],\n  "passives": [\n    {"id":1780933728695,"name":"南山保險","type":"dividend","amount":2500}\n  ],\n  "assets": [\n    {"id":1780930824405,"name":"南山保單","type":"insurance","amount":600000},\n    {"id":1780930854516,"name":"凱基保單","type":"insurance","amount":1000000}\n  ],\n  "settings": {\n    "name":"Wawa","currency":"TWD","goal":0,"goalNote":"","debitDay":0,"debitNote":"",\n    "notify":true,"review":true,"theme":"light"\n  }\n}';
+    try{
+      const s=JSON.parse(seed);
+      D.records=s.records||[];
+      D.subs=s.subs||[];
+      D.passives=s.passives||[];
+      D.assets=s.assets||[];
+      // merge settings but keep any existing theme preference
+      D.settings=Object.assign({name:'',currency:'TWD',goal:0,goalNote:'',debitDay:0,debitNote:'',notify:true,review:true,theme:'light'},s.settings||{});
+    }catch(e){}
+  }
+})();
 // migration: ensure settings sub-keys exist
 D.settings=Object.assign({name:'',currency:'TWD',goal:0,goalNote:'',debitDay:0,debitNote:'',notify:true,review:true,theme:'light'},D.settings||{});
+if(!D.bills)D.bills=[];
+if(!D.ccRecords)D.ccRecords=[];
 save(D);
 
 // Apply saved theme immediately (before DOMContentLoaded to avoid flash)
@@ -991,6 +1295,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   initNumFmt();
   applySettings();
   setRecType('income');
+  // set default cc month
+  const ccM=document.getElementById('cc-month');
+  if(ccM){const now=new Date();ccM.value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;}
   renderAll();
   // Bind overlay-click-to-close (must run after DOM ready)
   document.querySelectorAll('.modal-overlay').forEach(overlay=>{
@@ -1069,7 +1376,26 @@ function closeModal(id){
   document.getElementById(id).classList.remove('open');
   document.body.style.overflow='';
 }
-function toggleForm(id){document.getElementById(id).classList.toggle('open')}
+function toggleForm(id){
+  const body=document.getElementById(id);
+  const wasOpen=body.classList.contains('open');
+  body.classList.toggle('open');
+  // if just opened, scroll the toggle button into view smoothly
+  if(!wasOpen){
+    // find the parent add-form and scroll it to top of viewport
+    const form=body.closest('.add-form');
+    if(form){
+      setTimeout(()=>{
+        const rect=form.getBoundingClientRect();
+        const scrollY=window.scrollY+rect.top-80; // 80px offset from top
+        window.scrollTo({top:Math.max(0,scrollY),behavior:'smooth'});
+        // focus first input inside
+        const first=body.querySelector('input:not([type=hidden]),select');
+        if(first)setTimeout(()=>first.focus({preventScroll:true}),350);
+      },50);
+    }
+  }
+}
 
 
 
@@ -1093,8 +1419,29 @@ function setERT(t){
 }
 
 // ══════ CF TABS ══════
+// subscription category icons
+const SUB_CAT_ICON={
+  '影視串流':'🎬','音樂':'🎵','AI':'🤖','餐飲':'🍜','娛樂':'🎮',
+  'APP':'📱','雲端':'☁️','健身':'💪','新聞':'📰','遊戲':'🕹️','其他':'📦'
+};
+function getSubIcon(name){
+  const n=name.toLowerCase();
+  if(['netflix','disney','hbo','hami','愛奇藝','prime','youtube'].some(x=>n.includes(x)))return'🎬';
+  if(['spotify','apple music','kkbox'].some(x=>n.includes(x)))return'🎵';
+  if(['claude','chatgpt','openai','copilot','gemini'].some(x=>n.includes(x)))return'🤖';
+  if(['uber eats','foodpanda','foodpan'].some(x=>n.includes(x)))return'🍜';
+  if(['icloud','google one','dropbox','onedrive'].some(x=>n.includes(x)))return'☁️';
+  if(['line','wechat','discord'].some(x=>n.includes(x)))return'💬';
+  if(['f1','dazn','espn'].some(x=>n.includes(x)))return'🏎️';
+  if(['remini','canva','figma','adobe'].some(x=>n.includes(x)))return'🎨';
+  if(['gym','fitbit','garmin'].some(x=>n.includes(x)))return'💪';
+  if(['hafh','airbnb'].some(x=>n.includes(x)))return'🏠';
+  if(['uber','grab'].some(x=>n.includes(x)))return'🚗';
+  return'📦';
+}
+
 function cfTab(t){
-  ['rec','sub','pas'].forEach(x=>{
+  ['rec','sub','bill','pas'].forEach(x=>{
     const p=document.getElementById('cf-panel-'+x);
     const b=document.getElementById('cf-tab-'+x);
     if(p)p.style.display=x===t?'block':'none';
@@ -1133,8 +1480,288 @@ function renderAll(){
   renderDashboard();
   renderRecords();
   renderSubList();
+  renderBillList();
+  renderCCList();
   renderPassiveList();
   renderAssetCards();
+}
+
+// ══════ BILLS ══════
+const BILL_ICONS={水費:'💧',電費:'⚡',瓦斯費:'🔥',電話費:'📱',健保費:'🏥',國民年金:'🏛️',保險費:'🛡️',管理費:'🏢',網路費:'📡'};
+const BILL_CYCLE_LABEL={monthly:'每月',bimonthly:'每兩個月',quarterly:'每季',yearly:'每年'};
+
+function billPresetChange(v){
+  document.getElementById('bill-custom-wrap').style.display=v==='custom'?'block':'none';
+}
+
+function addBill(){
+  const preset=document.getElementById('bill-name-preset').value;
+  const custom=document.getElementById('bill-name-custom').value.trim();
+  const name=preset==='custom'?custom:preset;
+  const cycle=document.getElementById('bill-cycle').value;
+  const amount=getNum('bill-amount');
+  const date=document.getElementById('bill-date').value;
+  if(!name||!amount){alert('請填寫名稱和金額！');return}
+  D.bills.push({id:Date.now(),name,cycle,amount,date});
+  save(D);
+  document.getElementById('bill-name-preset').value='';
+  document.getElementById('bill-amount').value='';
+  document.getElementById('bill-date').value='';
+  document.getElementById('bill-custom-wrap').style.display='none';
+  toggleForm('add-bill-body');
+  renderBillList();
+}
+
+function renderBillList(){
+  const el=document.getElementById('bill-list');
+  if(!el)return;
+  if(!D.bills.length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-repeat"/></svg></div><div class="empty-text">還沒有雜費項目</div></div>`;return;
+  }
+  el.innerHTML=D.bills.map(b=>`<div class="sub-item">
+    <div class="sub-item-icon" style="font-size:18px;display:flex;align-items:center;justify-content:center">${BILL_ICONS[b.name]||'📋'}</div>
+    <div class="sub-item-left">
+      <div class="sub-item-name">${b.name}</div>
+      <div class="sub-item-meta">${b.date?'下次：'+b.date:''}</div>
+    </div>
+    <span class="badge">${BILL_CYCLE_LABEL[b.cycle]||b.cycle}</span>
+    <div class="sub-item-amt">${fmt(b.amount)}</div>
+    <div class="tx-actions">
+      <button class="icon-btn del" onclick="delBill(${b.id})"><svg class="ic-sm"><use href="#ic-close"/></svg></button>
+    </div>
+  </div>`).join('');
+}
+
+function delBill(id){
+  if(!confirm('確定刪除？'))return;
+  D.bills=D.bills.filter(b=>b.id!==id);
+  save(D);renderBillList();
+}
+
+// ══════ CREDIT CARD ══════
+function addCC(){
+  const card=document.getElementById('cc-card').value.trim();
+  const month=document.getElementById('cc-month').value;
+  const amount=getNum('cc-amount');
+  const note=document.getElementById('cc-note').value.trim();
+  if(!card||!amount){alert('請填寫卡片名稱和金額！');return}
+  D.ccRecords.push({id:Date.now(),card,month,amount,note});
+  save(D);
+  document.getElementById('cc-card').value='';
+  document.getElementById('cc-amount').value='';
+  document.getElementById('cc-note').value='';
+  toggleForm('add-cc-body');
+  renderCCList();
+}
+
+function renderCCList(){
+  const el=document.getElementById('cc-list');
+  if(!el)return;
+  if(!D.ccRecords.length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-wallet"/></svg></div><div class="empty-text">每月輸入帳單金額供參考</div></div>`;return;
+  }
+  // group by month
+  const byMonth={};
+  D.ccRecords.forEach(r=>{if(!byMonth[r.month])byMonth[r.month]=[];byMonth[r.month].push(r);});
+  const sorted=Object.keys(byMonth).sort().reverse();
+  el.innerHTML=sorted.map(m=>{
+    const items=byMonth[m];
+    const total=items.reduce((s,r)=>s+r.amount,0);
+    return `<div style="padding:0 0 4px">
+      <div style="font-size:11px;color:var(--stone);font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:8px 0 6px">${m}</div>
+      ${items.map(r=>`<div class="sub-item" style="margin-bottom:6px">
+        <div class="sub-item-icon" style="font-size:18px;display:flex;align-items:center;justify-content:center">💳</div>
+        <div class="sub-item-left">
+          <div class="sub-item-name">${r.card}</div>
+          <div class="sub-item-meta">${r.note||'信用卡帳單'}</div>
+        </div>
+        <div class="sub-item-amt">${fmt(r.amount)}</div>
+        <div class="tx-actions">
+          <button class="icon-btn del" onclick="delCC(${r.id})"><svg class="ic-sm"><use href="#ic-close"/></svg></button>
+        </div>
+      </div>`).join('')}
+      <div style="text-align:right;font-size:12px;color:var(--stone);padding:4px 4px 8px">本月合計 ${fmt(total)}</div>
+    </div>`;
+  }).join('<div style="height:1px;background:var(--fog);margin:4px 0"></div>');
+}
+
+function delCC(id){
+  if(!confirm('確定刪除？'))return;
+  D.ccRecords=D.ccRecords.filter(r=>r.id!==id);
+  save(D);renderCCList();
+}
+
+// ══════ TIME MACHINE ══════
+let timeRange=1; // 1=本月, 6=近6月, 12=近1年, 0=全部
+let currentCardIdx=0;
+
+function setTimeRange(n){
+  timeRange=n;
+  ['1','6','12','0'].forEach(x=>{
+    const el=document.getElementById('tt-'+x);
+    if(el)el.className='time-tab'+(String(n)===x?' on':'');
+  });
+  buildCardStrip();
+}
+
+let allMonths=[];  // global month list for nav
+
+function buildCardStrip(){
+  const now=new Date();
+  const curY=now.getFullYear(), curM=now.getMonth();
+
+  // always build full history + future 1 month for paging
+  // find oldest record
+  const allDates=D.records.filter(r=>r.date).map(r=>r.date).sort();
+  let sy=curY, sm=curM;
+  if(allDates.length){
+    const oldest=new Date(allDates[0]);
+    sy=oldest.getFullYear(); sm=oldest.getMonth();
+  }
+  // also respect timeRange filter for how many to show
+  let months=[];
+  if(timeRange===1){
+    months=[{y:curY,m:curM}];
+  } else if(timeRange===6){
+    for(let i=5;i>=0;i--){const d=new Date(curY,curM-i,1);months.push({y:d.getFullYear(),m:d.getMonth()});}
+  } else if(timeRange===12){
+    for(let i=11;i>=0;i--){const d=new Date(curY,curM-i,1);months.push({y:d.getFullYear(),m:d.getMonth()});}
+  } else {
+    let iy=sy,im=sm;
+    while(iy<curY||(iy===curY&&im<=curM)){
+      months.push({y:iy,m:im});
+      im++;if(im>11){im=0;iy++;}
+    }
+    if(!months.length)months=[{y:curY,m:curM}];
+  }
+  allMonths=months;
+
+  const strip=document.getElementById('card-strip');
+  const dots=document.getElementById('strip-dots');
+  const MONTH_ZH=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const fixed=getMonthlyFixed();
+  const passive=getTotalPassive();
+  const total=getTotalAssets();
+
+  strip.innerHTML=months.map((mo,idx)=>{
+    const mStr=`${mo.y}-${String(mo.m+1).padStart(2,'0')}`;
+    const recs=D.records.filter(r=>r.date&&r.date.startsWith(mStr));
+    const inc=recs.filter(r=>r.type==='income').reduce((s,r)=>s+r.amount,0);
+    const exp=recs.filter(r=>r.type==='expense').reduce((s,r)=>s+r.amount,0);
+    const net=inc-exp;
+    const isCur=(mo.y===curY&&mo.m===curM);
+    const netColor=net>=0?'rgba(160,230,190,.9)':'rgba(255,160,140,.9)';
+    const netArrow=net>=0?'↑':'↓';
+    const netSign=net>=0?'+':'';
+    // redefined values
+    const totalIn = inc + passive;           // 本月入袋 = 收入 + 被動收入
+    const totalOut = exp + fixed;            // 本月蒸發 = 支出 + 固定訂閱
+    const saved = totalIn - totalOut;        // 努力存了
+    const savedSign = saved>=0?'+':'';
+    const savedColor = saved>=0?'rgba(160,230,190,.95)':'rgba(255,160,140,.9)';
+    const netColor2 = saved>=0?'rgba(160,230,190,.9)':'rgba(255,160,140,.9)';
+    return `<div class="time-card-outer" data-idx="${idx}">
+      <div class="time-card${isCur?' current':''}">
+        <div class="tc-month">${mo.y} · ${MONTH_ZH[mo.m]}</div>
+        <div class="tc-label">總資產</div>
+        <div class="tc-amount"><span class="tc-cur">NT$</span>${Math.round(total).toLocaleString()}</div>
+        <div class="tc-change" style="color:${netColor2}">
+          ${saved>=0?'↑':'↓'} ${savedSign}${fmt(Math.abs(saved))}
+        </div>
+        <div class="tc-row">
+          <div class="tc-mini">
+            <div class="tc-mini-label">本月入袋</div>
+            <div class="tc-mini-val">${fmt(totalIn)}</div>
+          </div>
+          <div class="tc-mini">
+            <div class="tc-mini-label">本月蒸發</div>
+            <div class="tc-mini-val">${fmt(totalOut)}</div>
+          </div>
+          <div class="tc-mini">
+            <div class="tc-mini-label">努力存了</div>
+            <div class="tc-mini-val" style="color:${savedColor}">${savedSign}${fmt(Math.abs(saved))}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // dots — max 7 visible
+  const total_m=months.length;
+  const maxDots=Math.min(total_m,7);
+  dots.innerHTML=Array.from({length:maxDots},(_,i)=>{
+    const actualIdx=total_m<=7?i:Math.round(i*(total_m-1)/(maxDots-1));
+    return `<button class="strip-dot" onclick="scrollToCard(${actualIdx})"></button>`;
+  }).join('');
+
+  // init: scroll to current month (last)
+  const targetIdx=months.length-1;
+  currentCardIdx=targetIdx;
+  // use programmatic scroll after paint
+  requestAnimationFrame(()=>{
+    const outer=strip.children[targetIdx];
+    if(outer) strip.scrollLeft=outer.offsetLeft;
+    updateDots(targetIdx);
+    updateNavBtns();
+  });
+
+  // scroll listener — snap detection
+  let scrollTimer;
+  strip.onscroll=function(){
+    clearTimeout(scrollTimer);
+    scrollTimer=setTimeout(()=>{
+      // find which outer wrapper is most visible
+      let best=0, bestDist=Infinity;
+      Array.from(strip.children).forEach((outer,i)=>{
+        const dist=Math.abs(outer.offsetLeft - strip.scrollLeft);
+        if(dist<bestDist){bestDist=dist;best=i;}
+      });
+      if(best!==currentCardIdx){
+        currentCardIdx=best;
+        updateDots(best);
+        updateNavBtns();
+      }
+    },80);
+  };
+}
+
+function navCard(dir){
+  const strip=document.getElementById('card-strip');
+  const newIdx=Math.max(0,Math.min(currentCardIdx+dir, allMonths.length-1));
+  // use outer wrapper width (includes gap)
+  const outer=strip.children[newIdx];
+  if(outer) strip.scrollTo({left:outer.offsetLeft, behavior:'smooth'});
+  currentCardIdx=newIdx;
+  updateDots(newIdx);
+  updateNavBtns();
+}
+
+function scrollToCard(idx){
+  const strip=document.getElementById('card-strip');
+  const outer=strip.children[idx];
+  if(outer) strip.scrollTo({left:outer.offsetLeft, behavior:'smooth'});
+  currentCardIdx=idx;
+  updateDots(idx);
+  updateNavBtns();
+}
+
+function updateDots(activeIdx){
+  const dots=document.querySelectorAll('.strip-dot');
+  const total=allMonths.length;
+  const maxDots=Math.min(total,7);
+  dots.forEach((d,i)=>{
+    const actualIdx=total<=7?i:Math.round(i*(total-1)/(maxDots-1));
+    // active if this dot maps to current card
+    const isActive=total<=7?i===activeIdx:Math.abs(actualIdx-activeIdx)<(total/maxDots*0.6);
+    d.classList.toggle('on',isActive);
+  });
+}
+
+function updateNavBtns(){
+  const prev=document.getElementById('nav-prev');
+  const next=document.getElementById('nav-next');
+  if(prev)prev.style.opacity=currentCardIdx===0?'0.3':'1';
+  if(next)next.style.opacity=currentCardIdx===allMonths.length-1?'0.3':'1';
 }
 
 // ══════ DASHBOARD ══════
@@ -1143,13 +1770,32 @@ function renderDashboard(){
   const passive=getTotalPassive(),fixed=getMonthlyFixed(),total=getTotalAssets();
   const cov=fixed>0?Math.min(Math.round((passive/fixed)*100),200):0;
 
-  document.getElementById('dash-total').textContent=Math.round(total).toLocaleString();
-  document.getElementById('dash-inc').textContent=fmt(inc);
-  document.getElementById('dash-exp').textContent=fmt(exp);
-  document.getElementById('dash-saved').textContent=fmt(net);
+  // rebuild time machine
+  buildCardStrip();
 
-  document.getElementById('growth-ic').querySelector('use').setAttribute('href',net>=0?'#ic-arrow-up':'#ic-arrow-down');
-  document.getElementById('growth-txt').textContent=net>=0?`本月 +${fmt(net)}`:`本月 ${fmt(Math.abs(net))}`;
+  // ── Health Lights ──
+  renderHealthLights({inc,exp,net,passive,fixed,cov,total});
+
+  // ── Sub quick row ──
+  const monthlySub2=getMonthlyFixed();
+  const annualSub2=D.subs.reduce((s,x)=>{
+    if(x.cycle==='monthly')return s+x.amount*12;
+    if(x.cycle==='yearly')return s+x.amount;
+    if(x.cycle==='quarterly')return s+x.amount*4;
+    return s;
+  },0);
+  const sqr=document.getElementById('sub-quick-row');
+  if(sqr) sqr.innerHTML=`
+    <div style="flex:1;background:var(--paper);border:1px solid rgba(78,122,104,.2);border-radius:14px;padding:12px 14px;box-shadow:var(--sh-xs)">
+      <div style="font-size:10.5px;color:var(--stone);margin-bottom:4px;letter-spacing:.2px">本月訂閱</div>
+      <div style="font-family:var(--font-serif);font-size:17px;color:var(--ink-deep)">${fmt(monthlySub2)}</div>
+      <div style="font-size:10.5px;color:var(--stone);margin-top:2px">${D.subs.length} 個項目</div>
+    </div>
+    <div style="flex:1;background:var(--paper);border:1px solid rgba(78,122,104,.2);border-radius:14px;padding:12px 14px;box-shadow:var(--sh-xs)">
+      <div style="font-size:10.5px;color:var(--stone);margin-bottom:4px;letter-spacing:.2px">年度訂閱</div>
+      <div style="font-family:var(--font-serif);font-size:17px;color:var(--ink-deep)">${fmt(annualSub2)}</div>
+      <div style="font-size:10.5px;color:var(--stone);margin-top:2px">換算全年費用</div>
+    </div>`;
 
   document.getElementById('cov-pct').textContent=cov+'%';
   document.getElementById('cov-bar').style.width=Math.min(cov,100)+'%';
@@ -1175,6 +1821,54 @@ function renderDashboard(){
 
   // insights
   renderInsights({inc,exp,net,passive,fixed,cov,total});
+}
+
+function renderHealthLights({inc,exp,net,passive,fixed,cov,total}){
+  const lights=[];
+  const now=new Date();
+  const prevMs=`${now.getFullYear()}-${String(now.getMonth()).padStart(2,'0')}`;
+  const prevRecs=D.records.filter(r=>r.date&&r.date.startsWith(prevMs));
+  const prevExp=prevRecs.filter(r=>r.type==='expense').reduce((s,r)=>s+r.amount,0);
+  const prevInc=prevRecs.filter(r=>r.type==='income').reduce((s,r)=>s+r.amount,0);
+
+  // 1. coverage light
+  if(cov>=80) lights.push({cls:'g',label:'綠燈',text:`被動收入已覆蓋固定支出 ${cov}%`,badge:'健康'});
+  else if(cov>=40) lights.push({cls:'y',label:'黃燈',text:`被動收入覆蓋 ${cov}%，繼續努力`,badge:'加油'});
+  else lights.push({cls:'r',label:'紅燈',text:'被動收入覆蓋率偏低，建議增加被動收入',badge:'注意'});
+
+  // 2. expense vs last month
+  if(prevExp>0&&exp>0){
+    const chg=Math.round((exp-prevExp)/prevExp*100);
+    if(chg>15) lights.push({cls:'r',label:'紅燈',text:`本月支出較上月增加 ${chg}%，留意花費`,badge:'偏高'});
+    else if(chg>5) lights.push({cls:'y',label:'黃燈',text:`本月支出較上月增加 ${chg}%`,badge:'稍高'});
+    else if(chg<=0) lights.push({cls:'g',label:'綠燈',text:`本月支出較上月${chg===0?'持平':'減少 '+(Math.abs(chg))+'%'}`,badge:'良好'});
+  }
+
+  // 3. savings rate vs goal
+  const goal=D.settings.goal||0;
+  if(goal>0){
+    if(net>=goal) lights.push({cls:'g',label:'綠燈',text:`本月已達存款目標 ${fmt(goal)}`,badge:'達標 🎉'});
+    else if(net>0) lights.push({cls:'y',label:'黃燈',text:`距存款目標還差 ${fmt(goal-net)}`,badge:'努力中'});
+    else lights.push({cls:'r',label:'紅燈',text:'本月儲蓄率低於目標，支出可能偏高',badge:'未達標'});
+  } else if(inc>0){
+    const saveRate=Math.round(net/inc*100);
+    if(saveRate>=30) lights.push({cls:'g',label:'綠燈',text:`本月存款率 ${saveRate}%，很不錯！`,badge:'優秀'});
+    else if(saveRate>=10) lights.push({cls:'y',label:'黃燈',text:`本月存款率 ${saveRate}%，還有空間`,badge:'普通'});
+    else if(saveRate<0) lights.push({cls:'r',label:'紅燈',text:'本月支出大於收入，入不敷出',badge:'警示'});
+  }
+
+  const el=document.getElementById('health-lights');
+  if(!el)return;
+  if(!lights.length){
+    el.innerHTML=`<div class="health-item"><div class="health-dot g" style="box-shadow:0 0 8px #4caf7d"></div><div class="health-text">新增記錄後顯示健康狀態</div></div>`;
+    return;
+  }
+  el.innerHTML=lights.map(l=>`
+    <div class="health-item">
+      <div class="health-dot ${l.cls}"></div>
+      <div class="health-text">${l.text}</div>
+      <span class="health-badge ${l.cls}">${l.badge}</span>
+    </div>`).join('');
 }
 
 function renderInsights({inc,exp,net,passive,fixed,cov,total}){
@@ -1278,9 +1972,9 @@ function delRecord(id){if(!confirm('確定刪除？'))return;D.records=D.records
 function renderSubList(){
   const el=document.getElementById('sub-list');
   if(!D.subs.length){el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-repeat"/></svg></div><div class="empty-text">還沒有訂閱</div></div>`;return}
-  const cl={monthly:'每月',yearly:'每年',quarterly:'每季'};
+  const cl={monthly:'每月',yearly:'每年',quarterly:'每季',bimonthly:'每兩月'};
   el.innerHTML=D.subs.map(s=>`<div class="sub-item">
-    <div class="sub-item-icon"><svg class="ic-sm"><use href="#ic-repeat"/></svg></div>
+    <div class="sub-item-icon" style="font-size:18px;display:flex;align-items:center;justify-content:center">${getSubIcon(s.name)}</div>
     <div class="sub-item-left"><div class="sub-item-name">${s.name}</div><div class="sub-item-meta">${s.date?'下次：'+s.date:''}</div></div>
     <span class="badge">${cl[s.cycle]||s.cycle}</span>
     <div class="sub-item-amt">${fmt(s.amount)}</div>
@@ -1584,13 +2278,15 @@ function saveToggle(k,v){D.settings[k]=v;save(D)}
 function exportCSV(){
   // Export complete backup: records + subs + passives + assets + settings
   const backup = {
-    _version: 2,
+    _version: 3,
     _exportedAt: new Date().toISOString(),
-    records:  D.records,
-    subs:     D.subs,
-    passives: D.passives,
-    assets:   D.assets,
-    settings: D.settings
+    records:   D.records,
+    subs:      D.subs,
+    passives:  D.passives,
+    assets:    D.assets,
+    bills:     D.bills||[],
+    ccRecords: D.ccRecords||[],
+    settings:  D.settings
   };
   const json = JSON.stringify(backup, null, 2);
   const blob = new Blob([json], {type:'application/json;charset=utf-8;'});
@@ -1674,6 +2370,30 @@ function importCSV(input){
             if(!existing.has(key)){D.assets.push({...a,id:a.id||Date.now()+i});existing.add(key);added++;}
           });
           msg.push(`資產：新增 ${added} 筆`);
+        }
+
+        // bills
+        if(Array.isArray(backup.bills)&&backup.bills.length){
+          if(!D.bills)D.bills=[];
+          const existing=new Set(D.bills.map(b=>`${b.name}|${b.cycle}|${b.amount}`));
+          let added=0;
+          backup.bills.forEach((b,i)=>{
+            const key=`${b.name}|${b.cycle}|${b.amount}`;
+            if(!existing.has(key)){D.bills.push({...b,id:b.id||Date.now()+i});existing.add(key);added++;}
+          });
+          msg.push(`雜費項目：新增 ${added} 筆`);
+        }
+
+        // ccRecords
+        if(Array.isArray(backup.ccRecords)&&backup.ccRecords.length){
+          if(!D.ccRecords)D.ccRecords=[];
+          const existing=new Set(D.ccRecords.map(r=>`${r.card}|${r.month}|${r.amount}`));
+          let added=0;
+          backup.ccRecords.forEach((r,i)=>{
+            const key=`${r.card}|${r.month}|${r.amount}`;
+            if(!existing.has(key)){D.ccRecords.push({...r,id:r.id||Date.now()+i});existing.add(key);added++;}
+          });
+          msg.push(`信用卡帳單：新增 ${added} 筆`);
         }
 
         // settings — restore only if not already configured
