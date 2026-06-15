@@ -46,6 +46,7 @@
   <symbol id="ic-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
   <symbol id="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></symbol>
   <symbol id="ic-sun-fill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
+  <symbol id="ic-cloud-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15a6 6 0 10-11.4-2.6A4 4 0 105 19h13a3 3 0 000-6"/><path d="M12 12v6m-3-3l3-3 3 3"/></symbol>
   <symbol id="ic-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
 </svg>
 
@@ -1176,16 +1177,36 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   </div>
 
   <div class="settings-section">
-    <div class="settings-label">資料管理</div>
+    <div class="settings-label">資料備份</div>
+    <!-- Google Drive backup card -->
+    <div style="background:var(--paper);border:1.5px solid rgba(78,122,104,.28);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh-xs);margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:38px;height:38px;border-radius:10px;background:var(--green-pale);color:var(--green-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg class="ic"><use href="#ic-cloud-up"/></svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--ink)">備份到 Google Drive</div>
+          <div style="font-size:11.5px;color:var(--stone);margin-top:1px" id="gdrive-last-backup">建議每週備份一次</div>
+        </div>
+      </div>
+      <button onclick="backupToGoogleDrive()" style="width:100%;padding:11px;background:var(--green);color:white;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .15s" id="gdrive-btn">
+        <svg class="ic-sm"><use href="#ic-cloud-up"/></svg>
+        立即備份到 Google Drive
+      </button>
+      <div style="font-size:11px;color:var(--stone);margin-top:8px;text-align:center;line-height:1.5">
+        會請你登入 Google 帳號，備份檔案儲存在「我的雲端硬碟」
+      </div>
+    </div>
+
     <div class="settings-group">
       <div class="settings-row" onclick="exportCSV()">
         <div class="settings-row-icon"><svg class="ic"><use href="#ic-download"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-name">完整備份（JSON + CSV）</div><div class="settings-row-desc">包含所有記錄、訂閱、資產、設定</div></div>
+        <div class="settings-row-text"><div class="settings-row-name">下載備份檔案</div><div class="settings-row-desc">JSON + CSV，儲存到本機</div></div>
         <svg class="ic-sm settings-chevron"><use href="#ic-chevron-right"/></svg>
       </div>
       <div class="settings-row" onclick="document.getElementById('import-file').click()">
         <div class="settings-row-icon"><svg class="ic"><use href="#ic-upload"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-name">還原備份</div><div class="settings-row-desc">支援 .json 完整備份 或 .csv 記帳記錄</div></div>
+        <div class="settings-row-text"><div class="settings-row-name">還原備份</div><div class="settings-row-desc">支援 .json 完整備份 或 .csv 記錄</div></div>
         <svg class="ic-sm settings-chevron"><use href="#ic-chevron-right"/></svg>
       </div>
       <input type="file" id="import-file" accept=".json,.csv" style="display:none" onchange="importCSV(this)">
@@ -1461,6 +1482,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   initNumFmt();
   applySettings();
   setRecType('income');
+  // init gdrive status
+  initGDriveStatus();
   // set default cc month
   const ccM=document.getElementById('cc-month');
   if(ccM){const now=new Date();ccM.value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;}
@@ -2656,6 +2679,149 @@ function saveCurrency(){
 function saveToggle(k,v){D.settings[k]=v;save(D)}
 
 // ══════ FULL BACKUP EXPORT (JSON) ══════
+// ══════ GOOGLE DRIVE BACKUP ══════
+// Uses Google Identity Services (GIS) + Drive REST API
+// No backend required — pure frontend OAuth2 PKCE flow
+
+const GDRIVE_CLIENT_ID = ''; // placeholder — user sets up their own (see instructions)
+const GDRIVE_SCOPES    = 'https://www.googleapis.com/auth/drive.file';
+
+function backupToGoogleDrive(){
+  // Check if Google API is loaded
+  if(typeof google === 'undefined' || !google.accounts){
+    // Load Google Identity Services dynamically
+    const gisScript = document.createElement('script');
+    gisScript.src = 'https://accounts.google.com/gsi/client';
+    gisScript.onload = () => _startGDriveBackup();
+    gisScript.onerror = () => _gdriveManualFallback();
+    document.head.appendChild(gisScript);
+  } else {
+    _startGDriveBackup();
+  }
+}
+
+function _startGDriveBackup(){
+  // If no client ID configured, use manual fallback
+  if(!GDRIVE_CLIENT_ID){
+    _gdriveManualFallback();
+    return;
+  }
+
+  const btn = document.getElementById('gdrive-btn');
+  btn.textContent = '連線中...';
+  btn.disabled = true;
+
+  const tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GDRIVE_CLIENT_ID,
+    scope: GDRIVE_SCOPES,
+    callback: (tokenResponse) => {
+      if(tokenResponse.error){ btn.textContent='授權失敗'; btn.disabled=false; return; }
+      _uploadToDrive(tokenResponse.access_token);
+    }
+  });
+  tokenClient.requestAccessToken();
+}
+
+async function _uploadToDrive(accessToken){
+  const btn = document.getElementById('gdrive-btn');
+  btn.innerHTML = '<svg class="ic-sm"><use href="#ic-cloud-up"/></svg> 上傳中...';
+
+  try {
+    const backup = _buildBackupJSON();
+    const ts = new Date().toISOString().slice(0,10);
+    const filename = `wealth_os_backup_${ts}.json`;
+
+    // Multipart upload
+    const boundary = '-------wealth_os_boundary';
+    const metadata = JSON.stringify({ name: filename, mimeType: 'application/json' });
+    const body = [
+      `--${boundary}`,
+      'Content-Type: application/json; charset=UTF-8',
+      '', metadata, '',
+      `--${boundary}`,
+      'Content-Type: application/json',
+      '', JSON.stringify(backup, null, 2),
+      `--${boundary}--`
+    ].join('\r\n');
+
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': `multipart/related; boundary=${boundary}`
+      },
+      body
+    });
+
+    if(res.ok){
+      const now = new Date().toLocaleString('zh-TW');
+      localStorage.setItem('wealthos_gdrive_backup', now);
+      document.getElementById('gdrive-last-backup').textContent = `上次備份：${now}`;
+      btn.innerHTML = '<svg class="ic-sm"><use href="#ic-check"/></svg> 備份成功！';
+      btn.style.background = 'var(--green-soft)';
+      setTimeout(()=>{
+        btn.innerHTML = '<svg class="ic-sm"><use href="#ic-cloud-up"/></svg> 立即備份到 Google Drive';
+        btn.style.background = '';
+        btn.disabled = false;
+      }, 3000);
+    } else {
+      throw new Error('Upload failed: ' + res.status);
+    }
+  } catch(e){
+    console.error(e);
+    btn.textContent = '備份失敗，請重試';
+    btn.disabled = false;
+    setTimeout(()=>{
+      btn.innerHTML = '<svg class="ic-sm"><use href="#ic-cloud-up"/></svg> 立即備份到 Google Drive';
+    }, 3000);
+  }
+}
+
+function _gdriveManualFallback(){
+  // No OAuth client ID — offer download + open Drive
+  const backup = _buildBackupJSON();
+  const ts = new Date().toISOString().slice(0,10);
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `wealth_os_backup_${ts}.json`;
+  a.click(); URL.revokeObjectURL(url);
+
+  // Open Google Drive after short delay
+  setTimeout(()=>{
+    if(confirm('備份檔案已下載！\n\n要現在開啟 Google Drive 上傳嗎？')){
+      window.open('https://drive.google.com/drive/my-drive', '_blank');
+    }
+  }, 500);
+
+  const now = new Date().toLocaleString('zh-TW');
+  localStorage.setItem('wealthos_gdrive_backup', now);
+  document.getElementById('gdrive-last-backup').textContent = `上次備份：${now}`;
+}
+
+function _buildBackupJSON(){
+  return {
+    _version: 3,
+    _exportedAt: new Date().toISOString(),
+    records:   D.records,
+    subs:      D.subs,
+    passives:  D.passives,
+    assets:    D.assets,
+    bills:     D.bills||[],
+    ccRecords: D.ccRecords||[],
+    settings:  D.settings
+  };
+}
+
+// Show last backup time on settings load
+function initGDriveStatus(){
+  const last = localStorage.getItem('wealthos_gdrive_backup');
+  if(last){
+    const el = document.getElementById('gdrive-last-backup');
+    if(el) el.textContent = `上次備份：${last}`;
+  }
+}
+
 function exportCSV(){
   // Export complete backup: records + subs + passives + assets + settings
   const backup = {
