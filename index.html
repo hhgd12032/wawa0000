@@ -1489,12 +1489,30 @@ function signInWithGoogle(){
 
 // Google Identity Services callback
 function handleGoogleSignIn(response){
-  // response.credential is a JWT ID token
+  if(!response || !response.credential){
+    alert("登入失敗，請重試");
+    return;
+  }
   const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
-  auth.signInWithCredential(credential).catch(err=>{
-    console.error("Firebase credential error:", err);
-    alert("登入失敗："+err.message);
-  });
+  auth.signInWithCredential(credential)
+    .then(result=>{
+      console.log("Sign in success:", result.user.email);
+      // Explicitly update UI in case onAuthStateChanged is slow
+      currentUser = result.user;
+      const ls = document.getElementById("login-screen");
+      const ma = document.getElementById("main-app");
+      if(ls) ls.style.display = "none";
+      if(ma) ma.style.display = "block";
+      const av = document.getElementById("user-avatar");
+      if(av) av.innerHTML = result.user.photoURL
+        ? "<img src=\""+result.user.photoURL+"\">" 
+        : (result.user.displayName||"U")[0];
+      loadCloud();
+    })
+    .catch(err=>{
+      console.error("Firebase credential error:", err);
+      alert("登入失敗："+err.message);
+    });
 }
 function signOut(){ if(confirm("確定登出？")) auth.signOut(); }
 function showUserMenu(){
