@@ -1469,7 +1469,16 @@ auth.onAuthStateChanged(user=>{
 });
 
 function signInWithGoogle(){
-  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+  const provider = new firebase.auth.GoogleAuthProvider();
+  // Try popup first, fall back to redirect if blocked
+  auth.signInWithPopup(provider).catch(err=>{
+    console.log("Popup failed, trying redirect:", err.code);
+    if(err.code==="auth/popup-blocked"||err.code==="auth/popup-closed-by-user"||err.code==="auth/cancelled-popup-request"){
+      auth.signInWithRedirect(provider);
+    } else {
+      alert("登入失敗："+err.message);
+    }
+  });
 }
 function signOut(){ if(confirm("確定登出？")) auth.signOut(); }
 function showUserMenu(){
