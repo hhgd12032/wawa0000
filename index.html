@@ -1476,6 +1476,17 @@ const db   = firebase.firestore();
 let currentUser = null;
 let syncTimeout = null;
 
+// Handle redirect result (for mobile Safari)
+auth.getRedirectResult().then(result => {
+  if(result && result.user){
+    console.log('Redirect login success:', result.user.email);
+  }
+}).catch(err => {
+  if(err.code !== 'auth/no-auth-event'){
+    console.error('Redirect error:', err);
+  }
+});
+
 auth.onAuthStateChanged(user => {
   if(user){
     currentUser = user;
@@ -1496,7 +1507,16 @@ auth.onAuthStateChanged(user => {
 
 function signInWithGoogle(){
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(err => { console.error(err); alert('登入失敗，請重試'); });
+  // Use redirect for mobile Safari (popup blocked), fallback to popup on desktop
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(isMobile){
+    auth.signInWithRedirect(provider).catch(err => { console.error(err); alert('登入失敗，請重試'); });
+  } else {
+    auth.signInWithPopup(provider).catch(err => {
+      // fallback to redirect if popup blocked
+      auth.signInWithRedirect(provider);
+    });
+  }
 }
 
 function signOut(){ if(confirm('確定要登出嗎？')) auth.signOut(); }
