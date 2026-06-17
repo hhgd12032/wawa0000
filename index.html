@@ -1409,50 +1409,11 @@ function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
 function def(){return{records:[],assets:[],subs:[],passives:[],bills:[],ccRecords:[],settings:{name:"",currency:"TWD",goal:0,goalNote:"",debitDay:0,debitNote:"",notify:true,review:true,theme:"light"}}}
 
 let D=load();
-// ── Smart seed: merges latest data if seed version is newer than stored ──
+// ── Smart seed: disabled — data is private per user ──
+// To restore your data, use 設定 → 還原備份 to import your JSON backup
 (function smartSeed(){
-  const SEED_VER = '2026-06-09T14:45:38.207Z';
-  const stored_ver = localStorage.getItem('wealthos_seed_ver');
-  const seed = '{"records":[{"id":1781015285633,"type":"expense","name":"體香乳","amount":920,"date":"2026-06-01","cat":"shopping","note":""},{"id":1780933846913,"type":"expense","name":"高鐵 台北台南","amount":1350,"date":"2026-06-08","cat":"travel","note":""},{"id":1780930723159,"type":"expense","name":"涼鞋&褲子","amount":2600,"date":"2026-06-07","cat":"shopping","note":""},{"id":1780930723158,"type":"expense","name":"全聯","amount":1031,"date":"2026-06-06","cat":"shopping","note":""},{"id":1780930723160,"type":"expense","name":"Ikea洋芋片","amount":250,"date":"2026-06-06","cat":"food","note":""},{"id":1780930723161,"type":"expense","name":"泰式午餐","amount":420,"date":"2026-06-06","cat":"food","note":"韓佳融"},{"id":1780930723162,"type":"expense","name":"染頭髮","amount":2800,"date":"2026-06-05","cat":"daily","note":""}],"subs":[{"id":1780933488640,"name":"iCloud 2TB","cycle":"monthly","amount":300,"date":""},{"id":1780933506070,"name":"Netflix","cycle":"yearly","amount":1398,"date":""},{"id":1780933526394,"name":"Disney+","cycle":"yearly","amount":832,"date":""},{"id":1780933561668,"name":"HBO","cycle":"quarterly","amount":485,"date":""},{"id":1780933579501,"name":"Uber","cycle":"monthly","amount":120,"date":""},{"id":1780933595651,"name":"Hami","cycle":"yearly","amount":1111,"date":""},{"id":1780933611649,"name":"愛奇藝","cycle":"yearly","amount":595,"date":""},{"id":1780933626642,"name":"Line 貼圖","cycle":"yearly","amount":600,"date":""},{"id":1780933642464,"name":"F1","cycle":"yearly","amount":820,"date":""},{"id":1780933654950,"name":"Remini","cycle":"yearly","amount":1190,"date":""},{"id":1780933675608,"name":"Claude","cycle":"monthly","amount":600,"date":""},{"id":1780933694875,"name":"Hafh","cycle":"monthly","amount":745,"date":""}],"passives":[{"id":1780933728695,"name":"南山保險","type":"dividend","amount":2500}],"assets":[{"id":1780930824405,"name":"南山保單","type":"insurance","amount":600000},{"id":1780930854516,"name":"凱基保單","type":"insurance","amount":1000000},{"id":1781014662908,"name":"華南（主）","type":"bank","amount":3000000},{"id":1781014779696,"name":"First trade","type":"us-stock","amount":60000},{"id":1781014869211,"name":"華南（副）","type":"bank","amount":1000000},{"id":1781014994827,"name":"上海銀行","type":"bank","amount":1000000}],"bills":[{"id":1781015133496,"name":"國民年金","cycle":"bimonthly","amount":2658,"date":""},{"id":1781015167051,"name":"健保費","cycle":"bimonthly","amount":1652,"date":""}],"ccRecords":[{"id":1781015525833,"card":"台新","month":"2026-06","amount":30000,"note":""}],"settings":{"name":"WaWa","currency":"TWD","goal":0,"goalNote":"","debitDay":0,"debitNote":"","notify":true,"review":true,"theme":"dark"}}';
-  // Always merge if seed is newer OR if data is empty
-  const isEmpty = !D.records.length && !D.subs.length && !D.assets.length && !D.passives.length;
-  const isNewer = !stored_ver || new Date(SEED_VER) > new Date(stored_ver);
-  if(!isEmpty && !isNewer) return; // skip if data exists and seed is not newer
-
-  try {
-    const s = JSON.parse(seed);
-
-    // RECORDS: merge by id — skip duplicates, add new
-    const existingIds = new Set(D.records.map(r => r.id));
-    (s.records || []).forEach(r => { if(!existingIds.has(r.id)) D.records.push(r); });
-    D.records.sort((a,b) => b.date.localeCompare(a.date));
-
-    // SUBS: replace entirely from seed (authoritative list)
-    if(s.subs && s.subs.length) D.subs = s.subs;
-
-    // PASSIVES: replace entirely
-    if(s.passives && s.passives.length) D.passives = s.passives;
-
-    // ASSETS: replace entirely
-    if(s.assets && s.assets.length) D.assets = s.assets;
-
-    // BILLS: replace entirely
-    if(s.bills && s.bills.length) D.bills = s.bills;
-
-    // CC RECORDS: merge by id
-    if(!D.ccRecords) D.ccRecords = [];
-    const existingCC = new Set(D.ccRecords.map(r => r.id));
-    (s.ccRecords || []).forEach(r => { if(!existingCC.has(r.id)) D.ccRecords.push(r); });
-
-    // SETTINGS: merge — keep user's theme/notifications, update name/currency from seed
-    if(s.settings) {
-      const keep = {notify: D.settings.notify, review: D.settings.review, theme: D.settings.theme};
-      D.settings = Object.assign({}, s.settings, keep);
-    }
-
-    localStorage.setItem('wealthos_seed_ver', SEED_VER);
-    console.log('✅ Wealth OS: data synced from seed v' + SEED_VER);
-  } catch(e) { console.warn('Seed parse error:', e); }
+  // No seed data embedded — each user sees their own empty localStorage
+  // Use the backup/restore feature to migrate your data
 })();
 // migration: ensure settings sub-keys exist
 D.settings=Object.assign({name:'',currency:'TWD',goal:0,goalNote:'',debitDay:0,debitNote:'',notify:true,review:true,theme:'light'},D.settings||{});
