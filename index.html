@@ -561,7 +561,7 @@ html, body, .app, .page, div, span, button, input, select, nav, a {
 .tc-row{display:flex;gap:5px;margin-top:10px;position:relative;z-index:1}
 .tc-mini{flex:1;min-width:0;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 8px 7px}
 .tc-mini-label{font-size:9px;color:rgba(255,255,255,.45);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px}
-.tc-mini-val{font-family:'Outfit',var(--font-sans);font-size:13px;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-mini-val{font-family:'Outfit',var(--font-sans);font-size:12px;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.2px}
 
 /* time filter tabs */
 .time-tabs{display:flex;gap:6px;padding:2px 22px 16px;overflow-x:auto;scrollbar-width:none}
@@ -860,14 +860,23 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
     <!-- 分隔線 -->
     <div style="height:1px;background:rgba(255,255,255,.12);margin:14px 0 12px;position:relative;z-index:1"></div>
 
-    <!-- 收入行 -->
-    <div style="position:relative;z-index:1;margin-bottom:10px">
-      <div style="font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px">本月收入（含被動收入）</div>
-      <div style="display:flex;align-items:baseline;gap:8px">
-        <div id="cf-income-total" style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:200;letter-spacing:.5px">NT$0</div>
-        <div style="display:flex;align-items:center;gap:6px;flex:1;justify-content:flex-end">
-          <div style="font-size:10.5px;color:rgba(255,255,255,.5)">被動收入</div>
-          <div id="cf-passive-chip" style="font-size:11px;background:rgba(255,255,255,.12);border-radius:99px;padding:2px 9px;color:rgba(255,255,255,.85)">NT$0</div>
+    <!-- 本月收入組成 -->
+    <div style="position:relative;z-index:1;background:rgba(0,0,0,.12);border-radius:14px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px">本月收入組成</div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <div style="text-align:center">
+          <div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:2px">一般收入</div>
+          <div id="cf-daily-inc" style="font-size:14px;font-weight:500">NT$0</div>
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,.35);padding-top:10px">＋</div>
+        <div style="text-align:center">
+          <div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:2px">被動收入</div>
+          <div id="cf-passive-chip" style="font-size:14px;font-weight:500">NT$0</div>
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,.35);padding-top:10px;margin-left:2px">＝</div>
+        <div style="text-align:center;margin-left:2px">
+          <div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:2px">總收入</div>
+          <div id="cf-income-total" style="font-size:14px;font-weight:600;color:rgba(180,230,200,.95)">NT$0</div>
         </div>
       </div>
     </div>
@@ -1783,6 +1792,12 @@ function getMonthlyBillsFixed(){
 function getTotalPassive(){return D.passives.reduce((s,p)=>s+p.amount,0)}
 function getTotalAssets(){return D.assets.reduce((s,a)=>s+a.amount,0)}
 function fmt(n){if(n>=1000000)return`NT$${(n/10000).toFixed(1)}萬`;return`NT$${Math.round(n).toLocaleString()}`}
+// compact version for narrow cards — drops $ sign, uses 萬 sooner
+function fmtCompact(n){
+  const abs=Math.abs(n);
+  if(abs>=100000)return`NT${(n/10000).toFixed(1)}萬`;
+  return`NT${Math.round(n).toLocaleString()}`;
+}
 
 // ══════ RENDER ALL ══════
 function renderAll(){
@@ -2041,15 +2056,15 @@ function buildCardStrip(){
         <div class="tc-row">
           <div class="tc-mini">
             <div class="tc-mini-label">本月入袋</div>
-            <div class="tc-mini-val" style="color:rgba(255,220,120,.95)">＋${fmt(totalIn)}</div>
+            <div class="tc-mini-val" style="color:rgba(255,220,120,.95)">＋${fmtCompact(totalIn)}</div>
           </div>
           <div class="tc-mini">
             <div class="tc-mini-label">本月蒸發</div>
-            <div class="tc-mini-val">－${fmt(totalOut)}</div>
+            <div class="tc-mini-val">－${fmtCompact(totalOut)}</div>
           </div>
           <div class="tc-mini">
             <div class="tc-mini-label">本月現況</div>
-            <div class="tc-mini-val" style="color:${savedColor}">${saved>=0?'＋':'－'}${fmt(Math.abs(saved))}</div>
+            <div class="tc-mini-val" style="color:${savedColor}">${saved>=0?'＋':'－'}${fmtCompact(Math.abs(saved))}</div>
           </div>
         </div>
       </div>
@@ -2515,23 +2530,58 @@ function renderCharts(){
   const anYr=document.getElementById('an-year')?.value||String(new Date().getFullYear());
   const anMo=document.getElementById('an-month')?.value||'all';
   const now=new Date();
-  // build 6 months
-  const months=Array.from({length:6},(_,i)=>{
-    const d=new Date(parseInt(anYr),anMo==='all'?now.getMonth()-5+i:parseInt(anMo)-1,1);
-    return{label:`${d.getMonth()+1}月`,key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
-  });
-  const expD=months.map(m=>D.records.filter(r=>r.type==='expense'&&r.date?.startsWith(m.key)).reduce((s,r)=>s+r.amount,0));
-  const incD=months.map(m=>D.records.filter(r=>r.type==='income'&&r.date?.startsWith(m.key)).reduce((s,r)=>s+r.amount,0));
+  const isSpecificMonth = anMo !== 'all';
+
+  // ── Build x-axis points: daily (1~31) if specific month, else last 6 months ──
+  let xLabels = [];
+  let periodKeys = []; // date-prefix string used to filter records for each x point
+
+  if(isSpecificMonth){
+    const yr = parseInt(anYr), mo = parseInt(anMo);
+    const daysInMonth = new Date(yr, mo, 0).getDate();
+    for(let d=1; d<=daysInMonth; d++){
+      xLabels.push(`${d}`);
+      periodKeys.push(`${yr}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+    }
+  } else {
+    for(let i=5;i>=0;i--){
+      const d=new Date(now.getFullYear(), now.getMonth()-i, 1);
+      xLabels.push(`${d.getMonth()+1}月`);
+      periodKeys.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+    }
+  }
+
+  const expDFixed = periodKeys.map(key => D.records.filter(r=>{
+    if(r.type!=='expense'||!r.date) return false;
+    return isSpecificMonth ? r.date===key : r.date.startsWith(key);
+  }).reduce((s,r)=>s+r.amount,0));
+  const incDFixed = periodKeys.map(key => D.records.filter(r=>{
+    if(r.type!=='income'||!r.date) return false;
+    return isSpecificMonth ? r.date===key : r.date.startsWith(key);
+  }).reduce((s,r)=>s+r.amount,0));
 
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   const tickColor=isDark?'#7a7268':'#968e7e';
   const gridColor=isDark?'rgba(255,255,255,.04)':'rgba(60,53,41,.05)';
-  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tickColor,font:{size:10}}},y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},callback:v=>v>=1000?`${(v/1000).toFixed(1)}k`:v}}}};
+  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tickColor,font:{size:isSpecificMonth?8.5:10},maxRotation:0,autoSkip:true,maxTicksLimit:isSpecificMonth?10:6}},y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},callback:v=>v>=1000?`${(v/1000).toFixed(1)}k`:v}}}};
 
-  // expense/income bar
+  // expense/income chart — bar for monthly overview, line for daily detail
   const ec=document.getElementById('expense-chart').getContext('2d');
   if(charts.expense)charts.expense.destroy();
-  charts.expense=new Chart(ec,{type:'bar',data:{labels:months.map(m=>m.label),datasets:[{label:'支出',data:expD,backgroundColor:'rgba(196,104,96,.18)',borderColor:'rgba(196,104,96,.65)',borderWidth:1.5,borderRadius:5,borderSkipped:false},{label:'收入',data:incD,backgroundColor:'rgba(78,122,104,.15)',borderColor:'rgba(78,122,104,.6)',borderWidth:1.5,borderRadius:5,borderSkipped:false}]},options:{...base,plugins:{legend:{display:true,labels:{color:isDark?'#a89f92':'#6a6154',font:{size:10.5},boxWidth:10,boxHeight:10}}}}});
+  if(isSpecificMonth){
+    charts.expense=new Chart(ec,{type:'line',data:{labels:xLabels,datasets:[
+      {label:'支出',data:expDFixed,borderColor:'rgba(196,104,96,.8)',backgroundColor:'rgba(196,104,96,.1)',fill:true,tension:.3,pointRadius:2,pointBackgroundColor:'rgba(196,104,96,.9)',borderWidth:1.8},
+      {label:'收入',data:incDFixed,borderColor:'rgba(78,122,104,.8)',backgroundColor:'rgba(78,122,104,.08)',fill:true,tension:.3,pointRadius:2,pointBackgroundColor:'rgba(78,122,104,.9)',borderWidth:1.8}
+    ]},options:{...base,plugins:{legend:{display:true,labels:{color:isDark?'#a89f92':'#6a6154',font:{size:10.5},boxWidth:10,boxHeight:10}}}}});
+  } else {
+    charts.expense=new Chart(ec,{type:'bar',data:{labels:xLabels,datasets:[
+      {label:'支出',data:expDFixed,backgroundColor:'rgba(196,104,96,.18)',borderColor:'rgba(196,104,96,.65)',borderWidth:1.5,borderRadius:5,borderSkipped:false},
+      {label:'收入',data:incDFixed,backgroundColor:'rgba(78,122,104,.15)',borderColor:'rgba(78,122,104,.6)',borderWidth:1.5,borderRadius:5,borderSkipped:false}
+    ]},options:{...base,plugins:{legend:{display:true,labels:{color:isDark?'#a89f92':'#6a6154',font:{size:10.5},boxWidth:10,boxHeight:10}}}}});
+  }
+  // update chart card subtitle to reflect mode
+  const expSub = document.querySelector('#expense-chart')?.closest('.chart-card')?.querySelector('.chart-sub');
+  if(expSub) expSub.textContent = isSpecificMonth ? `${anYr} 年 ${parseInt(anMo)} 月 · 每日明細` : '近 6 個月';
 
   // category pie — filter by selected month/year
   const filterKey=anMo==='all'?anYr:`${anYr}-${anMo}`;
@@ -2557,36 +2607,48 @@ function renderCharts(){
     charts.cat=new Chart(cc,{type:'doughnut',data:{labels:catLabels,datasets:[{data:catVals,backgroundColor:catColors,borderWidth:0,hoverOffset:3}]},options:{cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)} (${Math.round(c.raw/catTotal*100)}%)`}}},animation:{duration:400}}});
   }
 
-  // asset line — use real monthly income-expense accumulation
+  // asset line — cumulative net income/expense over the chosen period (day-by-day or month-by-month)
   const ta=getTotalAssets();
-  // build real asset history: use cumulative net income across months as relative change
-  const aD=months.map(m=>{
-    // sum all income and expense up to and including this month
-    const cumRecs=D.records.filter(r=>r.date&&r.date<=m.key+'-31');
+  const aD=periodKeys.map(key=>{
+    // cumulative sum of all records up to and including this point in time
+    const cutoff = isSpecificMonth ? key : key+'-31'; // exact day, or end-of-month for monthly mode
+    const cumRecs=D.records.filter(r=>r.date&&r.date<=cutoff);
     const cumInc=cumRecs.filter(r=>r.type==='income').reduce((s,r)=>s+r.amount,0);
     const cumExp=cumRecs.filter(r=>r.type==='expense').reduce((s,r)=>s+r.amount,0);
-    return cumInc-cumExp; // net cumulative — shows growth trend
+    return cumInc-cumExp;
   });
-  // if all zero, show current total as flat line
   const hasRealData=aD.some(v=>v!==0);
-  const assetData=hasRealData?aD:months.map(()=>ta);
+  const assetData=hasRealData?aD:periodKeys.map(()=>ta);
   const ac=document.getElementById('asset-chart').getContext('2d');
   if(charts.asset)charts.asset.destroy();
-  charts.asset=new Chart(ac,{type:'line',data:{labels:months.map(m=>m.label),datasets:[{data:assetData,borderColor:'#2a4238',backgroundColor:'rgba(42,66,56,.06)',fill:true,tension:.35,pointRadius:4,pointBackgroundColor:'#2a4238',borderWidth:2}]},options:{...base,plugins:{...base.plugins,tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}}}});
+  charts.asset=new Chart(ac,{type:'line',data:{labels:xLabels,datasets:[{data:assetData,borderColor:'#2a4238',backgroundColor:'rgba(42,66,56,.06)',fill:true,tension:.35,pointRadius:isSpecificMonth?1.5:4,pointBackgroundColor:'#2a4238',borderWidth:2}]},options:{...base,plugins:{...base.plugins,tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}}}});
+  const assetSub = document.querySelector('#asset-chart')?.closest('.chart-card')?.querySelector('.chart-sub');
+  if(assetSub) assetSub.textContent = isSpecificMonth ? '本月累積資產變化' : '累積資產推估';
 
-  // coverage line — use real monthly passive vs fixed
+  // coverage line — passive income coverage ratio (recalculated daily if specific month selected)
   const fixed=getMonthlyFixed(),passive=getTotalPassive();
-  const{inc:ci,exp:ce}=getThisMonthData();
-  // 覆蓋率 = 被動收入 ÷ (訂閱月均 + 雜費月均 + 日常支出)
-  const cov=(fixed+ce)>0?Math.min(passive/(fixed+ce)*100,100):0;
-  // coverage is same each month (static config), show as flat reference line
-  const covD=months.map(()=>Math.round(cov*10)/10);
+  let covD;
+  if(isSpecificMonth){
+    // daily cumulative expense within the month, recompute coverage per day
+    covD = periodKeys.map(key=>{
+      const dayExp = D.records.filter(r=>r.type==='expense'&&r.date&&r.date<=key&&r.date.startsWith(key.slice(0,7))).reduce((s,r)=>s+r.amount,0);
+      const base2 = fixed+dayExp;
+      return base2>0 ? Math.round(Math.min(passive/base2*100,100)*10)/10 : 0;
+    });
+  } else {
+    const{exp:ce}=getThisMonthData();
+    const cov=(fixed+ce)>0?Math.min(passive/(fixed+ce)*100,100):0;
+    covD = periodKeys.map(()=>Math.round(cov*10)/10);
+  }
+  const covMax = Math.max(120, ...covD, 20);
   const vc=document.getElementById('coverage-chart').getContext('2d');
   if(charts.coverage)charts.coverage.destroy();
-  charts.coverage=new Chart(vc,{type:'line',data:{labels:months.map(m=>m.label),datasets:[{data:covD,borderColor:'#4e7a68',backgroundColor:'rgba(78,122,104,.08)',fill:true,tension:0,pointRadius:4,pointBackgroundColor:'#4e7a68',borderWidth:2}]},options:{...base,scales:{...base.scales,y:{...base.scales.y,min:0,max:Math.max(120,cov+20),ticks:{callback:v=>v+'%',color:tickColor,font:{size:10}}}},plugins:{...base.plugins,tooltip:{callbacks:{label:c=>` 覆蓋率 ${c.raw.toFixed(1)}%`}}}}});
+  charts.coverage=new Chart(vc,{type:'line',data:{labels:xLabels,datasets:[{data:covD,borderColor:'#4e7a68',backgroundColor:'rgba(78,122,104,.08)',fill:true,tension:isSpecificMonth?.3:0,pointRadius:isSpecificMonth?1.5:4,pointBackgroundColor:'#4e7a68',borderWidth:2}]},options:{...base,scales:{...base.scales,y:{...base.scales.y,min:0,max:covMax,ticks:{callback:v=>v+'%',color:tickColor,font:{size:10}}}},plugins:{...base.plugins,tooltip:{callbacks:{label:c=>` 覆蓋率 ${c.raw.toFixed(1)}%`}}}}});
+  const covSub = document.querySelector('#coverage-chart')?.closest('.chart-card')?.querySelector('.chart-sub');
+  if(covSub) covSub.textContent = isSpecificMonth ? '本月每日覆蓋率變化' : '逐月推估';
 
   // stats
-  const ti2=incD.reduce((s,v)=>s+v,0),te2=expD.reduce((s,v)=>s+v,0);
+  const ti2=incDFixed.reduce((s,v)=>s+v,0),te2=expDFixed.reduce((s,v)=>s+v,0);
   document.getElementById('avg-save').textContent=ti2>0?Math.round((ti2-te2)/ti2*100)+'%':'—';
   document.getElementById('fix-ratio').textContent=te2>0?Math.round(fixed/te2*100)+'%':'—';
 
@@ -2728,6 +2790,7 @@ function renderCFSummary(){
   // income block
   const ci=document.getElementById('cf-income-total');if(ci)ci.textContent=fmt(totalIncome);
   const cp=document.getElementById('cf-passive-chip');if(cp)cp.textContent=fmt(passive);
+  const cdi=document.getElementById('cf-daily-inc');if(cdi)cdi.textContent=fmt(inc);
   // expense formula
   const sm=document.getElementById('cf-sub-monthly');if(sm)sm.textContent=fmt(subMonthly);
   const cb=document.getElementById('cf-bills');if(cb)cb.textContent=fmt(billsMonthly);
