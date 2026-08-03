@@ -1184,7 +1184,7 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   <!-- 💰 存款率趨勢 -->
   <div class="chart-card">
     <div class="chart-card-head">
-      <div class="chart-title">💰 存款率趨勢</div>
+      <div class="chart-title">存款率趨勢</div>
       <div class="chart-sub" id="save-rate-sub">近 12 個月每月存款比例</div>
     </div>
     <div class="chart-body" style="position:relative;height:160px">
@@ -1195,7 +1195,7 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   <!-- 🏆 最高支出月份 -->
   <div class="chart-card">
     <div class="chart-card-head">
-      <div class="chart-title">🏆 最高支出月份</div>
+      <div class="chart-title">最高支出月份</div>
       <div class="chart-sub">全年各月花費排名</div>
     </div>
     <div class="chart-body" style="position:relative;height:180px">
@@ -1207,11 +1207,53 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   <!-- 🔁 收支對比雷達圖 -->
   <div class="chart-card">
     <div class="chart-card-head">
-      <div class="chart-title">🔁 收支類別雷達圖</div>
+      <div class="chart-title">支出類別雷達圖</div>
       <div class="chart-sub">各類別支出比重分布</div>
     </div>
     <div class="chart-body" style="position:relative;height:220px">
       <canvas id="radar-chart"></canvas>
+    </div>
+  </div>
+
+
+  <!-- 收入類型佔比 -->
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div class="chart-title">本月收入類型佔比</div>
+      <div class="chart-sub">點選類型看每月 / 全年走勢</div>
+    </div>
+    <div class="chart-body">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="position:relative;width:140px;height:140px;flex-shrink:0">
+          <canvas id="inc-cat-chart"></canvas>
+          <div class="chart-center">
+            <div class="chart-center-val" id="inc-cat-total">NT$0</div>
+            <div class="chart-center-label">總收入</div>
+          </div>
+        </div>
+        <div id="inc-cat-legend" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:7px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 收入類型詳細分析 drill-down -->
+  <div class="chart-card" id="inc-detail-card" style="display:none">
+    <div class="chart-card-head">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="chart-title" id="inc-detail-title">收入類型分析</div>
+          <div class="chart-sub" id="inc-detail-sub">點選下方分頁查看</div>
+        </div>
+        <button onclick="closeIncDetail()" style="background:var(--fog);border:none;border-radius:99px;padding:5px 12px;font-size:12px;color:var(--ink-light);cursor:pointer;font-family:inherit">✕ 關閉</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="cf-tab on" id="idt-monthly" onclick="incDetailTab('monthly')" style="padding:5px 12px;font-size:12px">每月走勢</button>
+        <button class="cf-tab" id="idt-yearly" onclick="incDetailTab('yearly')" style="padding:5px 12px;font-size:12px">全年總覽</button>
+      </div>
+    </div>
+    <div class="chart-body">
+      <div id="inc-detail-monthly-wrap" style="position:relative;height:180px"><canvas id="inc-monthly-chart"></canvas></div>
+      <div id="inc-detail-yearly-wrap" style="display:none;position:relative;height:180px"><canvas id="inc-yearly-chart"></canvas></div>
     </div>
   </div>
 
@@ -2033,6 +2075,7 @@ function saveEditBill(){
 // ══════ TIME MACHINE ══════
 let timeRange=1; // 1=本月, 6=近6月, 12=近1年, 0=全部
 let currentCardIdx=0;
+let amountHidden=false; // toggle to hide all financial amounts
 
 function setTimeRange(n){
   timeRange=n;
@@ -2049,30 +2092,20 @@ function buildCardStrip(){
   const now=new Date();
   const curY=now.getFullYear(), curM=now.getMonth();
 
-  // always build full history + future 1 month for paging
-  // find oldest record
+  // always show all months from oldest record to current month
   const allDates=D.records.filter(r=>r.date).map(r=>r.date).sort();
   let sy=curY, sm=curM;
   if(allDates.length){
     const oldest=new Date(allDates[0]);
     sy=oldest.getFullYear(); sm=oldest.getMonth();
   }
-  // also respect timeRange filter for how many to show
-  let months=[];
-  if(timeRange===1){
-    months=[{y:curY,m:curM}];
-  } else if(timeRange===6){
-    for(let i=5;i>=0;i--){const d=new Date(curY,curM-i,1);months.push({y:d.getFullYear(),m:d.getMonth()});}
-  } else if(timeRange===12){
-    for(let i=11;i>=0;i--){const d=new Date(curY,curM-i,1);months.push({y:d.getFullYear(),m:d.getMonth()});}
-  } else {
-    let iy=sy,im=sm;
-    while(iy<curY||(iy===curY&&im<=curM)){
-      months.push({y:iy,m:im});
-      im++;if(im>11){im=0;iy++;}
-    }
-    if(!months.length)months=[{y:curY,m:curM}];
+  const months=[];
+  let iy=sy,im=sm;
+  while(iy<curY||(iy===curY&&im<=curM)){
+    months.push({y:iy,m:im});
+    im++;if(im>11){im=0;iy++;}
   }
+  if(!months.length) months=[{y:curY,m:curM}];
   allMonths=months;
 
   const strip=document.getElementById('card-strip');
@@ -2102,26 +2135,26 @@ function buildCardStrip(){
     return `<div class="time-card-outer" data-idx="${idx}">
       <div class="time-card${isCur?' current':''}">
         <div class="tc-month">${mo.y} · ${MONTH_ZH[mo.m]}</div>
-        <div style="display:flex;align-items:baseline;justify-content:space-between;position:relative;z-index:1;margin-top:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;margin-top:8px">
           <div class="tc-label" style="margin-top:0">總資產</div>
-          ${isCur?'<div style="font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.3px">本月單月計算</div>':''}
+          <button onclick="toggleAmountHidden(event)" style="background:rgba(255,255,255,.12);border:none;border-radius:99px;padding:2px 8px;font-size:10px;color:rgba(255,255,255,.65);cursor:pointer;font-family:inherit;letter-spacing:.3px" id="hide-amt-btn">${amountHidden?'顯示':'隱藏'}</button>
         </div>
-        <div class="tc-amount"><span class="tc-cur">NT$</span>${Math.round(total).toLocaleString()}</div>
+        <div class="tc-amount"><span class="tc-cur">${amountHidden?'':'NT$'}</span>${amountHidden?'＊＊＊＊＊':Math.round(total).toLocaleString()}</div>
         <div class="tc-change" style="color:${netColor2}">
-          ${saved>=0?'↑':'↓'} ${savedSign}${fmt(Math.abs(saved))}
+          ${saved>=0?'↑':'↓'} ${amountHidden?'＊＊＊':savedSign+fmt(Math.abs(saved))}
         </div>
         <div class="tc-row">
           <div class="tc-mini">
             <div class="tc-mini-label">本月入袋</div>
-            <div class="tc-mini-val" style="color:rgba(255,220,120,.95)">＋${fmtCompact(totalIn)}</div>
+            <div class="tc-mini-val" style="color:rgba(255,220,120,.95)">${amountHidden?'＊＊＊':'＋'+fmtCompact(totalIn)}</div>
           </div>
           <div class="tc-mini">
             <div class="tc-mini-label">本月蒸發</div>
-            <div class="tc-mini-val">－${fmtCompact(totalOut)}</div>
+            <div class="tc-mini-val">${amountHidden?'＊＊＊':'－'+fmtCompact(totalOut)}</div>
           </div>
           <div class="tc-mini">
             <div class="tc-mini-label">本月現況</div>
-            <div class="tc-mini-val" style="color:${savedColor}">${saved>=0?'＋':'－'}${fmtCompact(Math.abs(saved))}</div>
+            <div class="tc-mini-val" style="color:${savedColor}">${amountHidden?'＊＊＊':(saved>=0?'＋':'－')+fmtCompact(Math.abs(saved))}</div>
           </div>
         </div>
       </div>
@@ -2165,6 +2198,12 @@ function buildCardStrip(){
       }
     },80);
   };
+}
+
+function toggleAmountHidden(e){
+  if(e) e.stopPropagation();
+  amountHidden=!amountHidden;
+  buildCardStrip(); // rebuild cards with new state
 }
 
 function navCard(dir){
@@ -2804,6 +2843,40 @@ function renderCharts(){
     }
   }
 
+  // ── 收入類型佔比圓餅圖 ──
+  {
+    const incRecs = anMo==='all'
+      ? D.records.filter(r=>r.type==='income'&&r.date?.startsWith(anYr))
+      : D.records.filter(r=>r.type==='income'&&r.date?.startsWith(`${anYr}-${String(parseInt(anMo)).padStart(2,'0')}`));
+    const incMap={};
+    incRecs.forEach(r=>{incMap[r.cat]=(incMap[r.cat]||0)+r.amount;});
+    const incTotal=Object.values(incMap).reduce((s,v)=>s+v,0);
+    const incKeys=Object.keys(incMap);
+    const incLabels=incKeys.map(c=>CAT_LABELS[c]||c);
+    const incVals=Object.values(incMap);
+    const incColors=['#4e7a68','#7aab8f','#a8d4b9','#2a4238','#6b9e82','#3d6655','#8fc4a4','#537f6c'];
+
+    document.getElementById('inc-cat-total').textContent=fmt(incTotal);
+    const icc=document.getElementById('inc-cat-chart')?.getContext('2d');
+    if(icc){
+      if(charts.incCat)charts.incCat.destroy();
+      if(!incKeys.length){
+        document.getElementById('inc-cat-legend').innerHTML=`<div style="color:var(--stone);font-size:12px">沒有收入記錄</div>`;
+      } else {
+        document.getElementById('inc-cat-legend').innerHTML=incLabels.map((l,i)=>{
+          const pct=incTotal>0?Math.round(incVals[i]/incTotal*100):0;
+          return`<div class="legend-item" onclick="showIncDetail('${incKeys[i]}','${l}','${anYr}','${anMo}')" style="cursor:pointer;border-radius:8px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='var(--fog)'" onmouseout="this.style.background=''">
+            <div class="legend-dot" style="background:${incColors[i%incColors.length]}"></div>
+            <div class="legend-name" style="font-size:12px">${l}</div>
+            <div class="legend-pct">${pct}%</div>
+            <div class="legend-amt" style="font-size:12px">${fmt(incVals[i])}</div>
+          </div>`;
+        }).join('');
+        charts.incCat=new Chart(icc,{type:'doughnut',data:{labels:incLabels,datasets:[{data:incVals,backgroundColor:incColors,borderWidth:0,hoverOffset:3}]},options:{cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)} (${Math.round(c.raw/incTotal*100)}%)`}}},animation:{duration:400}}});
+      }
+    }
+  }
+
   // render calendar
   renderCalendar(parseInt(anYr), anMo==='all'?now.getMonth()+1:parseInt(anMo));
 }
@@ -2826,6 +2899,81 @@ function closeCatDetail(){
   document.getElementById('cat-detail-card').style.display='none';
   if(charts_catYearly){charts_catYearly.destroy();charts_catYearly=null;}
   if(charts_catDaily){charts_catDaily.destroy();charts_catDaily=null;}
+}
+
+// ══ INCOME DETAIL ══
+let charts_incMonthly=null, charts_incYearly=null;
+let currentIncCat='', currentIncLabel='';
+
+function showIncDetail(catKey, catLabel, yr, mo){
+  currentIncCat=catKey; currentIncLabel=catLabel;
+  const card=document.getElementById('inc-detail-card');
+  card.style.display='block';
+  document.getElementById('inc-detail-title').textContent=catLabel+' 走勢分析';
+  setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  incDetailTab('monthly');
+}
+
+function closeIncDetail(){
+  document.getElementById('inc-detail-card').style.display='none';
+  if(charts_incMonthly){charts_incMonthly.destroy();charts_incMonthly=null;}
+  if(charts_incYearly){charts_incYearly.destroy();charts_incYearly=null;}
+}
+
+function incDetailTab(tab){
+  ['monthly','yearly'].forEach(t=>{
+    const el=document.getElementById('inc-detail-'+t+'-wrap');
+    const btn=document.getElementById('idt-'+t);
+    if(el) el.style.display=t===tab?'block':'none';
+    if(btn) btn.className='cf-tab'+(t===tab?' on':'');
+  });
+
+  const anYr=parseInt(document.getElementById('an-year')?.value||String(new Date().getFullYear()));
+  const anMo=document.getElementById('an-month')?.value||'all';
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const tickColor=isDark?'#7a7268':'#968e7e';
+  const gridColor=isDark?'rgba(255,255,255,.04)':'rgba(60,53,41,.05)';
+  const baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tickColor,font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12}},y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},callback:v=>v>=1000?`${(v/1000).toFixed(1)}k`:v}}}};
+
+  if(tab==='monthly'){
+    // 近12個月每月這個收入類型的金額
+    const now=new Date();
+    const months12=Array.from({length:12},(_,i)=>{
+      const d=new Date(now.getFullYear(),now.getMonth()-11+i,1);
+      return{label:`${d.getMonth()+1}月`,key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
+    });
+    const vals=months12.map(m=>D.records.filter(r=>r.type==='income'&&r.cat===currentIncCat&&r.date?.startsWith(m.key)).reduce((s,r)=>s+r.amount,0));
+    const maxVal=Math.max(...vals,1);
+    document.getElementById('inc-detail-sub').textContent=`近 12 個月 · ${currentIncLabel}`;
+    const ctx=document.getElementById('inc-monthly-chart')?.getContext('2d');
+    if(ctx){
+      if(charts_incMonthly)charts_incMonthly.destroy();
+      charts_incMonthly=new Chart(ctx,{type:'bar',data:{labels:months12.map(m=>m.label),datasets:[{
+        data:vals,
+        backgroundColor:vals.map(v=>`rgba(78,122,104,${Math.max(0.12,v/maxVal*0.8).toFixed(2)})`),
+        borderColor:'rgba(78,122,104,.7)',borderWidth:1.5,borderRadius:6,borderSkipped:false
+      }]},options:{...baseOpts,plugins:{...baseOpts.plugins,tooltip:{callbacks:{label:c=>` ${fmt(c.raw)}`}}}}});
+    }
+
+  } else {
+    // 全年每個月這個收入類型的金額
+    const yr=anYr;
+    const vals=Array.from({length:12},(_,i)=>{
+      const mStr=`${yr}-${String(i+1).padStart(2,'0')}`;
+      return D.records.filter(r=>r.type==='income'&&r.cat===currentIncCat&&r.date?.startsWith(mStr)).reduce((s,r)=>s+r.amount,0);
+    });
+    const maxVal=Math.max(...vals,1);
+    document.getElementById('inc-detail-sub').textContent=`${yr} 年全年 · ${currentIncLabel}`;
+    const ctx=document.getElementById('inc-yearly-chart')?.getContext('2d');
+    if(ctx){
+      if(charts_incYearly)charts_incYearly.destroy();
+      charts_incYearly=new Chart(ctx,{type:'bar',data:{labels:Array.from({length:12},(_,i)=>`${i+1}月`),datasets:[{
+        data:vals,
+        backgroundColor:vals.map(v=>`rgba(78,122,104,${Math.max(0.12,v/maxVal*0.8).toFixed(2)})`),
+        borderColor:'rgba(78,122,104,.7)',borderWidth:1.5,borderRadius:6,borderSkipped:false
+      }]},options:{...baseOpts,plugins:{...baseOpts.plugins,tooltip:{callbacks:{label:c=>` ${fmt(c.raw)}`}}}}});
+    }
+  }
 }
 
 function catDetailTab(tab){
