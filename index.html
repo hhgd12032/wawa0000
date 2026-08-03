@@ -53,6 +53,8 @@
   <symbol id="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></symbol>
   <symbol id="ic-sun-fill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
   <symbol id="ic-cloud-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15a6 6 0 10-11.4-2.6A4 4 0 105 19h13a3 3 0 000-6"/><path d="M12 12v6m-3-3l3-3 3 3"/></symbol>
+  <symbol id="ic-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ic-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
   <symbol id="ic-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
 </svg>
 
@@ -1136,6 +1138,47 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
     </div>
   </div>
 
+  <!-- 收入類型佔比 -->
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div class="chart-title">本月收入類型佔比</div>
+      <div class="chart-sub">點選類型看每月 / 全年走勢</div>
+    </div>
+    <div class="chart-body">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="position:relative;width:140px;height:140px;flex-shrink:0">
+          <canvas id="inc-cat-chart"></canvas>
+          <div class="chart-center">
+            <div class="chart-center-val" id="inc-cat-total">NT$0</div>
+            <div class="chart-center-label">總收入</div>
+          </div>
+        </div>
+        <div id="inc-cat-legend" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:7px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 收入類型詳細分析 drill-down -->
+  <div class="chart-card" id="inc-detail-card" style="display:none">
+    <div class="chart-card-head">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="chart-title" id="inc-detail-title">收入類型分析</div>
+          <div class="chart-sub" id="inc-detail-sub">點選下方分頁查看</div>
+        </div>
+        <button onclick="closeIncDetail()" style="background:var(--fog);border:none;border-radius:99px;padding:5px 12px;font-size:12px;color:var(--ink-light);cursor:pointer;font-family:inherit">✕ 關閉</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="cf-tab on" id="idt-monthly" onclick="incDetailTab('monthly')" style="padding:5px 12px;font-size:12px">每月走勢</button>
+        <button class="cf-tab" id="idt-yearly" onclick="incDetailTab('yearly')" style="padding:5px 12px;font-size:12px">全年總覽</button>
+      </div>
+    </div>
+    <div class="chart-body">
+      <div id="inc-detail-monthly-wrap" style="position:relative;height:180px"><canvas id="inc-monthly-chart"></canvas></div>
+      <div id="inc-detail-yearly-wrap" style="display:none;position:relative;height:180px"><canvas id="inc-yearly-chart"></canvas></div>
+    </div>
+  </div>
+
   <!-- Monthly Calendar Heatmap — after category pie -->
   <div class="chart-card" id="cal-card">
     <div class="chart-card-head">
@@ -1216,46 +1259,6 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   </div>
 
 
-  <!-- 收入類型佔比 -->
-  <div class="chart-card">
-    <div class="chart-card-head">
-      <div class="chart-title">本月收入類型佔比</div>
-      <div class="chart-sub">點選類型看每月 / 全年走勢</div>
-    </div>
-    <div class="chart-body">
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-        <div style="position:relative;width:140px;height:140px;flex-shrink:0">
-          <canvas id="inc-cat-chart"></canvas>
-          <div class="chart-center">
-            <div class="chart-center-val" id="inc-cat-total">NT$0</div>
-            <div class="chart-center-label">總收入</div>
-          </div>
-        </div>
-        <div id="inc-cat-legend" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:7px"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 收入類型詳細分析 drill-down -->
-  <div class="chart-card" id="inc-detail-card" style="display:none">
-    <div class="chart-card-head">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div class="chart-title" id="inc-detail-title">收入類型分析</div>
-          <div class="chart-sub" id="inc-detail-sub">點選下方分頁查看</div>
-        </div>
-        <button onclick="closeIncDetail()" style="background:var(--fog);border:none;border-radius:99px;padding:5px 12px;font-size:12px;color:var(--ink-light);cursor:pointer;font-family:inherit">✕ 關閉</button>
-      </div>
-      <div style="display:flex;gap:6px;margin-top:10px">
-        <button class="cf-tab on" id="idt-monthly" onclick="incDetailTab('monthly')" style="padding:5px 12px;font-size:12px">每月走勢</button>
-        <button class="cf-tab" id="idt-yearly" onclick="incDetailTab('yearly')" style="padding:5px 12px;font-size:12px">全年總覽</button>
-      </div>
-    </div>
-    <div class="chart-body">
-      <div id="inc-detail-monthly-wrap" style="position:relative;height:180px"><canvas id="inc-monthly-chart"></canvas></div>
-      <div id="inc-detail-yearly-wrap" style="display:none;position:relative;height:180px"><canvas id="inc-yearly-chart"></canvas></div>
-    </div>
-  </div>
 
 </div>
 
@@ -1718,9 +1721,13 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 function setGreeting(){
   const h=new Date().getHours();
-  const g=h<12?'早安':h<17?'午安':'晚安';
+  let g, icon;
+  if(h>=0 && h<8){    g='夜貓子'; icon='🌙'; }
+  else if(h<13){      g='早安';   icon='☀️'; }
+  else if(h<19){      g='午安';   icon='🌤️'; }
+  else {              g='晚安';   icon='🌙'; }
   const n=D.settings.name;
-  document.getElementById('greeting').textContent=g+(n?'，'+n:'')+' ☀';
+  document.getElementById('greeting').textContent=g+(n?'，'+n:'')+'　'+icon;
 }
 function setDate(){
   const d=new Date();
@@ -2137,7 +2144,12 @@ function buildCardStrip(){
         <div class="tc-month">${mo.y} · ${MONTH_ZH[mo.m]}</div>
         <div style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;margin-top:8px">
           <div class="tc-label" style="margin-top:0">總資產</div>
-          <button onclick="toggleAmountHidden(event)" style="background:rgba(255,255,255,.12);border:none;border-radius:99px;padding:2px 8px;font-size:10px;color:rgba(255,255,255,.65);cursor:pointer;font-family:inherit;letter-spacing:.3px" id="hide-amt-btn">${amountHidden?'顯示':'隱藏'}</button>
+          <button onclick="toggleAmountHidden(event)" style="background:rgba(255,255,255,.12);border:none;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" id="hide-amt-btn">
+          ${amountHidden
+            ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.8" stroke-linecap="round"><path d=\"M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94\"/><path d=\"M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19\"/><line x1=\"1\" y1=\"1\" x2=\"23\" y2=\"23\"/></svg>'
+            : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.8" stroke-linecap="round"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>'
+          }
+        </button>
         </div>
         <div class="tc-amount"><span class="tc-cur">${amountHidden?'':'NT$'}</span>${amountHidden?'＊＊＊＊＊':Math.round(total).toLocaleString()}</div>
         <div class="tc-change" style="color:${netColor2}">
