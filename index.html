@@ -1114,6 +1114,28 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
     </div>
   </div>
 
+  <!-- Category Detail Drill-down -->
+  <div class="chart-card" id="cat-detail-card" style="display:none">
+    <div class="chart-card-head">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="chart-title" id="cat-detail-title">類別分析</div>
+          <div class="chart-sub" id="cat-detail-sub">點選下方分頁查看</div>
+        </div>
+        <button onclick="closeCatDetail()" style="background:var(--fog);border:none;border-radius:99px;padding:5px 12px;font-size:12px;color:var(--ink-light);cursor:pointer;font-family:inherit">✕ 關閉</button>
+      </div>
+      <!-- sub-tabs -->
+      <div style="display:flex;gap:6px;margin-top:10px;overflow-x:auto;scrollbar-width:none">
+        <button class="cf-tab on" id="cdt-yearly" onclick="catDetailTab('yearly')" style="padding:5px 12px;font-size:12px">全年月份</button>
+        <button class="cf-tab" id="cdt-daily" onclick="catDetailTab('daily')" style="padding:5px 12px;font-size:12px">本月每日</button>
+      </div>
+    </div>
+    <div class="chart-body">
+      <div id="cat-detail-yearly" style="position:relative;height:180px"><canvas id="cat-yearly-chart"></canvas></div>
+      <div id="cat-detail-daily" style="display:none;position:relative;height:180px"><canvas id="cat-daily-chart"></canvas></div>
+    </div>
+  </div>
+
   <!-- Monthly Calendar Heatmap — after category pie -->
   <div class="chart-card" id="cal-card">
     <div class="chart-card-head">
@@ -1158,6 +1180,41 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
     <div class="metric-card"><div class="metric-card-inner"><div class="metric-icon"><svg class="ic"><use href="#ic-trending"/></svg></div><div class="metric-label">平均存款率</div><div class="metric-val" id="avg-save">—</div><div class="metric-sub">近 6 個月</div></div></div>
     <div class="metric-card"><div class="metric-card-inner"><div class="metric-icon"><svg class="ic" style="color:var(--amber)"><use href="#ic-repeat"/></svg></div><div class="metric-label">固定支出佔比</div><div class="metric-val" id="fix-ratio">—</div><div class="metric-sub">佔總支出</div></div></div>
   </div>
+
+  <!-- 💰 存款率趨勢 -->
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div class="chart-title">💰 存款率趨勢</div>
+      <div class="chart-sub" id="save-rate-sub">近 12 個月每月存款比例</div>
+    </div>
+    <div class="chart-body" style="position:relative;height:160px">
+      <canvas id="save-rate-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- 🏆 最高支出月份 -->
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div class="chart-title">🏆 最高支出月份</div>
+      <div class="chart-sub">全年各月花費排名</div>
+    </div>
+    <div class="chart-body" style="position:relative;height:180px">
+      <canvas id="top-months-chart"></canvas>
+    </div>
+    <div id="top-months-note" style="padding:0 4px 4px;font-size:11.5px;color:var(--stone)"></div>
+  </div>
+
+  <!-- 🔁 收支對比雷達圖 -->
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div class="chart-title">🔁 收支類別雷達圖</div>
+      <div class="chart-sub">各類別支出比重分布</div>
+    </div>
+    <div class="chart-body" style="position:relative;height:220px">
+      <canvas id="radar-chart"></canvas>
+    </div>
+  </div>
+
 </div>
 
 <!-- ═══════════ SETTINGS ═══════════ -->
@@ -1590,10 +1647,10 @@ save(D);
 
 let recType='income', editRecType='income', recFilter='all';
 let charts={donut:null,expense:null,cat:null,asset:null,coverage:null};
-const CAT_INC=['salary','bonus','side','other-income'];
-const CAT_EXP=['food','veggie','transport','shopping','health','entertainment','electric','travel','daily','other-expense'];
-const CAT_LABELS={salary:'薪水',bonus:'獎金',side:'副業',food:'餐飲',veggie:'蔬菜',transport:'交通',shopping:'購物',health:'醫療',entertainment:'娛樂',electric:'電費',travel:'旅遊',daily:'日常用品',rent:'租金',royalty:'版稅','other-income':'其他收入','other-expense':'其他支出'};
-const CAT_IC={salary:'ic-bank',bonus:'ic-trending',side:'ic-leaf',food:'ic-wallet',veggie:'ic-leaf',transport:'ic-flow',shopping:'ic-wallet',health:'ic-shield',entertainment:'ic-sun',electric:'ic-bell',travel:'ic-target',daily:'ic-wallet',rent:'ic-bank',royalty:'ic-leaf','other-income':'ic-trending','other-expense':'ic-wallet'};
+const CAT_INC=['salary','bonus','dividend-income','side','other-income'];
+const CAT_EXP=['food','veggie','transport','shopping','health','entertainment','electric','travel','sport','daily','other-expense'];
+const CAT_LABELS={salary:'薪水',bonus:'獎金','dividend-income':'股息收入',side:'副業',food:'餐飲',veggie:'蔬菜',transport:'交通',shopping:'購物',health:'醫療',entertainment:'娛樂',electric:'電費',travel:'旅遊',sport:'運動',daily:'日常用品',rent:'租金',royalty:'版稅','other-income':'其他收入','other-expense':'其他支出'};
+const CAT_IC={salary:'ic-bank',bonus:'ic-trending','dividend-income':'ic-trending',side:'ic-leaf',food:'ic-wallet',veggie:'ic-leaf',transport:'ic-flow',shopping:'ic-wallet',health:'ic-shield',entertainment:'ic-sun',electric:'ic-bell',travel:'ic-target',sport:'ic-target',daily:'ic-wallet',rent:'ic-bank',royalty:'ic-leaf','other-income':'ic-trending','other-expense':'ic-wallet'};
 const ASSET_INFO={bank:{label:'銀行存款',ic:'ic-bank',color:'#5270a0',bg:'var(--blue-pale)'},'tw-stock':{label:'台股/基金',ic:'ic-trending',color:'#2a4238',bg:'var(--green-pale)'},'us-stock':{label:'美股 ETF',ic:'ic-trending',color:'#4e7a68',bg:'var(--green-mist)'},insurance:{label:'保險',ic:'ic-shield',color:'#b87c32',bg:'var(--amber-pale)'},crypto:{label:'加密貨幣',ic:'ic-target',color:'#7a6040',bg:'#f5edda'},'real-estate':{label:'不動產',ic:'ic-target',color:'#5a7240',bg:'#eef3e4'},cash:{label:'現金/其他',ic:'ic-wallet',color:'#9e9890',bg:'var(--cream2)'}};
 
 // ══════ INIT ══════
@@ -2600,9 +2657,16 @@ function renderCharts(){
     document.getElementById('cat-legend').innerHTML=`<div style="color:var(--stone);font-size:12px">沒有支出記錄</div>`;
     charts.cat=new Chart(cc,{type:'doughnut',data:{labels:['無'],datasets:[{data:[1],backgroundColor:['#ddd8cc'],borderWidth:0}]},options:{cutout:'65%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:400}}});
   } else {
+    // make legend items clickable — show drill-down
+    const catKeys = Object.keys(catMap);
     document.getElementById('cat-legend').innerHTML=catLabels.map((l,i)=>{
       const pct=catTotal>0?Math.round(catVals[i]/catTotal*100):0;
-      return`<div class="legend-item"><div class="legend-dot" style="background:${catColors[i]}"></div><div class="legend-name" style="font-size:12px">${l}</div><div class="legend-pct">${pct}%</div><div class="legend-amt" style="font-size:12px">${fmt(catVals[i])}</div></div>`;
+      return`<div class="legend-item" onclick="showCatDetail('${catKeys[i]}','${l}',${anYr},'${anMo}')" style="cursor:pointer;border-radius:8px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='var(--fog)'" onmouseout="this.style.background=''">
+        <div class="legend-dot" style="background:${catColors[i]}"></div>
+        <div class="legend-name" style="font-size:12px">${l}</div>
+        <div class="legend-pct">${pct}%</div>
+        <div class="legend-amt" style="font-size:12px">${fmt(catVals[i])}</div>
+      </div>`;
     }).join('');
     charts.cat=new Chart(cc,{type:'doughnut',data:{labels:catLabels,datasets:[{data:catVals,backgroundColor:catColors,borderWidth:0,hoverOffset:3}]},options:{cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)} (${Math.round(c.raw/catTotal*100)}%)`}}},animation:{duration:400}}});
   }
@@ -2652,8 +2716,181 @@ function renderCharts(){
   document.getElementById('avg-save').textContent=ti2>0?Math.round((ti2-te2)/ti2*100)+'%':'—';
   document.getElementById('fix-ratio').textContent=te2>0?Math.round(fixed/te2*100)+'%':'—';
 
+  // ── 💰 存款率趨勢 (近12個月) ──
+  {
+    const now2=new Date();
+    const months12=Array.from({length:12},(_,i)=>{
+      const d=new Date(now2.getFullYear(),now2.getMonth()-11+i,1);
+      return{label:`${d.getMonth()+1}月`,key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
+    });
+    const saveRates=months12.map(m=>{
+      const recs=D.records.filter(r=>r.date?.startsWith(m.key));
+      const mInc=recs.filter(r=>r.type==='income').reduce((s,r)=>s+r.amount,0)+getTotalPassive();
+      const mExp=recs.filter(r=>r.type==='expense').reduce((s,r)=>s+r.amount,0)+getMonthlyFixed();
+      return mInc>0?Math.round((mInc-mExp)/mInc*100):0;
+    });
+    const srCtx=document.getElementById('save-rate-chart')?.getContext('2d');
+    if(srCtx){
+      if(charts.saveRate)charts.saveRate.destroy();
+      charts.saveRate=new Chart(srCtx,{type:'line',data:{labels:months12.map(m=>m.label),datasets:[{
+        data:saveRates,
+        borderColor:'rgba(78,122,104,.9)',
+        backgroundColor:saveRates.map(v=>v>=0?'rgba(78,122,104,.08)':'rgba(196,104,96,.08)'),
+        fill:true,tension:.4,pointRadius:3,
+        pointBackgroundColor:saveRates.map(v=>v>=0?'rgba(78,122,104,.9)':'rgba(196,104,96,.9)'),
+        borderWidth:2,segment:{borderColor:ctx=>ctx.p0.parsed.y<0?'rgba(196,104,96,.8)':'rgba(78,122,104,.9)'}
+      }]},options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` 存款率 ${c.raw}%`}}},
+        scales:{x:{grid:{display:false},ticks:{color:tickColor,font:{size:10},maxRotation:0}},
+          y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},callback:v=>v+'%'},
+            afterDataLimits:axis=>{axis.max=Math.max(axis.max,10);axis.min=Math.min(axis.min,-5);}}}
+      }});
+    }
+  }
+
+  // ── 🏆 最高支出月份 ──
+  {
+    const yr2=parseInt(anYr);
+    const allMonths12=Array.from({length:12},(_,i)=>{
+      const mStr=`${yr2}-${String(i+1).padStart(2,'0')}`;
+      const total=D.records.filter(r=>r.type==='expense'&&r.date?.startsWith(mStr)).reduce((s,r)=>s+r.amount,0);
+      return{label:`${i+1}月`,total,mStr};
+    });
+    const sorted=[...allMonths12].sort((a,b)=>b.total-a.total);
+    const maxTop=sorted[0]?.total||1;
+    const topCtx=document.getElementById('top-months-chart')?.getContext('2d');
+    if(topCtx){
+      if(charts.topMonths)charts.topMonths.destroy();
+      charts.topMonths=new Chart(topCtx,{type:'bar',
+        data:{labels:allMonths12.map(m=>m.label),datasets:[{
+          data:allMonths12.map(m=>m.total),
+          backgroundColor:allMonths12.map(m=>m.total===maxTop?'rgba(196,104,96,.85)':m.total>=sorted[2]?.total?'rgba(196,104,96,.4)':'rgba(196,104,96,.15)'),
+          borderColor:allMonths12.map(m=>m.total===maxTop?'rgba(196,104,96,1)':'rgba(196,104,96,.4)'),
+          borderWidth:1.5,borderRadius:5,borderSkipped:false
+        }]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)}`}}},
+          scales:{x:{grid:{display:false},ticks:{color:tickColor,font:{size:10},maxRotation:0}},
+            y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:9},callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v}}}}
+      });
+      // Top 3 note
+      const note=document.getElementById('top-months-note');
+      if(note&&sorted[0]?.total>0){
+        const medals=['🥇','🥈','🥉'];
+        note.textContent=sorted.slice(0,3).filter(m=>m.total>0).map((m,i)=>`${medals[i]} ${m.label} ${fmt(m.total)}`).join('　');
+      }
+    }
+  }
+
+  // ── 🔁 收支類別雷達圖 ──
+  {
+    const topCats=CAT_EXP.slice(0,8); // top 8 expense categories for radar
+    const catTotals=topCats.map(c=>D.records.filter(r=>r.type==='expense'&&r.cat===c&&(anMo==='all'||r.date?.startsWith(`${anYr}-${String(parseInt(anMo)).padStart(2,'0')}`))).reduce((s,r)=>s+r.amount,0));
+    const catMax=Math.max(...catTotals,1);
+    const radarCtx=document.getElementById('radar-chart')?.getContext('2d');
+    if(radarCtx){
+      if(charts.radar)charts.radar.destroy();
+      charts.radar=new Chart(radarCtx,{type:'radar',
+        data:{labels:topCats.map(c=>CAT_LABELS[c]||c),datasets:[{
+          data:catTotals.map(v=>Math.round(v/catMax*100)),
+          backgroundColor:'rgba(78,122,104,.12)',borderColor:'rgba(78,122,104,.7)',
+          pointBackgroundColor:'rgba(78,122,104,.9)',pointRadius:3,borderWidth:1.8,fill:true
+        }]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:(c,i)=>` ${fmt(catTotals[c.dataIndex])}`}}},
+          scales:{r:{grid:{color:gridColor},ticks:{display:false},pointLabels:{color:tickColor,font:{size:10}},
+            angleLines:{color:gridColor},suggestedMin:0,suggestedMax:100}}}
+      });
+    }
+  }
+
   // render calendar
   renderCalendar(parseInt(anYr), anMo==='all'?now.getMonth()+1:parseInt(anMo));
+}
+
+// ══ CATEGORY DETAIL ══
+let charts_catYearly=null, charts_catDaily=null;
+let currentCatKey='', currentCatLabel='';
+
+function showCatDetail(catKey, catLabel, yr, mo){
+  currentCatKey=catKey; currentCatLabel=catLabel;
+  const card=document.getElementById('cat-detail-card');
+  card.style.display='block';
+  document.getElementById('cat-detail-title').textContent=catLabel+' 詳細分析';
+  // scroll to card
+  setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  catDetailTab('yearly');
+}
+
+function closeCatDetail(){
+  document.getElementById('cat-detail-card').style.display='none';
+  if(charts_catYearly){charts_catYearly.destroy();charts_catYearly=null;}
+  if(charts_catDaily){charts_catDaily.destroy();charts_catDaily=null;}
+}
+
+function catDetailTab(tab){
+  ['yearly','daily'].forEach(t=>{
+    const el=document.getElementById('cat-detail-'+t);
+    const btn=document.getElementById('cdt-'+t);
+    if(el) el.style.display=t===tab?'block':'none';
+    if(btn) btn.className='cf-tab'+(t===tab?' on':'');
+  });
+
+  const anYr=parseInt(document.getElementById('an-year')?.value||String(new Date().getFullYear()));
+  const anMo=document.getElementById('an-month')?.value||'all';
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const tickColor=isDark?'#7a7268':'#968e7e';
+  const gridColor=isDark?'rgba(255,255,255,.04)':'rgba(60,53,41,.05)';
+  const baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tickColor,font:{size:10},maxRotation:0}},y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},callback:v=>v>=1000?`${(v/1000).toFixed(1)}k`:v}}}};
+
+  if(tab==='yearly'){
+    // Monthly totals for this category across the year
+    const MONTH_ZH=['1','2','3','4','5','6','7','8','9','10','11','12'];
+    const monthData = Array.from({length:12},(_,i)=>{
+      const mStr=`${anYr}-${String(i+1).padStart(2,'0')}`;
+      return D.records.filter(r=>r.type==='expense'&&r.cat===currentCatKey&&r.date?.startsWith(mStr)).reduce((s,r)=>s+r.amount,0);
+    });
+    const maxVal=Math.max(...monthData,1);
+    document.getElementById('cat-detail-sub').textContent=`${anYr} 年 · ${currentCatLabel} 每月花費`;
+
+    const ctx=document.getElementById('cat-yearly-chart').getContext('2d');
+    if(charts_catYearly)charts_catYearly.destroy();
+    charts_catYearly=new Chart(ctx,{
+      type:'bar',
+      data:{labels:MONTH_ZH.map(m=>m+'月'),datasets:[{
+        data:monthData,
+        backgroundColor:monthData.map(v=>`rgba(196,104,96,${Math.max(0.12,v/maxVal*0.8).toFixed(2)})`),
+        borderColor:'rgba(196,104,96,.7)',
+        borderWidth:1.5,borderRadius:6,borderSkipped:false
+      }]},
+      options:{...baseOpts,plugins:{...baseOpts.plugins,tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}}}
+    });
+
+  } else {
+    // Daily totals for this category within the selected month
+    const mo = anMo==='all' ? new Date().getMonth()+1 : parseInt(anMo);
+    const daysInMonth = new Date(anYr, mo, 0).getDate();
+    const dailyData = Array.from({length:daysInMonth},(_,i)=>{
+      const dStr=`${anYr}-${String(mo).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
+      return D.records.filter(r=>r.type==='expense'&&r.cat===currentCatKey&&r.date===dStr).reduce((s,r)=>s+r.amount,0);
+    });
+    const maxVal=Math.max(...dailyData,1);
+    const MONTH_ZH=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+    document.getElementById('cat-detail-sub').textContent=`${anYr} 年 ${MONTH_ZH[mo-1]} · ${currentCatLabel} 每日花費`;
+
+    const ctx=document.getElementById('cat-daily-chart').getContext('2d');
+    if(charts_catDaily)charts_catDaily.destroy();
+    charts_catDaily=new Chart(ctx,{
+      type:'bar',
+      data:{labels:Array.from({length:daysInMonth},(_,i)=>i+1),datasets:[{
+        data:dailyData,
+        backgroundColor:dailyData.map(v=>v>0?`rgba(196,104,96,${Math.max(0.2,v/maxVal*0.85).toFixed(2)})`:'rgba(196,104,96,.05)'),
+        borderColor:dailyData.map(v=>v>0?'rgba(196,104,96,.7)':'transparent'),
+        borderWidth:1.2,borderRadius:4,borderSkipped:false
+      }]},
+      options:{...baseOpts,scales:{...baseOpts.scales,x:{...baseOpts.scales.x,ticks:{...baseOpts.scales.x.ticks,autoSkip:true,maxTicksLimit:10}}},plugins:{...baseOpts.plugins,tooltip:{callbacks:{label:c=>c.raw>0?' '+fmt(c.raw):' 無支出'}}}}
+    });
+  }
 
   // update cashflow summary too
   renderCFSummary();
@@ -2746,7 +2983,7 @@ function showDayDetail(yr,mo,d){
   ].filter(Boolean).join('');
 
   // record list
-  const CAT_IC_MAP={salary:'💼',bonus:'🎁',side:'🌱',food:'🍜',veggie:'🥬',transport:'🚌',shopping:'🛍️',health:'💊',entertainment:'🎬',electric:'⚡',travel:'✈️',daily:'🪴','other-income':'💰','other-expense':'📦'};
+  const CAT_IC_MAP={salary:'💼',bonus:'🎁','dividend-income':'📈',side:'🌱',food:'🍜',veggie:'🥬',transport:'🚌',shopping:'🛍️',health:'💊',entertainment:'🎬',electric:'⚡',travel:'✈️',sport:'🏋️',daily:'🪴','other-income':'💰','other-expense':'📦'};
   document.getElementById('day-detail-list').innerHTML=recs.map(r=>`
     <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--fog)">
       <div style="width:36px;height:36px;border-radius:10px;background:${r.type==='income'?'var(--green-pale)':'var(--red-pale)'};display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">
