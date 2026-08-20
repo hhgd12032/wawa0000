@@ -941,6 +941,17 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
       <button class="filter-chip" data-val="income" onclick="setFilter('income')">收入</button>
       <button class="filter-chip" data-val="expense" onclick="setFilter('expense')">支出</button>
     </div>
+    <!-- sort mode toggle -->
+    <div style="display:flex;gap:6px;padding:0 18px;margin-bottom:8px">
+      <button class="filter-chip on" id="sort-date-btn" onclick="setSort('date')" style="display:flex;align-items:center;gap:4px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        日期排列
+      </button>
+      <button class="filter-chip" id="sort-cat-btn" onclick="setSort('cat')" style="display:flex;align-items:center;gap:4px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+        類型排列
+      </button>
+    </div>
     <!-- month/year selector -->
     <div style="display:flex;gap:8px;padding:0 18px;margin-bottom:10px">
       <select class="form-input an-select" id="filter-year" onchange="renderRecords()" style="flex:1"></select>
@@ -1868,6 +1879,14 @@ function cfTab(t){
 
 // ══════ FILTER ══════
 let filterVal='all';
+let sortMode='date'; // 'date' | 'cat'
+function setSort(mode){
+  sortMode=mode;
+  document.getElementById('sort-date-btn').className='filter-chip'+(mode==='date'?' on':'');
+  document.getElementById('sort-cat-btn').className='filter-chip'+(mode==='cat'?' on':'');
+  renderRecords();
+}
+
 function setFilter(v){
   filterVal=v;
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.val===v));
@@ -2390,12 +2409,44 @@ function renderRecords(){
     if(!r.date.startsWith(yr))return false;
     if(mo!=='all'&&!r.date.startsWith(yr+'-'+mo))return false;
     if(filterVal!=='all'&&r.type!==filterVal)return false;
-    if(q&&!r.name.toLowerCase().includes(q)&&!r.date.includes(q))return false;
+    if(q&&!(r.name.toLowerCase().includes(q)||r.date.includes(q)||(r.note||'').toLowerCase().includes(q)))return false;
     return true;
   });
+
   const el=document.getElementById('all-records');
-  if(!recs.length){el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-flow"/></svg></div><div class="empty-text">找不到符合的記錄</div></div>`;return}
-  el.innerHTML=recs.map(r=>txHTML(r,true)).join('');
+  if(!recs.length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-flow"/></svg></div><div class="empty-text">${q?'找不到「'+q+'」的記錄':'沒有記錄'}</div></div>`;
+    return;
+  }
+
+  if(sortMode==='date'){
+    // sort by date descending (newest first), then by id descending for same date
+    recs.sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+    el.innerHTML=recs.map(r=>txHTML(r,true)).join('');
+
+  } else {
+    // sort by category, then date descending within each category
+    recs.sort((a,b)=>{
+      const ca=CAT_LABELS[a.cat]||a.cat||'', cb=CAT_LABELS[b.cat]||b.cat||'';
+      return ca.localeCompare(cb,'zh')||b.date.localeCompare(a.date);
+    });
+    // group by category with section headers
+    const groups={};
+    recs.forEach(r=>{
+      const key=r.cat||'other';
+      if(!groups[key])groups[key]=[];
+      groups[key].push(r);
+    });
+    el.innerHTML=Object.entries(groups).map(([cat,items])=>{
+      const label=CAT_LABELS[cat]||cat;
+      const total=items.reduce((s,r)=>s+r.amount,0);
+      const typeColor=items[0]?.type==='income'?'var(--green-soft)':'var(--red-soft)';
+      return`<div style="padding:10px 18px 5px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:11px;font-weight:600;color:var(--stone);letter-spacing:.5px;text-transform:uppercase">${label}</div>
+        <div style="font-size:11px;color:${typeColor};font-weight:500">${fmt(total)}</div>
+      </div>`+items.map(r=>txHTML(r,true)).join('');
+    }).join('<div style="height:1px;background:var(--fog);margin:6px 18px"></div>');
+  }
 }
 
 function addRecord(){
@@ -2405,7 +2456,8 @@ function addRecord(){
   const cat=document.getElementById('rec-cat').value;
   const note=document.getElementById('rec-note').value.trim();
   if(!name||!amount||!date){alert('請填寫名稱、金額和日期！');return}
-  D.records.unshift({id:Date.now(),type:recType,name,amount,date,cat,note});
+  D.records.push({id:Date.now(),type:recType,name,amount,date,cat,note});
+  D.records.sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
   save(D);
   // clear
   document.getElementById('rec-name').value='';
