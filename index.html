@@ -854,9 +854,23 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   <div class="topbar">
     <div><div class="topbar-title">收支管理</div><div class="topbar-sub">訂閱 · 被動收入 · 每日記錄</div></div>
   </div>
+  <!-- CF month nav -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 18px;margin-bottom:8px;position:relative;z-index:1">
+    <button onclick="cfNavMonth(-1)" style="background:var(--fog);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--stone);transition:all .15s" id="cf-prev-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div style="text-align:center">
+      <div id="cf-month-label" style="font-size:14px;font-weight:500;color:var(--ink)">2026年 6月</div>
+      <div id="cf-month-tag" style="font-size:11px;color:var(--stone);margin-top:1px">本月</div>
+    </div>
+    <button onclick="cfNavMonth(1)" style="background:var(--fog);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--stone);transition:all .15s" id="cf-next-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+
   <div class="cf-summary">
     <!-- 標題 + 淨值 -->
-    <div class="cf-title">本月現金流</div>
+    <div class="cf-title" id="cf-title-label">本月現金流</div>
     <div class="cf-val" id="cf-net">NT$0</div>
 
     <!-- 分隔線 -->
@@ -1790,7 +1804,18 @@ function switchPage(page){
   fab.style.display=(page==='dashboard'||page==='cashflow')?'flex':'none';
   if(page==='analytics'){initYearSelectors();renderCharts()}
   if(page==='assets')renderDonut();
-  if(page==='cashflow'){renderCFSummary();renderSubList();renderBillList();renderPassiveList();renderRecords();}
+  if(page==='cashflow'){
+    // init month nav label
+    const MONTH_ZH=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+    const lbl=document.getElementById('cf-month-label');
+    if(lbl)lbl.textContent=`${cfSelectedYear}年 ${cfSelectedMonth}月`;
+    const now2=new Date();
+    const isCur=cfSelectedYear===now2.getFullYear()&&cfSelectedMonth===now2.getMonth()+1;
+    const tag=document.getElementById('cf-month-tag');if(tag)tag.textContent=isCur?'本月':'歷史月份';
+    const nextBtn=document.getElementById('cf-next-btn');if(nextBtn)nextBtn.style.opacity=isCur?'0.35':'1';
+    const titleLbl=document.getElementById('cf-title-label');if(titleLbl)titleLbl.textContent=isCur?'本月現金流':`${cfSelectedMonth}月現金流`;
+    renderCFSummary();renderSubList();renderBillList();renderPassiveList();renderRecords();
+  }
   window.scrollTo(0,0);
 }
 
@@ -1880,6 +1905,8 @@ function cfTab(t){
 // ══════ FILTER ══════
 let filterVal='all';
 let sortMode='date'; // 'date' | 'cat'
+let cfSelectedYear=new Date().getFullYear();
+let cfSelectedMonth=new Date().getMonth()+1; // 1-12
 function setSort(mode){
   sortMode=mode;
   document.getElementById('sort-date-btn').className='filter-chip'+(mode==='date'?' on':'');
@@ -1895,6 +1922,14 @@ function setFilter(v){
 
 // ══════ CALCULATIONS ══════
 function getMonthStr(y,m){return`${y}-${String(m).padStart(2,'0')}`}
+function getCFMonthData(yr, mo){
+  const mStr=`${yr}-${String(mo).padStart(2,'0')}`;
+  const recs=D.records.filter(r=>r.date&&r.date.startsWith(mStr));
+  const inc=recs.filter(r=>r.type==='income').reduce((s,r)=>s+r.amount,0);
+  const exp=recs.filter(r=>r.type==='expense').reduce((s,r)=>s+r.amount,0);
+  return{inc,exp,net:inc-exp};
+}
+
 function getThisMonthData(){
   const now=new Date();
   return getMonthDataFor(now.getFullYear(),now.getMonth()+1);
@@ -2401,13 +2436,17 @@ function txHTML(r,showActions=true){
 
 // ══════ RECORDS ══════
 function renderRecords(){
-  const yr=document.getElementById('filter-year')?.value||String(new Date().getFullYear());
-  const mo=document.getElementById('filter-month')?.value||'all';
+  const fy=document.getElementById('filter-year');
+  const fm=document.getElementById('filter-month');
   const q=(document.getElementById('rec-search')?.value||'').trim().toLowerCase();
+  // sync selectors with cf nav state
+  const cfMoStr=String(cfSelectedMonth).padStart(2,'0');
+  const activeYr=String(cfSelectedYear);
+  const activeMo=cfMoStr;
   let recs=D.records.filter(r=>{
     if(!r.date)return false;
-    if(!r.date.startsWith(yr))return false;
-    if(mo!=='all'&&!r.date.startsWith(yr+'-'+mo))return false;
+    if(!r.date.startsWith(activeYr))return false;
+    if(!r.date.startsWith(activeYr+'-'+activeMo))return false;
     if(filterVal!=='all'&&r.type!==filterVal)return false;
     if(q&&!(r.name.toLowerCase().includes(q)||r.date.includes(q)||(r.note||'').toLowerCase().includes(q)))return false;
     return true;
@@ -3214,8 +3253,36 @@ function showDayDetail(yr,mo,d){
   openModal('modal-day-detail');
 }
 
+function cfNavMonth(dir){
+  const now=new Date();
+  const curY=now.getFullYear(), curM=now.getMonth()+1;
+  cfSelectedMonth+=dir;
+  if(cfSelectedMonth>12){cfSelectedMonth=1;cfSelectedYear++;}
+  if(cfSelectedMonth<1){cfSelectedMonth=12;cfSelectedYear--;}
+  // update label + tag
+  const MONTH_ZH=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  const lbl=document.getElementById('cf-month-label');
+  const tag=document.getElementById('cf-month-tag');
+  const titleLbl=document.getElementById('cf-title-label');
+  if(lbl)lbl.textContent=`${cfSelectedYear}年 ${cfSelectedMonth}月`;
+  const isCur=cfSelectedYear===curY&&cfSelectedMonth===curM;
+  if(tag)tag.textContent=isCur?'本月':'歷史月份';
+  if(titleLbl)titleLbl.textContent=isCur?'本月現金流':`${cfSelectedMonth}月現金流`;
+  // grey out next btn if at current month
+  const nextBtn=document.getElementById('cf-next-btn');
+  if(nextBtn)nextBtn.style.opacity=isCur?'0.35':'1';
+  // update filter selectors to match
+  const fy=document.getElementById('filter-year');
+  const fm=document.getElementById('filter-month');
+  if(fy)fy.value=String(cfSelectedYear);
+  if(fm)fm.value=String(cfSelectedMonth).padStart(2,'0');
+  renderCFSummary();
+  renderRecords();
+}
+
 function renderCFSummary(){
-  const{inc,exp,net}=getThisMonthData();
+  const mStr=`${cfSelectedYear}-${String(cfSelectedMonth).padStart(2,'0')}`;
+  const{inc,exp,net}=getCFMonthData(cfSelectedYear,cfSelectedMonth);
   const passive=getTotalPassive();
   const subMonthly=D.subs.reduce((s,x)=>s+(x.cycle==='monthly'?x.amount:x.cycle==='yearly'?x.amount/12:x.cycle==='quarterly'?x.amount/3:x.cycle==='bimonthly'?x.amount/2:0),0);
   const subYearly=D.subs.reduce((s,x)=>{
