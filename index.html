@@ -854,6 +854,41 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   <div class="topbar">
     <div><div class="topbar-title">收支管理</div><div class="topbar-sub">訂閱 · 被動收入 · 每日記錄</div></div>
   </div>
+  <!-- ── Global search bar ── -->
+  <div class="search-bar">
+    <svg class="ic-sm"><use href="#ic-search"/></svg>
+    <input type="text" id="rec-search" placeholder="搜尋記錄..." oninput="renderRecords()">
+  </div>
+
+  <!-- ── Filter + sort row ── -->
+  <div style="display:flex;gap:0;padding:0 18px;margin-bottom:6px;align-items:center;flex-wrap:wrap;gap:8px">
+    <div class="filter-row" id="filter-row" style="margin-bottom:0;padding:0;flex:1">
+      <button class="filter-chip on" data-val="all" onclick="setFilter('all')">全部</button>
+      <button class="filter-chip" data-val="income" onclick="setFilter('income')">收入</button>
+      <button class="filter-chip" data-val="expense" onclick="setFilter('expense')">支出</button>
+    </div>
+    <div style="display:flex;gap:5px;flex-shrink:0">
+      <button class="filter-chip on" id="sort-date-btn" onclick="setSort('date')" style="display:flex;align-items:center;gap:3px;font-size:11.5px;padding:5px 9px">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        日期
+      </button>
+      <button class="filter-chip" id="sort-cat-btn" onclick="setSort('cat')" style="display:flex;align-items:center;gap:3px;font-size:11.5px;padding:5px 9px">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+        類型
+      </button>
+    </div>
+  </div>
+
+  <!-- hidden selectors synced by cfNavMonth (not shown, used by renderRecords) -->
+  <select id="filter-year" style="display:none"></select>
+  <select id="filter-month" style="display:none">
+    <option value="all">全年</option>
+    <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option>
+    <option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
+    <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option>
+    <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+  </select>
+
   <!-- CF month nav -->
   <div style="display:flex;align-items:center;justify-content:space-between;padding:0 18px;margin-bottom:8px;position:relative;z-index:1">
     <button onclick="cfNavMonth(-1)" style="background:var(--fog);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--stone);transition:all .15s" id="cf-prev-btn">
@@ -945,38 +980,6 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
 
   <!-- Record panel -->
   <div id="cf-panel-rec">
-    <!-- search & filter -->
-    <div class="search-bar">
-      <svg class="ic-sm"><use href="#ic-search"/></svg>
-      <input type="text" id="rec-search" placeholder="搜尋記錄..." oninput="renderRecords()">
-    </div>
-    <div class="filter-row" id="filter-row">
-      <button class="filter-chip on" data-val="all" onclick="setFilter('all')">全部</button>
-      <button class="filter-chip" data-val="income" onclick="setFilter('income')">收入</button>
-      <button class="filter-chip" data-val="expense" onclick="setFilter('expense')">支出</button>
-    </div>
-    <!-- sort mode toggle -->
-    <div style="display:flex;gap:6px;padding:0 18px;margin-bottom:8px">
-      <button class="filter-chip on" id="sort-date-btn" onclick="setSort('date')" style="display:flex;align-items:center;gap:4px">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        日期排列
-      </button>
-      <button class="filter-chip" id="sort-cat-btn" onclick="setSort('cat')" style="display:flex;align-items:center;gap:4px">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
-        類型排列
-      </button>
-    </div>
-    <!-- month/year selector -->
-    <div style="display:flex;gap:8px;padding:0 18px;margin-bottom:10px">
-      <select class="form-input an-select" id="filter-year" onchange="renderRecords()" style="flex:1"></select>
-      <select class="form-input an-select" id="filter-month" onchange="renderRecords()" style="flex:1">
-        <option value="all">全年</option>
-        <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option>
-        <option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
-        <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option>
-        <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
-      </select>
-    </div>
     <div class="tx-wrap" id="all-records"></div>
   </div>
 
