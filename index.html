@@ -854,32 +854,13 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   <div class="topbar">
     <div><div class="topbar-title">收支管理</div><div class="topbar-sub">訂閱 · 被動收入 · 每日記錄</div></div>
   </div>
-  <!-- ── Global search bar ── -->
+  <!-- ── Search bar (top) ── -->
   <div class="search-bar">
     <svg class="ic-sm"><use href="#ic-search"/></svg>
     <input type="text" id="rec-search" placeholder="搜尋記錄..." oninput="renderRecords()">
   </div>
 
-  <!-- ── Filter + sort row ── -->
-  <div style="display:flex;gap:0;padding:0 18px;margin-bottom:6px;align-items:center;flex-wrap:wrap;gap:8px">
-    <div class="filter-row" id="filter-row" style="margin-bottom:0;padding:0;flex:1">
-      <button class="filter-chip on" data-val="all" onclick="setFilter('all')">全部</button>
-      <button class="filter-chip" data-val="income" onclick="setFilter('income')">收入</button>
-      <button class="filter-chip" data-val="expense" onclick="setFilter('expense')">支出</button>
-    </div>
-    <div style="display:flex;gap:5px;flex-shrink:0">
-      <button class="filter-chip on" id="sort-date-btn" onclick="setSort('date')" style="display:flex;align-items:center;gap:3px;font-size:11.5px;padding:5px 9px">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        日期
-      </button>
-      <button class="filter-chip" id="sort-cat-btn" onclick="setSort('cat')" style="display:flex;align-items:center;gap:3px;font-size:11.5px;padding:5px 9px">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
-        類型
-      </button>
-    </div>
-  </div>
-
-  <!-- hidden selectors synced by cfNavMonth (not shown, used by renderRecords) -->
+  <!-- hidden selectors synced by cfNavMonth -->
   <select id="filter-year" style="display:none"></select>
   <select id="filter-month" style="display:none">
     <option value="all">全年</option>
@@ -890,15 +871,19 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   </select>
 
   <!-- CF month nav -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 18px;margin-bottom:8px;position:relative;z-index:1">
-    <button onclick="cfNavMonth(-1)" style="background:var(--fog);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--stone);transition:all .15s" id="cf-prev-btn">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 18px;margin-bottom:8px">
+    <button onclick="cfNavMonth(-1)" style="background:var(--fog);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--stone)" id="cf-prev-btn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <div style="text-align:center">
-      <div id="cf-month-label" style="font-size:14px;font-weight:500;color:var(--ink)">2026年 6月</div>
+    <!-- clickable month label — opens picker -->
+    <button onclick="openCFMonthPicker()" style="background:none;border:none;cursor:pointer;text-align:center;padding:4px 12px;border-radius:12px;transition:background .15s" onmouseover="this.style.background='var(--fog)'" onmouseout="this.style.background='none'">
+      <div id="cf-month-label" style="font-size:14px;font-weight:500;color:var(--ink);display:flex;align-items:center;gap:5px">
+        2026年 6月
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--stone)"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
       <div id="cf-month-tag" style="font-size:11px;color:var(--stone);margin-top:1px">本月</div>
-    </div>
-    <button onclick="cfNavMonth(1)" style="background:var(--fog);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--stone);transition:all .15s" id="cf-next-btn">
+    </button>
+    <button onclick="cfNavMonth(1)" style="background:var(--fog);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--stone)" id="cf-next-btn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
   </div>
@@ -971,6 +956,25 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
       </div>
     </div>
   </div>
+  <!-- ── Filter + sort row (below hero) ── -->
+  <div style="display:flex;align-items:center;gap:8px;padding:0 18px;margin-bottom:8px;flex-wrap:wrap">
+    <div class="filter-row" id="filter-row" style="margin-bottom:0;padding:0;flex:1;min-width:0">
+      <button class="filter-chip on" data-val="all" onclick="setFilter('all')">全部</button>
+      <button class="filter-chip" data-val="income" onclick="setFilter('income')">收入</button>
+      <button class="filter-chip" data-val="expense" onclick="setFilter('expense')">支出</button>
+    </div>
+    <div style="display:flex;gap:5px;flex-shrink:0">
+      <button class="filter-chip on" id="sort-date-btn" onclick="setSort('date')" style="display:flex;align-items:center;gap:3px;font-size:11.5px;padding:5px 10px">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        日期
+      </button>
+      <button class="filter-chip" id="sort-cat-btn" onclick="setSort('cat')" style="display:flex;align-items:center;gap:3px;font-size:11.5px;padding:5px 10px">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+        類型
+      </button>
+    </div>
+  </div>
+
   <div class="cf-tabs">
     <button class="cf-tab on" id="cf-tab-rec" onclick="cfTab('rec')">日常記錄</button>
     <button class="cf-tab" id="cf-tab-sub" onclick="cfTab('sub')">訂閱項目</button>
@@ -1506,6 +1510,17 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
 </div>
 
 <!-- Settings modals -->
+<!-- CF Month Picker Modal -->
+<div class="modal-overlay" id="modal-cf-month-picker">
+  <div class="modal-sheet" style="max-height:80vh;overflow-y:auto">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">選擇月份</div>
+    <div id="cf-month-picker-content">
+      <!-- year tabs + month grid rendered by JS -->
+    </div>
+  </div>
+</div>
+
 <!-- Day Detail Modal -->
 <div class="modal-overlay" id="modal-day-detail">
   <div class="modal-sheet">
@@ -1808,15 +1823,7 @@ function switchPage(page){
   if(page==='analytics'){initYearSelectors();renderCharts()}
   if(page==='assets')renderDonut();
   if(page==='cashflow'){
-    // init month nav label
-    const MONTH_ZH=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-    const lbl=document.getElementById('cf-month-label');
-    if(lbl)lbl.textContent=`${cfSelectedYear}年 ${cfSelectedMonth}月`;
-    const now2=new Date();
-    const isCur=cfSelectedYear===now2.getFullYear()&&cfSelectedMonth===now2.getMonth()+1;
-    const tag=document.getElementById('cf-month-tag');if(tag)tag.textContent=isCur?'本月':'歷史月份';
-    const nextBtn=document.getElementById('cf-next-btn');if(nextBtn)nextBtn.style.opacity=isCur?'0.35':'1';
-    const titleLbl=document.getElementById('cf-title-label');if(titleLbl)titleLbl.textContent=isCur?'本月現金流':`${cfSelectedMonth}月現金流`;
+    cfUpdateNavUI();
     renderCFSummary();renderSubList();renderBillList();renderPassiveList();renderRecords();
   }
   window.scrollTo(0,0);
@@ -3256,32 +3263,100 @@ function showDayDetail(yr,mo,d){
   openModal('modal-day-detail');
 }
 
+function openCFMonthPicker(){
+  const now=new Date();
+  const curY=now.getFullYear();
+  // build year list: from oldest record year to current year
+  const years=[];
+  const allDates=D.records.filter(r=>r.date).map(r=>r.date).sort();
+  const minY=allDates.length?parseInt(allDates[0].slice(0,4)):curY;
+  for(let y=curY;y>=minY;y--) years.push(y);
+  if(!years.includes(curY)) years.unshift(curY);
+
+  const MONTH_ZH=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const pickerYr=cfSelectedYear;
+
+  const html=`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      ${years.map(y=>`<button onclick="cfPickerSetYear(${y})" id="cpy-${y}" style="padding:6px 14px;border-radius:99px;border:1.5px solid ${y===pickerYr?'var(--green-soft)':'var(--fog)'};background:${y===pickerYr?'var(--green-pale)':'none'};color:${y===pickerYr?'var(--green-soft)':'var(--ink-light)'};font-family:inherit;font-size:13px;font-weight:${y===pickerYr?'600':'400'};cursor:pointer">${y}年</button>`).join('')}
+    </div>
+    <div id="cf-picker-months" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+      ${MONTH_ZH.map((m,i)=>{
+        const mo=i+1;
+        const isSel=pickerYr===cfSelectedYear&&mo===cfSelectedMonth;
+        const isFuture=pickerYr>curY||(pickerYr===curY&&mo>curY)||(pickerYr===curY&&mo>now.getMonth()+1);
+        return`<button onclick="${isFuture?'':` cfPickerSelect(${pickerYr},${mo})`}" style="padding:10px 4px;border-radius:12px;border:1.5px solid ${isSel?'var(--green-soft)':'var(--fog)'};background:${isSel?'var(--green-pale)':'none'};color:${isFuture?'var(--mist)':isSel?'var(--green-soft)':'var(--ink)'};font-family:inherit;font-size:13px;font-weight:${isSel?'600':'400'};cursor:${isFuture?'default':'pointer'}">${m}</button>`;
+      }).join('')}
+    </div>`;
+
+  document.getElementById('cf-month-picker-content').innerHTML=html;
+  openModal('modal-cf-month-picker');
+}
+
+function cfPickerSetYear(y){
+  // re-render picker with new year selected
+  const now=new Date();
+  const curY=now.getFullYear();
+  // update year buttons
+  document.querySelectorAll('[id^="cpy-"]').forEach(btn=>{
+    const by=parseInt(btn.id.slice(4));
+    btn.style.borderColor=by===y?'var(--green-soft)':'var(--fog)';
+    btn.style.background=by===y?'var(--green-pale)':'none';
+    btn.style.color=by===y?'var(--green-soft)':'var(--ink-light)';
+    btn.style.fontWeight=by===y?'600':'400';
+  });
+  // re-render months
+  const MONTH_ZH=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('cf-picker-months').innerHTML=MONTH_ZH.map((m,i)=>{
+    const mo=i+1;
+    const isSel=y===cfSelectedYear&&mo===cfSelectedMonth;
+    const isFuture=(y>curY)||(y===curY&&mo>now.getMonth()+1);
+    return`<button onclick="${isFuture?'':` cfPickerSelect(${y},${mo})`}" style="padding:10px 4px;border-radius:12px;border:1.5px solid ${isSel?'var(--green-soft)':'var(--fog)'};background:${isSel?'var(--green-pale)':'none'};color:${isFuture?'var(--mist)':isSel?'var(--green-soft)':'var(--ink)'};font-family:inherit;font-size:13px;font-weight:${isSel?'600':'400'};cursor:${isFuture?'default':'pointer'}">${m}</button>`;
+  }).join('');
+}
+
+function cfPickerSelect(yr, mo){
+  cfSelectedYear=yr;
+  cfSelectedMonth=mo;
+  closeModal('modal-cf-month-picker');
+  cfUpdateNavUI();
+  renderCFSummary();
+  renderRecords();
+}
+
+function cfUpdateNavUI(){
+  const now=new Date();
+  const isCur=cfSelectedYear===now.getFullYear()&&cfSelectedMonth===now.getMonth()+1;
+  const MONTH_ZH=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  const lbl=document.getElementById('cf-month-label');
+  if(lbl){
+    // keep the label text, but the SVG chevron is inside so we update just the text node
+    lbl.childNodes[0].textContent=`${cfSelectedYear}年 ${cfSelectedMonth}月 `;
+  }
+  const tag=document.getElementById('cf-month-tag');if(tag)tag.textContent=isCur?'本月':'歷史月份';
+  const titleLbl=document.getElementById('cf-title-label');if(titleLbl)titleLbl.textContent=isCur?'本月現金流':`${cfSelectedMonth}月現金流`;
+  const nextBtn=document.getElementById('cf-next-btn');if(nextBtn)nextBtn.style.opacity=isCur?'0.35':'1';
+  // sync hidden selectors
+  const fy=document.getElementById('filter-year');if(fy)fy.value=String(cfSelectedYear);
+  const fm=document.getElementById('filter-month');if(fm)fm.value=String(cfSelectedMonth).padStart(2,'0');
+}
+
 function cfNavMonth(dir){
   const now=new Date();
   const curY=now.getFullYear(), curM=now.getMonth()+1;
   cfSelectedMonth+=dir;
   if(cfSelectedMonth>12){cfSelectedMonth=1;cfSelectedYear++;}
   if(cfSelectedMonth<1){cfSelectedMonth=12;cfSelectedYear--;}
-  // update label + tag
-  const MONTH_ZH=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-  const lbl=document.getElementById('cf-month-label');
-  const tag=document.getElementById('cf-month-tag');
-  const titleLbl=document.getElementById('cf-title-label');
-  if(lbl)lbl.textContent=`${cfSelectedYear}年 ${cfSelectedMonth}月`;
-  const isCur=cfSelectedYear===curY&&cfSelectedMonth===curM;
-  if(tag)tag.textContent=isCur?'本月':'歷史月份';
-  if(titleLbl)titleLbl.textContent=isCur?'本月現金流':`${cfSelectedMonth}月現金流`;
-  // grey out next btn if at current month
-  const nextBtn=document.getElementById('cf-next-btn');
-  if(nextBtn)nextBtn.style.opacity=isCur?'0.35':'1';
-  // update filter selectors to match
-  const fy=document.getElementById('filter-year');
-  const fm=document.getElementById('filter-month');
-  if(fy)fy.value=String(cfSelectedYear);
-  if(fm)fm.value=String(cfSelectedMonth).padStart(2,'0');
+  // clamp to current month
+  if(cfSelectedYear>curY||(cfSelectedYear===curY&&cfSelectedMonth>curM)){
+    cfSelectedYear=curY;cfSelectedMonth=curM;
+  }
+  cfUpdateNavUI();
   renderCFSummary();
   renderRecords();
 }
+
+
 
 function renderCFSummary(){
   const mStr=`${cfSelectedYear}-${String(cfSelectedMonth).padStart(2,'0')}`;
