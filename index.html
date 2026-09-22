@@ -353,6 +353,20 @@ select.form-input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
 .mt-12{margin-top:12px}
 .mt-8{margin-top:8px}
 
+.invest-hero{margin:4px 18px 14px;background:var(--green);border-radius:24px;padding:20px 20px 18px;color:white;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(42,66,56,.2)}
+.invest-hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(100deg,transparent 0,transparent 3px,rgba(255,255,255,.015) 3px,rgba(255,255,255,.015) 4px);pointer-events:none}
+.etf-card{background:var(--paper);border:1px solid rgba(78,122,104,.18);border-radius:var(--r);margin:0 18px 12px;overflow:hidden;box-shadow:var(--sh-xs)}
+.etf-card-head{background:linear-gradient(135deg,#2a4238,#3a5c4e);padding:14px 16px;color:white}
+.etf-card-body{padding:14px 16px}
+.etf-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.etf-stat{text-align:center;background:var(--fog);border-radius:10px;padding:8px 4px}
+.etf-stat-lbl{font-size:9.5px;color:var(--stone);margin-bottom:2px}
+.etf-stat-val{font-size:12.5px;font-weight:500;color:var(--ink-deep)}
+.etf-stat-val.pos{color:var(--green-soft)}
+.etf-stat-val.neg{color:var(--red-soft)}
+.dep-card{background:var(--paper);border:1px solid rgba(196,154,60,.25);border-radius:var(--r);margin:0 18px 12px;padding:14px 16px;box-shadow:var(--sh-xs)}
+.dep-countdown{background:#fef9ec;border:1px solid rgba(196,154,60,.2);border-radius:12px;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+
 /* ══════ SEARCH BAR FIX ══════ */
 /* prevent noise texture showing through transparent input */
 .search-bar { isolation: isolate; }
@@ -1303,6 +1317,136 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
 </div>
 
 <!-- ═══════════ SETTINGS ═══════════ -->
+<!-- ═══════════ INVEST ═══════════ -->
+<div class="page" id="page-invest">
+  <div class="topbar">
+    <div><div class="topbar-title">投資管理</div><div class="topbar-sub">ETF · 定存 · 定期定額</div></div>
+  </div>
+
+  <!-- hero -->
+  <div class="invest-hero" id="invest-hero">
+    <div style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px;position:relative;z-index:1">投資總覽</div>
+    <div style="font-family:'Outfit',sans-serif;font-size:32px;font-weight:200;letter-spacing:.5px;margin-bottom:14px;position:relative;z-index:1" id="invest-total-val"><span style="font-size:14px;opacity:.6;margin-right:3px;vertical-align:super">NT$</span>0</div>
+    <div style="display:flex;gap:6px;position:relative;z-index:1">
+      <div style="flex:1;background:rgba(255,255,255,.1);border-radius:12px;padding:9px 10px;text-align:center">
+        <div style="font-size:9.5px;color:rgba(255,255,255,.5);margin-bottom:3px">累積本金</div>
+        <div id="invest-principal" style="font-size:13px">NT$0</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,.1);border-radius:12px;padding:9px 10px;text-align:center">
+        <div style="font-size:9.5px;color:rgba(255,255,255,.5);margin-bottom:3px">帳面損益</div>
+        <div id="invest-pnl" style="font-size:13px">NT$0</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,.1);border-radius:12px;padding:9px 10px;text-align:center">
+        <div style="font-size:9.5px;color:rgba(255,255,255,.5);margin-bottom:3px">報酬率</div>
+        <div id="invest-roi" style="font-size:13px">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- tabs -->
+  <div class="cf-tabs" style="margin-bottom:12px">
+    <button class="cf-tab on" id="inv-tab-etf" onclick="invTab('etf')">ETF 定期定額</button>
+    <button class="cf-tab" id="inv-tab-deposit" onclick="invTab('deposit')">定存</button>
+    <button class="cf-tab" id="inv-tab-overview" onclick="invTab('overview')">總覽圖表</button>
+  </div>
+
+  <!-- ETF panel -->
+  <div id="inv-panel-etf">
+    <div class="add-form">
+      <div class="add-form-toggle" onclick="toggleForm('add-etf-body')">
+        <span class="add-form-toggle-title"><svg class="ic-sm"><use href="#ic-plus"/></svg> 新增 ETF</span>
+        <svg class="ic-sm" style="color:var(--stone)"><use href="#ic-chevron-right"/></svg>
+      </div>
+      <div class="add-form-body" id="add-etf-body">
+        <div class="form-group"><label class="form-label">ETF 代碼</label>
+          <input class="form-input" id="etf-code" placeholder="例：0050、00662" style="text-transform:uppercase">
+        </div>
+        <div class="form-group"><label class="form-label">ETF 名稱</label>
+          <input class="form-input" id="etf-name" placeholder="例：元大台灣50">
+        </div>
+        <div class="form-group"><label class="form-label">每月投入金額 (NT$)</label>
+          <input class="form-input numfmt" id="etf-monthly" type="text" inputmode="numeric" placeholder="0">
+        </div>
+        <div class="form-group"><label class="form-label">每月扣款日</label>
+          <select class="form-input" id="etf-debit-day">
+            ${Array.from({length:28},(_,i)=>`<option value="${i+1}">${i+1} 號</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">開始日期</label>
+          <input class="form-input" id="etf-start" type="date">
+        </div>
+        <div class="form-group"><label class="form-label">目標金額 (NT$)（選填）</label>
+          <input class="form-input numfmt" id="etf-goal" type="text" inputmode="numeric" placeholder="0">
+        </div>
+        <div class="btn-row">
+          <button class="btn-sm btn-p" onclick="addETF()"><svg class="ic-sm"><use href="#ic-check"/></svg> 新增</button>
+          <button class="btn-sm btn-g" onclick="toggleForm('add-etf-body')">取消</button>
+        </div>
+      </div>
+    </div>
+    <div id="etf-list"></div>
+  </div>
+
+  <!-- Deposit panel -->
+  <div id="inv-panel-deposit" style="display:none">
+    <div class="add-form">
+      <div class="add-form-toggle" onclick="toggleForm('add-dep-body')">
+        <span class="add-form-toggle-title"><svg class="ic-sm"><use href="#ic-plus"/></svg> 新增定存</span>
+        <svg class="ic-sm" style="color:var(--stone)"><use href="#ic-chevron-right"/></svg>
+      </div>
+      <div class="add-form-body" id="add-dep-body">
+        <div class="form-group"><label class="form-label">銀行名稱</label>
+          <input class="form-input" id="dep-bank" placeholder="例：華南銀行"></div>
+        <div class="form-group"><label class="form-label">本金 (NT$)</label>
+          <input class="form-input numfmt" id="dep-principal" type="text" inputmode="numeric" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">年利率 (%)</label>
+          <input class="form-input" id="dep-rate" type="number" step="0.01" placeholder="例：1.8"></div>
+        <div class="form-group"><label class="form-label">存入日期</label>
+          <input class="form-input" id="dep-start" type="date"></div>
+        <div class="form-group"><label class="form-label">到期日期</label>
+          <input class="form-input" id="dep-end" type="date"></div>
+        <div class="form-group"><label class="form-label">備註（選填）</label>
+          <input class="form-input" id="dep-note" placeholder="..."></div>
+        <div class="btn-row">
+          <button class="btn-sm btn-p" onclick="addDeposit()"><svg class="ic-sm"><use href="#ic-check"/></svg> 新增</button>
+          <button class="btn-sm btn-g" onclick="toggleForm('add-dep-body')">取消</button>
+        </div>
+      </div>
+    </div>
+    <div id="deposit-list"></div>
+  </div>
+
+  <!-- Overview panel -->
+  <div id="inv-panel-overview" style="display:none">
+    <div style="padding:0 18px">
+      <!-- allocation -->
+      <div class="chart-card">
+        <div class="chart-card-head"><div class="chart-title">資產配置</div><div class="chart-sub">投資本金分布</div></div>
+        <div class="chart-body">
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <div style="position:relative;width:130px;height:130px;flex-shrink:0">
+              <canvas id="inv-alloc-chart"></canvas>
+              <div class="chart-center"><div class="chart-center-val" id="inv-alloc-total">NT$0</div><div class="chart-center-label">總本金</div></div>
+            </div>
+            <div id="inv-alloc-legend" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:7px"></div>
+          </div>
+        </div>
+      </div>
+      <!-- PnL trend -->
+      <div class="chart-card" id="inv-pnl-card" style="display:none">
+        <div class="chart-card-head"><div class="chart-title">損益走勢</div><div class="chart-sub">累積市值 vs 投入本金</div></div>
+        <div class="chart-body" style="position:relative;height:180px"><canvas id="inv-pnl-chart"></canvas></div>
+      </div>
+      <!-- deposit timeline -->
+      <div class="chart-card" id="inv-dep-timeline-card">
+        <div class="chart-card-head"><div class="chart-title">定存到期時間軸</div><div class="chart-sub">依到期日排列</div></div>
+        <div id="inv-dep-timeline"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SETTINGS ═══════════ -->
 <div class="page" id="page-settings">
   <div class="topbar">
     <div><div class="topbar-title">設定</div><div class="topbar-sub">個人化你的財務 OS</div></div>
@@ -1416,6 +1560,18 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   </div>
 
   <div class="settings-section">
+    <div class="settings-label">投資 API</div>
+    <div class="settings-group">
+      <div style="padding:12px 14px">
+        <div style="font-size:12.5px;font-weight:500;color:var(--ink);margin-bottom:6px">FinMind API Token</div>
+        <div style="font-size:11.5px;color:var(--stone);margin-bottom:8px;line-height:1.5">用於自動抓取 ETF 淨值資料，申請網址：finmindtrade.com</div>
+        <input class="form-input" id="finmind-token-input" placeholder="貼上你的 API Token" style="font-size:12px;margin-bottom:8px">
+        <button class="btn-sm btn-p" onclick="saveFinmindToken()" style="width:100%">儲存 Token</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
     <div class="settings-label">關於</div>
     <div class="settings-group">
       <div class="settings-row" style="cursor:default">
@@ -1432,6 +1588,7 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   <button class="nav-item active" id="nav-dashboard" onclick="switchPage('dashboard')"><svg class="ic"><use href="#ic-home"/></svg><div class="nav-label">首頁</div></button>
   <button class="nav-item" id="nav-assets" onclick="switchPage('assets')"><svg class="ic"><use href="#ic-gem"/></svg><div class="nav-label">資產</div></button>
   <button class="nav-item" id="nav-cashflow" onclick="switchPage('cashflow')"><svg class="ic"><use href="#ic-flow"/></svg><div class="nav-label">收支</div></button>
+  <button class="nav-item" id="nav-invest" onclick="switchPage('invest')"><svg class="ic"><use href="#ic-trending"/></svg><div class="nav-label">投資</div></button>
   <button class="nav-item" id="nav-analytics" onclick="switchPage('analytics')"><svg class="ic"><use href="#ic-chart"/></svg><div class="nav-label">分析</div></button>
   <button class="nav-item" id="nav-settings" onclick="switchPage('settings')"><svg class="ic"><use href="#ic-settings"/></svg><div class="nav-label">設定</div></button>
 </nav>
@@ -1677,6 +1834,13 @@ function handleGoogleSignIn(response){
     });
 }
 function signOut(){ if(confirm("確定登出？")) auth.signOut(); }
+function saveFinmindToken(){
+  const val=document.getElementById("finmind-token-input")?.value.trim();
+  if(!val){alert("請輸入 Token");return}
+  D.settings.finmindToken=val;
+  save(D);
+  alert("Token 已儲存！");
+}
 function showUserMenu(){
   if(currentUser&&confirm("登入："+(currentUser.displayName||currentUser.email)+"\n\n點確定登出")) signOut();
 }
@@ -1719,7 +1883,7 @@ function saveCloud(){
 const KEY = 'wealthos_v3'; // same key → preserves existing data
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||def()}catch{return def()}}
 function save(d){localStorage.setItem(KEY,JSON.stringify(d));saveCloud();}
-function def(){return{records:[],assets:[],subs:[],passives:[],bills:[],ccRecords:[],settings:{name:"",currency:"TWD",goal:0,goalNote:"",debitDay:0,debitNote:"",notify:true,review:true,theme:"light"}}}
+function def(){return{records:[],assets:[],subs:[],passives:[],bills:[],ccRecords:[],etfs:[],deposits:[],settings:{name:"",currency:"TWD",goal:0,goalNote:"",debitDay:0,debitNote:"",notify:true,review:true,theme:"light",finmindToken:""}}}
 
 let D=load();
 // ── Smart seed: disabled — data is private per user ──
@@ -1732,6 +1896,9 @@ let D=load();
 D.settings=Object.assign({name:'',currency:'TWD',goal:0,goalNote:'',debitDay:0,debitNote:'',notify:true,review:true,theme:'light'},D.settings||{});
 if(!D.bills)D.bills=[];
 if(!D.ccRecords)D.ccRecords=[];
+if(!D.etfs)D.etfs=[];
+if(!D.deposits)D.deposits=[];
+if(!D.settings.finmindToken)D.settings.finmindToken='';
 save(D);
 
 // Apply saved theme immediately (before DOMContentLoaded to avoid flash)
@@ -1830,6 +1997,7 @@ function switchPage(page){
   fab.style.display=(page==='dashboard'||page==='cashflow')?'flex':'none';
   if(page==='analytics'){initYearSelectors();renderCharts()}
   if(page==='assets')renderDonut();
+  if(page==='invest'){renderInvest();}
   if(page==='cashflow'){
     cfUpdateNavUI();
     renderCFSummary();renderSubList();renderBillList();renderPassiveList();renderRecords();
@@ -2051,6 +2219,294 @@ function fmtCompact(n){
 }
 
 // ══════ RENDER ALL ══════
+// ══════ INVEST ══════
+const FINMIND_DEFAULT_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiaGhnZDEyMDMyQGdtYWlsLmNvbSIsImVtYWlsIjoiaGhnZDEyMDMyQGdtYWlsLmNvbSIsInRva2VuX3ZlcnNpb24iOjB9.Zmg4Tmq7sDsW4bhZD4GNniY5k6Gesa69JufuVkcKB0I';
+const INV_COLORS = ['#4e7a68','#7aab8f','#a8d4b9','#c49a3c','#e8b86d','#2a4238','#6b9e82','#3d6655'];
+
+function invTab(t){
+  ['etf','deposit','overview'].forEach(x=>{
+    const p=document.getElementById('inv-panel-'+x);
+    const b=document.getElementById('inv-tab-'+x);
+    if(p)p.style.display=x===t?'block':'none';
+    if(b)b.className='cf-tab'+(x===t?' on':'');
+  });
+  if(t==='overview') renderInvestOverview();
+}
+
+// ── ETF ──
+async function fetchETFPrice(code){
+  const token=D.settings.finmindToken||FINMIND_DEFAULT_TOKEN;
+  const today=new Date();
+  const start=new Date(today); start.setMonth(start.getMonth()-6);
+  const startStr=start.toISOString().slice(0,10);
+  try{
+    const res=await fetch(`https://api.finmindtrade.com/api/v4/data?dataset=TaiwanETFNetAssetValue&data_id=${code}&start_date=${startStr}&token=${token}`);
+    const d=await res.json();
+    if(d.status===200&&d.data?.length){
+      const latest=d.data[d.data.length-1];
+      return{price:parseFloat(latest.net_asset_value)||parseFloat(latest.close)||0, data:d.data};
+    }
+  }catch(e){console.warn('FinMind fetch error:',e);}
+  return null;
+}
+
+function addETF(){
+  const code=document.getElementById('etf-code').value.trim().toUpperCase();
+  const name=document.getElementById('etf-name').value.trim();
+  const monthly=getNum('etf-monthly');
+  const debitDay=parseInt(document.getElementById('etf-debit-day').value)||5;
+  const start=document.getElementById('etf-start').value;
+  const goal=getNum('etf-goal');
+  if(!code||!name||!monthly||!start){alert('請填寫代碼、名稱、每月金額、開始日期');return}
+  D.etfs.push({id:Date.now(),code,name,monthly,debitDay,start,goal,
+    history:[],  // {date,nav,units} — monthly records
+    currentNav:0
+  });
+  save(D);
+  document.getElementById('etf-code').value='';
+  document.getElementById('etf-name').value='';
+  document.getElementById('etf-monthly').value='';
+  document.getElementById('etf-start').value='';
+  document.getElementById('etf-goal').value='';
+  toggleForm('add-etf-body');
+  renderETFList();
+}
+
+function calcETFStats(etf){
+  // calculate months elapsed
+  const start=new Date(etf.start);
+  const now=new Date();
+  const months=Math.max(1,(now.getFullYear()-start.getFullYear())*12+(now.getMonth()-start.getMonth()));
+  const principal=etf.monthly*months;
+  const currentNav=etf.currentNav||0;
+  // estimate market value from history or currentNav
+  let marketVal=principal; // fallback
+  if(etf.history&&etf.history.length){
+    // sum units * current nav
+    const totalUnits=etf.history.reduce((s,h)=>s+(h.units||0),0);
+    if(totalUnits&&currentNav) marketVal=totalUnits*currentNav;
+  }
+  const pnl=marketVal-principal;
+  const roi=principal>0?(pnl/principal*100):0;
+  return{months,principal,marketVal,pnl,roi};
+}
+
+function renderETFList(){
+  const el=document.getElementById('etf-list');
+  if(!D.etfs.length){
+    el.innerHTML=`<div class="empty"><div class="empty-text">還沒有 ETF，新增第一個吧</div></div>`;
+    renderInvestHero();return;
+  }
+  el.innerHTML=D.etfs.map(etf=>{
+    const s=calcETFStats(etf);
+    const pnlColor=s.pnl>=0?'var(--green-soft)':'var(--red-soft)';
+    const roiSign=s.roi>=0?'+':'';
+    const progress=etf.goal>0?Math.min(s.principal/etf.goal*100,100):0;
+    return`<div class="etf-card">
+      <div class="etf-card-head">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-size:16px;font-weight:300;letter-spacing:.3px">${etf.name}</div>
+          <div style="display:flex;gap:5px">
+            <button class="icon-btn" style="color:rgba(255,255,255,.7)" onclick="openEditETF(${etf.id})"><svg class="ic-sm"><use href="#ic-edit"/></svg></button>
+            <button class="icon-btn del" style="color:rgba(255,160,140,.8)" onclick="delETF(${etf.id})"><svg class="ic-sm"><use href="#ic-close"/></svg></button>
+          </div>
+        </div>
+        <div style="font-size:11px;opacity:.55">${etf.code} · 每月 ${etf.debitDay} 號扣 NT$${etf.monthly.toLocaleString()}</div>
+      </div>
+      <div class="etf-card-body">
+        <div class="etf-stat-grid">
+          <div class="etf-stat"><div class="etf-stat-lbl">累積本金</div><div class="etf-stat-val">${fmt(s.principal)}</div></div>
+          <div class="etf-stat"><div class="etf-stat-lbl">帳面損益</div><div class="etf-stat-val ${s.pnl>=0?'pos':'neg'}">${s.pnl>=0?'+':'-'}${fmt(Math.abs(s.pnl))}</div></div>
+          <div class="etf-stat"><div class="etf-stat-lbl">報酬率</div><div class="etf-stat-val ${s.roi>=0?'pos':'neg'}">${roiSign}${s.roi.toFixed(1)}%</div></div>
+          <div class="etf-stat"><div class="etf-stat-lbl">持續月數</div><div class="etf-stat-val">${s.months} 個月</div></div>
+          <div class="etf-stat"><div class="etf-stat-lbl">最新淨值</div><div class="etf-stat-val">${etf.currentNav?'NT$'+etf.currentNav.toFixed(2):'未更新'}</div></div>
+          <div class="etf-stat"><div class="etf-stat-lbl">目標金額</div><div class="etf-stat-val">${etf.goal?fmt(etf.goal):'未設定'}</div></div>
+        </div>
+        ${etf.goal>0?`
+        <div style="background:var(--fog);border-radius:99px;height:5px;overflow:hidden;margin-bottom:5px">
+          <div style="width:${progress}%;height:100%;background:var(--green-soft);border-radius:99px;transition:width .6s"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--stone)">
+          <span>目標進度 ${progress.toFixed(1)}%</span>
+          <span>還差 ${fmt(Math.max(0,etf.goal-s.principal))}</span>
+        </div>`:''}
+        <button onclick="openETFRecord(${etf.id})" style="margin-top:10px;width:100%;padding:8px;background:var(--green-pale);color:var(--green-soft);border:1px solid var(--green-mist);border-radius:10px;font-family:inherit;font-size:12.5px;cursor:pointer">
+          📊 更新淨值 / 查看走勢
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+  renderInvestHero();
+}
+
+function delETF(id){
+  if(!confirm('確定刪除此 ETF？'))return;
+  D.etfs=D.etfs.filter(e=>e.id!==id);
+  save(D);renderETFList();
+}
+
+// ── Deposit ──
+function addDeposit(){
+  const bank=document.getElementById('dep-bank').value.trim();
+  const principal=getNum('dep-principal');
+  const rate=parseFloat(document.getElementById('dep-rate').value)||0;
+  const start=document.getElementById('dep-start').value;
+  const end=document.getElementById('dep-end').value;
+  const note=document.getElementById('dep-note').value.trim();
+  if(!bank||!principal||!start||!end){alert('請填寫銀行、本金、存入/到期日期');return}
+  D.deposits.push({id:Date.now(),bank,principal,rate,start,end,note});
+  save(D);
+  document.getElementById('dep-bank').value='';
+  document.getElementById('dep-principal').value='';
+  document.getElementById('dep-rate').value='';
+  document.getElementById('dep-note').value='';
+  toggleForm('add-dep-body');
+  renderDepositList();
+}
+
+function renderDepositList(){
+  const el=document.getElementById('deposit-list');
+  if(!D.deposits.length){
+    el.innerHTML=`<div class="empty"><div class="empty-text">還沒有定存記錄</div></div>`;
+    renderInvestHero();return;
+  }
+  const today=new Date();
+  const sorted=[...D.deposits].sort((a,b)=>a.end.localeCompare(b.end));
+  el.innerHTML=sorted.map(dep=>{
+    const endDate=new Date(dep.end);
+    const daysLeft=Math.max(0,Math.ceil((endDate-today)/(1000*60*60*24)));
+    const totalDays=Math.ceil((endDate-new Date(dep.start))/(1000*60*60*24));
+    const elapsed=Math.max(0,Math.ceil((today-new Date(dep.start))/(1000*60*60*24)));
+    const progress=Math.min(elapsed/totalDays*100,100);
+    const interest=Math.round(dep.principal*dep.rate/100);
+    const isExpired=daysLeft===0;
+    const urgentColor=daysLeft<30?'var(--red-soft)':daysLeft<90?'var(--amber)':'var(--green-soft)';
+    return`<div class="dep-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div style="font-size:14px;font-weight:500;margin-bottom:2px">🏦 ${dep.bank}</div>
+          <div style="font-size:11.5px;color:var(--stone)">年利率 ${dep.rate}% · 本金 ${fmt(dep.principal)}</div>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="icon-btn del" onclick="delDeposit(${dep.id})"><svg class="ic-sm"><use href="#ic-close"/></svg></button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0 8px">
+        <div style="text-align:center;background:var(--fog);border-radius:10px;padding:8px 4px">
+          <div style="font-size:9.5px;color:var(--stone);margin-bottom:2px">存入日</div>
+          <div style="font-size:11.5px;font-weight:500">${dep.start}</div>
+        </div>
+        <div style="text-align:center;background:var(--fog);border-radius:10px;padding:8px 4px">
+          <div style="font-size:9.5px;color:var(--stone);margin-bottom:2px">到期日</div>
+          <div style="font-size:11.5px;font-weight:500">${dep.end}</div>
+        </div>
+        <div style="text-align:center;background:#e8f2ec;border-radius:10px;padding:8px 4px">
+          <div style="font-size:9.5px;color:var(--stone);margin-bottom:2px">預計利息</div>
+          <div style="font-size:11.5px;font-weight:600;color:var(--green-soft)">+${fmt(interest)}</div>
+        </div>
+      </div>
+      <!-- progress -->
+      <div style="background:var(--fog);border-radius:99px;height:4px;overflow:hidden;margin-bottom:5px">
+        <div style="width:${progress}%;height:100%;background:var(--green-soft);border-radius:99px"></div>
+      </div>
+      <div class="dep-countdown">
+        <div>
+          <div style="font-size:10.5px;color:${urgentColor};font-weight:500">${isExpired?'已到期':'距離到期'}</div>
+          <div style="font-size:11px;color:var(--stone);margin-top:1px">${dep.end}</div>
+        </div>
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:200;color:${urgentColor}">${isExpired?'到期':''}<span style="font-size:${isExpired?14:22}px">${isExpired?'請提領':daysLeft}</span>${!isExpired?' <span style=\"font-size:13px\">天</span>':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+  renderInvestHero();
+}
+
+function delDeposit(id){
+  if(!confirm('確定刪除此定存記錄？'))return;
+  D.deposits=D.deposits.filter(d=>d.id!==id);
+  save(D);renderDepositList();
+}
+
+// ── Hero summary ──
+function renderInvestHero(){
+  const totalPrincipal=D.etfs.reduce((s,e)=>s+calcETFStats(e).principal,0)
+    +D.deposits.reduce((s,d)=>s+d.principal,0);
+  const etfPnL=D.etfs.reduce((s,e)=>s+calcETFStats(e).pnl,0);
+  const depInterest=D.deposits.reduce((s,d)=>{
+    const days=Math.max(0,Math.ceil((new Date()-new Date(d.start))/(1000*60*60*24)));
+    return s+Math.round(d.principal*d.rate/100*days/365);
+  },0);
+  const totalPnL=etfPnL+depInterest;
+  const roi=totalPrincipal>0?(totalPnL/totalPrincipal*100):0;
+  const totalVal=totalPrincipal+totalPnL;
+  const tv=document.getElementById('invest-total-val');
+  if(tv)tv.innerHTML=`<span style="font-size:14px;opacity:.6;margin-right:3px;vertical-align:super">NT$</span>${Math.round(totalVal).toLocaleString()}`;
+  const ip=document.getElementById('invest-principal');if(ip)ip.textContent=fmt(totalPrincipal);
+  const ipnl=document.getElementById('invest-pnl');
+  if(ipnl){ipnl.textContent=(totalPnL>=0?'+':'')+fmt(totalPnL);ipnl.style.color=totalPnL>=0?'rgba(160,230,190,.95)':'rgba(255,160,140,.9)';}
+  const ir=document.getElementById('invest-roi');
+  if(ir){ir.textContent=(roi>=0?'+':'')+roi.toFixed(1)+'%';ir.style.color=roi>=0?'rgba(160,230,190,.95)':'rgba(255,160,140,.9)';}
+}
+
+// ── Overview charts ──
+function renderInvestOverview(){
+  renderInvestHero();
+  // allocation donut
+  const items=[...D.etfs.map(e=>{const s=calcETFStats(e);return{name:e.name+' '+e.code,val:s.principal};}),
+    ...D.deposits.map(d=>{return{name:d.bank+'定存',val:d.principal};})]
+    .filter(i=>i.val>0);
+  const total=items.reduce((s,i)=>s+i.val,0);
+  const el=document.getElementById('inv-alloc-total');if(el)el.textContent=fmt(total);
+  const legend=document.getElementById('inv-alloc-legend');
+  if(legend)legend.innerHTML=items.map((it,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${INV_COLORS[i%INV_COLORS.length]}"></div><div class="legend-name" style="font-size:12px">${it.name}</div><div class="legend-pct">${total>0?Math.round(it.val/total*100):0}%</div><div class="legend-amt" style="font-size:12px">${fmt(it.val)}</div></div>`).join('');
+  const ctx=document.getElementById('inv-alloc-chart')?.getContext('2d');
+  if(ctx&&items.length){
+    if(charts.invAlloc)charts.invAlloc.destroy();
+    charts.invAlloc=new Chart(ctx,{type:'doughnut',data:{labels:items.map(i=>i.name),datasets:[{data:items.map(i=>i.val),backgroundColor:INV_COLORS,borderWidth:0,hoverOffset:3}]},options:{cutout:'65%',plugins:{legend:{display:false}},animation:{duration:400}}});
+  }
+  // deposit timeline
+  const timeline=document.getElementById('inv-dep-timeline');
+  if(timeline){
+    if(!D.deposits.length){timeline.innerHTML='<div style="padding:0 0 8px;font-size:12px;color:var(--stone)">還沒有定存記錄</div>';}
+    else{
+      const sorted=[...D.deposits].sort((a,b)=>a.end.localeCompare(b.end));
+      const today=new Date();
+      timeline.innerHTML='<div style="padding:0 0 8px">'+sorted.map(d=>{
+        const daysLeft=Math.max(0,Math.ceil((new Date(d.end)-today)/(1000*60*60*24)));
+        const color=daysLeft<30?'var(--red-soft)':daysLeft<90?'var(--amber)':'var(--green-soft)';
+        return`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--fog);align-items:center">
+          <div style="flex:1"><div style="font-size:13px;font-weight:500">🏦 ${d.bank}</div><div style="font-size:11px;color:var(--stone)">${d.end} 到期 · NT$${(d.principal/10000).toFixed(0)}萬 @ ${d.rate}%</div></div>
+          <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:200;color:${color};text-align:right">${daysLeft>0?daysLeft+'天':'到期'}</div>
+        </div>`;
+      }).join('')+'</div>';
+    }
+  }
+}
+
+// ── ETF nav record modal (simplified) ──
+function openETFRecord(id){
+  const etf=D.etfs.find(e=>e.id===id);if(!etf)return;
+  const nav=prompt(`輸入 ${etf.name} (${etf.code}) 最新淨值（NT$）:`);
+  if(!nav||isNaN(parseFloat(nav)))return;
+  etf.currentNav=parseFloat(nav);
+  const today=new Date().toISOString().slice(0,7);
+  const existing=etf.history.findIndex(h=>h.date===today);
+  const monthlyUnits=etf.monthly/parseFloat(nav);
+  if(existing>=0){etf.history[existing]={date:today,nav:parseFloat(nav),units:monthlyUnits};}
+  else{etf.history.push({date:today,nav:parseFloat(nav),units:monthlyUnits});}
+  save(D);renderETFList();
+}
+
+function openEditETF(id){
+  // simple: just let user delete and re-add for now
+  alert('如需修改，請先刪除後重新新增');
+}
+
+function renderInvest(){
+  renderETFList();
+  renderDepositList();
+}
+
 function renderAll(){
   renderDashboard();
   renderRecords();
@@ -2060,6 +2516,7 @@ function renderAll(){
   renderPassiveList();
   renderAssetCards();
   renderCFSummary();
+  renderInvest();
 }
 
 // ══════ BILLS ══════
@@ -3492,6 +3949,8 @@ function applySettings(){
   document.getElementById('set-cur-desc').textContent=({TWD:'TWD 新台幣',USD:'USD 美元',JPY:'JPY 日圓',EUR:'EUR 歐元'})[s.currency]||s.currency;
   document.getElementById('tog-notify').checked=s.notify!==false;
   document.getElementById('tog-review').checked=s.review!==false;
+  const fti=document.getElementById('finmind-token-input');
+  if(fti&&s.finmindToken) fti.value=s.finmindToken;
   if(currentUser){
     const un=document.getElementById('settings-user-name');
     const ue=document.getElementById('settings-user-email');
