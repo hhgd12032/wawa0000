@@ -8,260 +8,214 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--green:#2a4238;--green-soft:#4e7a68;--green-pale:#e8f2ec;--ink:#1c1810;--stone:#6a6154;--fog:#ede8e0;--paper:#faf7f2;--amber:#c49a3c;--red-soft:#c46860;--font:'Outfit',sans-serif}
-body{background:#f5f1ea;font-family:var(--font);color:var(--ink);max-width:420px;margin:0 auto;padding:20px 16px 40px}
+:root{--green:#2a4238;--green-soft:#4e7a68;--green-pale:#e8f2ec;--ink:#1c1810;--stone:#6a6154;--fog:#ede8e0;--paper:#faf7f2;--amber:#c49a3c;--red-soft:#c46860}
+body{background:#f5f1ea;font-family:'Outfit',sans-serif;color:var(--ink);max-width:420px;margin:0 auto;padding:20px 16px 40px}
 h2{font-size:20px;font-weight:300;margin-bottom:4px}
 .sub{font-size:12px;color:var(--stone);margin-bottom:20px}
 .card{background:var(--paper);border-radius:18px;padding:18px;margin-bottom:14px;border:1px solid rgba(78,122,104,.15)}
-.label{font-size:10px;color:var(--stone);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
-input,select{width:100%;padding:10px 12px;border:1px solid var(--fog);border-radius:10px;font-family:inherit;font-size:13px;color:var(--ink);background:white;margin-bottom:10px}
+label{font-size:10px;color:var(--stone);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:4px}
+input{width:100%;padding:10px 12px;border:1px solid var(--fog);border-radius:10px;font-family:inherit;font-size:13px;color:var(--ink);background:white;margin-bottom:12px}
 button{width:100%;padding:12px;background:var(--green-soft);color:white;border:none;border-radius:12px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:8px}
-button.secondary{background:var(--fog);color:var(--stone)}
-.status{font-size:12px;color:var(--stone);padding:8px 0;min-height:20px}
-.status.ok{color:var(--green-soft)}
-.status.err{color:var(--red-soft)}
-.range-row{display:flex;gap:6px;margin-bottom:12px}
-.range-btn{flex:1;padding:6px 0;border-radius:99px;border:1px solid var(--fog);background:none;font-family:inherit;font-size:12px;color:var(--stone);cursor:pointer}
-.range-btn.on{background:var(--green-soft);color:white;border-color:var(--green-soft)}
-.tab-row{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto}
-.tab{padding:5px 14px;border-radius:99px;border:1px solid var(--fog);background:none;font-family:inherit;font-size:12px;color:var(--stone);cursor:pointer;white-space:nowrap}
+button.sec{background:var(--fog);color:var(--stone)}
+.status{font-size:12px;color:var(--stone);padding:8px 0;min-height:20px;word-break:break-all}
+.status.ok{color:var(--green-soft);font-weight:500}
+.status.err{color:var(--red-soft);font-weight:500}
+.range-row{display:flex;gap:5px;margin-bottom:12px}
+.rb{flex:1;padding:6px 0;border-radius:99px;border:1px solid var(--fog);background:none;font-family:inherit;font-size:12px;color:var(--stone);cursor:pointer}
+.rb.on{background:var(--green-soft);color:white;border-color:var(--green-soft)}
+.tab-row{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto}
+.tab{padding:5px 12px;border-radius:99px;border:1px solid var(--fog);background:none;font-family:inherit;font-size:12px;color:var(--stone);cursor:pointer;white-space:nowrap}
 .tab.on{background:var(--green);color:white;border-color:var(--green)}
 .chart-wrap{position:relative;height:220px}
 .stat-row{display:flex;gap:8px;margin-bottom:14px}
 .stat{flex:1;background:var(--fog);border-radius:10px;padding:9px 8px;text-align:center}
 .stat-l{font-size:9.5px;color:var(--stone);margin-bottom:2px}
 .stat-v{font-size:13px;font-weight:500}
-.stat-v.pos{color:var(--green-soft)}
-.stat-v.neg{color:var(--red-soft)}
-.hist-table{width:100%;border-collapse:collapse;margin-top:12px}
-.hist-table th{font-size:11px;color:var(--stone);font-weight:400;padding:4px 6px;text-align:left;border-bottom:1px solid var(--fog)}
-.hist-table td{font-size:12px;padding:7px 6px;border-bottom:1px solid var(--fog)}
+.pos{color:var(--green-soft)}.neg{color:var(--red-soft)}
+.hist-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}
+.hist-table th{color:var(--stone);font-weight:400;padding:4px 6px;text-align:left;border-bottom:1px solid var(--fog)}
+.hist-table td{padding:7px 6px;border-bottom:1px solid var(--fog)}
+.log{font-size:11px;color:var(--stone);background:var(--fog);border-radius:8px;padding:10px;margin-top:8px;max-height:120px;overflow-y:auto;word-break:break-all;font-family:monospace}
 </style>
 </head>
 <body>
-
-<h2>ETF 走勢圖測試</h2>
-<div class="sub">輸入你的 FinMind Token 和 ETF 代碼來測試 API 連線</div>
+<h2>FinMind API 連線測試</h2>
+<div class="sub">確認 ETF 資料可以正確抓取</div>
 
 <div class="card">
-  <div class="label">設定</div>
-  <input id="token" placeholder="FinMind API Token" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiaGhnZDEyMDMyQGdtYWlsLmNvbSIsImVtYWlsIjoiaGhnZDEyMDMyQGdtYWlsLmNvbSIsInRva2VuX3ZlcnNpb24iOjB9.Zmg4Tmq7sDsW4bhZD4GNniY5k6Gesa69JufuVkcKB0I">
-  <input id="code" placeholder="ETF 代碼（例：0050）" value="0050">
-  <input id="monthly" placeholder="每月投入金額（例：10000）" value="10000" type="number">
-  <button onclick="fetchAndDraw()">🔗 連線並抓取資料</button>
-  <button class="secondary" onclick="useDemoData()">📊 使用示意資料預覽</button>
-  <div class="status" id="status">等待中...</div>
+  <label>FinMind Token</label>
+  <input id="token" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiaGhnZDEyMDMyQGdtYWlsLmNvbSIsImVtYWlsIjoiaGhnZDEyMDMyQGdtYWlsLmNvbSIsInRva2VuX3ZlcnNpb24iOjB9.Zmg4Tmq7sDsW4bhZD4GNniY5k6Gesa69JufuVkcKB0I">
+  <label>ETF 代碼</label>
+  <input id="code" value="0050">
+  <label>每月投入金額</label>
+  <input id="monthly" value="10000" type="number">
+  <button onclick="fetchReal()">🔗 連線 FinMind API</button>
+  <button class="sec" onclick="useDemo()">📊 使用示意資料</button>
+  <div class="status" id="status">等待連線...</div>
+  <div class="log" id="log" style="display:none"></div>
 </div>
 
-<div class="card" id="result-card" style="display:none">
+<div class="card" id="result" style="display:none">
   <div class="stat-row">
     <div class="stat"><div class="stat-l">累積本金</div><div class="stat-v" id="s-principal">—</div></div>
     <div class="stat"><div class="stat-l">最新淨值</div><div class="stat-v" id="s-nav">—</div></div>
     <div class="stat"><div class="stat-l">帳面損益</div><div class="stat-v" id="s-pnl">—</div></div>
   </div>
-
   <div class="tab-row">
     <button class="tab on" onclick="switchTab('nav',this)">淨值走勢</button>
     <button class="tab" onclick="switchTab('cost',this)">成本 vs 市值</button>
     <button class="tab" onclick="switchTab('return',this)">月報酬率</button>
   </div>
   <div class="range-row">
-    <button class="range-btn on" id="r-1" onclick="switchRange(1,this)">1M</button>
-    <button class="range-btn" id="r-3" onclick="switchRange(3,this)">3M</button>
-    <button class="range-btn" id="r-6" onclick="switchRange(6,this)">6M</button>
-    <button class="range-btn" id="r-12" onclick="switchRange(12,this)">1Y</button>
-    <button class="range-btn" id="r-0" onclick="switchRange(0,this)">全部</button>
+    <button class="rb on" onclick="switchRange(1,this)">1M</button>
+    <button class="rb" onclick="switchRange(3,this)">3M</button>
+    <button class="rb" onclick="switchRange(6,this)">6M</button>
+    <button class="rb" onclick="switchRange(12,this)">1Y</button>
+    <button class="rb" onclick="switchRange(0,this)">全部</button>
   </div>
   <div class="chart-wrap"><canvas id="chart"></canvas></div>
-
-  <table class="hist-table" id="hist-table">
-    <thead><tr><th>月份</th><th>收盤價</th><th>單月買進股數</th><th>累積成本</th></tr></thead>
+  <table class="hist-table">
+    <thead><tr><th>月份</th><th>收盤價</th><th>估算股數</th><th>累積成本</th></tr></thead>
     <tbody id="hist-body"></tbody>
   </table>
 </div>
 
 <script>
-let allData = [];
-let currentTab = 'nav';
-let currentRange = 1;
-let monthly = 10000;
-let chartInst = null;
+let allData=[], curTab='nav', curRange=1, monthly=10000, chartInst=null;
 
-async function fetchAndDraw() {
-  const token = document.getElementById('token').value.trim();
-  const code = document.getElementById('code').value.trim().toUpperCase();
-  monthly = parseInt(document.getElementById('monthly').value) || 10000;
-  const status = document.getElementById('status');
+function log(msg){ const el=document.getElementById('log'); el.style.display='block'; el.textContent+=(el.textContent?'\n':'')+msg; el.scrollTop=el.scrollHeight; }
 
-  status.className = 'status';
-  status.textContent = '連線中，抓取 FinMind 資料...';
+async function fetchReal(){
+  const token=document.getElementById('token').value.trim();
+  const code=document.getElementById('code').value.trim().toUpperCase();
+  monthly=parseInt(document.getElementById('monthly').value)||10000;
+  const st=document.getElementById('status');
+  const logEl=document.getElementById('log');
+  logEl.textContent=''; logEl.style.display='block';
 
-  const start = new Date();
-  start.setFullYear(start.getFullYear() - 1);
-  const startStr = start.toISOString().slice(0,10);
+  st.className='status'; st.textContent='連線中...';
 
-  const datasets = ['TaiwanStockPrice', 'TaiwanETFNetAssetValue'];
-  let found = false;
+  const start=new Date(); start.setFullYear(start.getFullYear()-1);
+  const startStr=start.toISOString().slice(0,10);
 
-  for (const ds of datasets) {
-    try {
-      const url = `https://api.finmindtrade.com/api/v4/data?dataset=${ds}&data_id=${code}&start_date=${startStr}&token=${token}`;
-      status.textContent = `嘗試 ${ds}...`;
-      const res = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const d = await res.json();
-      if (d.status === 200 && d.data?.length) {
-        status.className = 'status ok';
-        status.textContent = `✅ 成功！來源：${ds}，共 ${d.data.length} 筆資料`;
-        processData(d.data, ds);
-        found = true;
-        break;
-      } else {
-        status.textContent = `${ds} 無資料 (${d.msg||d.status})，嘗試下一個...`;
-      }
-    } catch(e) {
-      status.textContent = `${ds} 錯誤：${e.message}`;
+  // Official FinMind format from docs: GET with params + Bearer header
+  const params=new URLSearchParams({dataset:'TaiwanStockPrice',data_id:code,start_date:startStr,token});
+  const url=`https://api.finmindtrade.com/api/v4/data?${params}`;
+
+  log(`URL: ${url.slice(0,80)}...`);
+  log(`Header: Authorization: Bearer ${token.slice(0,20)}...`);
+
+  try{
+    const res=await fetch(url,{headers:{'Authorization':`Bearer ${token}`}});
+    log(`HTTP status: ${res.status} ${res.statusText}`);
+    const text=await res.text();
+    log(`Response (first 200): ${text.slice(0,200)}`);
+    const d=JSON.parse(text);
+    if(d.status===200&&d.data?.length){
+      const valid=d.data.filter(r=>parseFloat(r.close)>0)
+        .sort((a,b)=>a.date.localeCompare(b.date));
+      log(`✅ 成功！共 ${d.data.length} 筆，有效 ${valid.length} 筆`);
+      st.className='status ok'; st.textContent=`✅ 成功取得 ${valid.length} 筆資料，最新：${valid[valid.length-1]?.date} NT$${valid[valid.length-1]?.close}`;
+      processData(valid);
+    } else {
+      st.className='status err'; st.textContent=`❌ API 回傳：status=${d.status} msg="${d.msg}"`;
+      log(`status: ${d.status}, msg: ${d.msg}`);
     }
-  }
-
-  if (!found) {
-    status.className = 'status err';
-    status.textContent = '❌ 無法取得資料，請確認 Token 和 ETF 代碼是否正確';
+  }catch(e){
+    st.className='status err'; st.textContent=`❌ 錯誤：${e.message}`;
+    log(`Error: ${e.message}`);
   }
 }
 
-function processData(raw, ds) {
-  // group by month, take last record of each month
-  const byMonth = {};
-  raw.forEach(row => {
-    const mo = row.date.slice(0,7);
-    const price = parseFloat(row.close) || parseFloat(row.net_asset_value) || 0;
-    if (price > 0) byMonth[mo] = { date: mo, nav: price };
+function processData(raw){
+  // compress to monthly
+  const byMonth={};
+  raw.forEach(r=>{ const mo=r.date.slice(0,7); byMonth[mo]={date:mo,nav:parseFloat(r.close)}; });
+  allData=Object.values(byMonth).sort((a,b)=>a.date.localeCompare(b.date))
+    .map((h,i)=>({...h,units:monthly/h.nav,cost:monthly*(i+1)}));
+  renderResult();
+}
+
+function useDemo(){
+  monthly=parseInt(document.getElementById('monthly').value)||10000;
+  const navs=[155.2,158.4,162.1,159.8,165.3,169.7,172.4,168.9,174.5,178.2,176.8,180.1];
+  const base=new Date(); base.setMonth(base.getMonth()-11);
+  allData=navs.map((nav,i)=>{
+    const d=new Date(base); d.setMonth(d.getMonth()+i);
+    const date=d.toISOString().slice(0,7);
+    return{date,nav,units:monthly/nav,cost:monthly*(i+1)};
   });
-  allData = Object.values(byMonth).sort((a,b) => a.date.localeCompare(b.date));
+  document.getElementById('status').className='status ok';
+  document.getElementById('status').textContent='✅ 示意資料載入';
+  renderResult();
+}
 
-  // enrich with units and cumulative cost
-  allData = allData.map((h, i) => ({
-    ...h,
-    units: monthly / h.nav,
-    cost: monthly * (i + 1)
-  }));
-
-  const latest = allData[allData.length - 1];
-  const totalUnits = allData.reduce((s, h) => s + h.units, 0);
-  const marketVal = Math.round(latest.nav * totalUnits);
-  const principal = monthly * allData.length;
-  const pnl = marketVal - principal;
-
-  document.getElementById('s-principal').textContent = 'NT$' + principal.toLocaleString();
-  document.getElementById('s-nav').textContent = 'NT$' + latest.nav.toFixed(2);
-  const pnlEl = document.getElementById('s-pnl');
-  pnlEl.textContent = (pnl >= 0 ? '+' : '') + 'NT$' + pnl.toLocaleString();
-  pnlEl.className = 'stat-v ' + (pnl >= 0 ? 'pos' : 'neg');
-
-  // history table
-  const tbody = document.getElementById('hist-body');
-  tbody.innerHTML = [...allData].reverse().slice(0, 12).map(h =>
-    `<tr><td>${h.date}</td><td>NT$${h.nav.toFixed(2)}</td><td>${h.units.toFixed(2)} 股</td><td>NT$${h.cost.toLocaleString()}</td></tr>`
+function renderResult(){
+  const latest=allData[allData.length-1];
+  const totalUnits=allData.reduce((s,h)=>s+h.units,0);
+  const mktVal=Math.round(latest.nav*totalUnits);
+  const principal=monthly*allData.length;
+  const pnl=mktVal-principal;
+  document.getElementById('s-principal').textContent='NT$'+principal.toLocaleString();
+  document.getElementById('s-nav').textContent='NT$'+latest.nav.toFixed(2);
+  const pEl=document.getElementById('s-pnl');
+  pEl.textContent=(pnl>=0?'+':'')+'NT$'+Math.abs(pnl).toLocaleString();
+  pEl.className='stat-v '+(pnl>=0?'pos':'neg');
+  document.getElementById('hist-body').innerHTML=[...allData].reverse().slice(0,12).map(h=>
+    `<tr><td>${h.date}</td><td>NT$${h.nav.toFixed(2)}</td><td>${h.units.toFixed(2)}</td><td>NT$${h.cost.toLocaleString()}</td></tr>`
   ).join('');
-
-  document.getElementById('result-card').style.display = 'block';
+  document.getElementById('result').style.display='block';
   drawChart();
 }
 
-function useDemoData() {
-  monthly = parseInt(document.getElementById('monthly').value) || 10000;
-  // 12 months of fake 0050 data
-  const navs = [155.2,158.4,162.1,159.8,165.3,169.7,172.4,168.9,174.5,178.2,176.8,180.1];
-  const base = new Date(); base.setMonth(base.getMonth() - 11);
-  allData = navs.map((nav, i) => {
-    const d = new Date(base); d.setMonth(d.getMonth() + i);
-    const date = d.toISOString().slice(0,7);
-    return { date, nav, units: monthly / nav, cost: monthly * (i + 1) };
-  });
-  const latest = allData[allData.length - 1];
-  const totalUnits = allData.reduce((s, h) => s + h.units, 0);
-  const marketVal = Math.round(latest.nav * totalUnits);
-  const principal = monthly * allData.length;
-  const pnl = marketVal - principal;
-  document.getElementById('s-principal').textContent = 'NT$' + principal.toLocaleString();
-  document.getElementById('s-nav').textContent = 'NT$' + latest.nav.toFixed(2);
-  const pnlEl = document.getElementById('s-pnl');
-  pnlEl.textContent = '+NT$' + pnl.toLocaleString();
-  pnlEl.className = 'stat-v pos';
-  const tbody = document.getElementById('hist-body');
-  tbody.innerHTML = [...allData].reverse().map(h =>
-    `<tr><td>${h.date}</td><td>NT$${h.nav.toFixed(2)}</td><td>${h.units.toFixed(2)} 股</td><td>NT$${h.cost.toLocaleString()}</td></tr>`
-  ).join('');
-  document.getElementById('result-card').style.display = 'block';
-  document.getElementById('status').className = 'status ok';
-  document.getElementById('status').textContent = '✅ 示意資料載入完成';
-  drawChart();
+function getFiltered(){
+  if(!curRange) return allData;
+  const cut=new Date(); cut.setMonth(cut.getMonth()-curRange);
+  const s=cut.toISOString().slice(0,7);
+  const f=allData.filter(h=>h.date>=s);
+  return f.length?f:allData;
 }
 
-function getFilteredData() {
-  if (currentRange === 0) return allData;
-  const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - currentRange);
-  const cutoffStr = cutoff.toISOString().slice(0,7);
-  const filtered = allData.filter(h => h.date >= cutoffStr);
-  return filtered.length ? filtered : allData;
-}
+function drawChart(){
+  const data=getFiltered();
+  const labels=data.map(h=>h.date);
+  const navs=data.map(h=>h.nav);
+  const costs=data.map(h=>h.cost);
+  let cum=0;
+  const startIdx=allData.findIndex(h=>h.date===data[0]?.date);
+  allData.slice(0,startIdx).forEach(h=>cum+=h.units);
+  const mktVals=data.map(h=>{cum+=h.units; return Math.round(h.nav*cum);});
+  const rets=navs.map((n,i)=>i===0?0:parseFloat(((n-navs[i-1])/navs[i-1]*100).toFixed(1)));
 
-function drawChart() {
-  const data = getFilteredData();
-  const labels = data.map(h => h.date);
-  const navs = data.map(h => h.nav);
-  const costs = data.map(h => h.cost);
-  // market val: cumulative units × current nav
-  let cumUnits = 0;
-  const allIdx = allData.findIndex(h => h.date === data[0].date);
-  cumUnits = allData.slice(0, allIdx).reduce((s, h) => s + h.units, 0);
-  const marketVals = data.map(h => { cumUnits += h.units; return Math.round(h.nav * cumUnits); });
-  const returns = navs.map((n, i) => i === 0 ? 0 : parseFloat(((n - navs[i-1]) / navs[i-1] * 100).toFixed(1)));
+  if(chartInst){chartInst.destroy();chartInst=null;}
+  const ctx=document.getElementById('chart').getContext('2d');
+  const tc='#968e7e',gc='rgba(60,53,41,.05)';
+  const base={responsive:true,maintainAspectRatio:false,
+    scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:6}}}};
 
-  if (chartInst) { chartInst.destroy(); chartInst = null; }
-  const ctx = document.getElementById('chart').getContext('2d');
-  const tc = '#968e7e', gc = 'rgba(60,53,41,.05)';
-  const baseOpts = { responsive: true, maintainAspectRatio: false,
-    scales: { x: { grid: { display: false }, ticks: { color: tc, font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 } } } };
-
-  if (currentTab === 'nav') {
-    chartInst = new Chart(ctx, { type: 'line', data: { labels, datasets: [
-      { label: '每股淨值', data: navs, borderColor: '#4e7a68', backgroundColor: 'rgba(78,122,104,.12)', fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: '#4e7a68', borderWidth: 2 }
-    ]}, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { grid: { color: gc }, ticks: { color: tc, font: { size: 10 }, callback: v => 'NT$' + v } } },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' NT$' + c.raw.toFixed(2) } } } } });
-
-  } else if (currentTab === 'cost') {
-    chartInst = new Chart(ctx, { type: 'line', data: { labels, datasets: [
-      { label: '市值估算', data: marketVals, borderColor: '#4e7a68', backgroundColor: 'rgba(78,122,104,.1)', fill: true, tension: .4, pointRadius: 3, borderWidth: 2 },
-      { label: '累積成本', data: costs, borderColor: 'rgba(196,154,60,.7)', backgroundColor: 'transparent', fill: false, tension: .1, pointRadius: 0, borderWidth: 1.5, borderDash: [5, 4] }
-    ]}, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { grid: { color: gc }, ticks: { color: tc, font: { size: 10 }, callback: v => v >= 10000 ? `${(v/10000).toFixed(1)}萬` : v } } },
-      plugins: { legend: { display: true, labels: { color: tc, font: { size: 10 }, boxWidth: 10 } } } } });
-
+  if(curTab==='nav'){
+    chartInst=new Chart(ctx,{type:'line',data:{labels,datasets:[{data:navs,borderColor:'#4e7a68',backgroundColor:'rgba(78,122,104,.12)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#4e7a68',borderWidth:2}]},
+      options:{...base,scales:{...base.scales,y:{grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>'NT$'+v}}},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' NT$'+c.raw.toFixed(2)}}}}});
+  } else if(curTab==='cost'){
+    chartInst=new Chart(ctx,{type:'line',data:{labels,datasets:[
+      {label:'市值',data:mktVals,borderColor:'#4e7a68',backgroundColor:'rgba(78,122,104,.1)',fill:true,tension:.4,pointRadius:3,borderWidth:2},
+      {label:'成本',data:costs,borderColor:'rgba(196,154,60,.7)',fill:false,tension:.1,pointRadius:0,borderWidth:1.5,borderDash:[5,4]}
+    ]},options:{...base,scales:{...base.scales,y:{grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>v>=10000?`${(v/10000).toFixed(1)}萬`:v}}},
+      plugins:{legend:{display:true,labels:{color:tc,font:{size:10},boxWidth:10}}}}});
   } else {
-    chartInst = new Chart(ctx, { type: 'bar', data: { labels: labels.slice(1), datasets: [
-      { data: returns.slice(1), backgroundColor: returns.slice(1).map(v => v >= 0 ? 'rgba(78,122,104,.65)' : 'rgba(196,104,96,.65)'),
-        borderColor: returns.slice(1).map(v => v >= 0 ? '#4e7a68' : '#c46860'), borderWidth: 1.2, borderRadius: 4, borderSkipped: false }
-    ]}, options: { ...baseOpts, scales: { ...baseOpts.scales, y: { grid: { color: gc }, ticks: { color: tc, font: { size: 10 }, callback: v => v + '%' } } },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => (c.raw >= 0 ? '+' : '') + c.raw + '%' } } } } });
+    chartInst=new Chart(ctx,{type:'bar',data:{labels:labels.slice(1),datasets:[{
+      data:rets.slice(1),
+      backgroundColor:rets.slice(1).map(v=>v>=0?'rgba(78,122,104,.65)':'rgba(196,104,96,.65)'),
+      borderColor:rets.slice(1).map(v=>v>=0?'#4e7a68':'#c46860'),
+      borderWidth:1.2,borderRadius:4,borderSkipped:false}]},
+      options:{...base,scales:{...base.scales,y:{grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>v+'%'}}},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>(c.raw>=0?'+':'')+c.raw+'%'}}}}});
   }
 }
 
-function switchTab(tab, btn) {
-  currentTab = tab;
-  document.querySelectorAll('.tab').forEach(b => b.className = 'tab');
-  btn.className = 'tab on';
-  drawChart();
-}
-
-function switchRange(months, btn) {
-  currentRange = months;
-  document.querySelectorAll('.range-btn').forEach(b => b.className = 'range-btn');
-  btn.className = 'range-btn on';
-  drawChart();
-}
+function switchTab(t,btn){curTab=t;document.querySelectorAll('.tab').forEach(b=>b.className='tab');btn.className='tab on';drawChart();}
+function switchRange(m,btn){curRange=m;document.querySelectorAll('.rb').forEach(b=>b.className='rb');btn.className='rb on';drawChart();}
 </script>
 </body>
 </html>
