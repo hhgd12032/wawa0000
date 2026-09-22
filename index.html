@@ -2276,29 +2276,65 @@ function invTab(t){
 
 // ── ETF ──
 async function fetchETFPrice(code){
-  const token=D.settings.finmindToken||FINMIND_DEFAULT_TOKEN;
+  // Use Claude API with FinMind llms.txt knowledge to fetch stock data
+  // Claude reads FinMind API docs and calls the API server-side (no CORS issue)
   const today=new Date();
   const start=new Date(today); start.setFullYear(start.getFullYear()-1);
   const startStr=start.toISOString().slice(0,10);
-  const BASE='https://api.finmindtrade.com/api/v4/data';
-  const headers={'Authorization':`Bearer ${token}`};
-  // TaiwanStockPrice is the correct dataset for ETFs (confirmed from official docs)
-  const params=new URLSearchParams({dataset:'TaiwanStockPrice',data_id:code,start_date:startStr,token});
+  const todayStr=today.toISOString().slice(0,10);
+  const finmindToken=D.settings.finmindToken||FINMIND_DEFAULT_TOKEN;
+
   try{
-    const res=await fetch(`${BASE}?${params}`,{headers});
-    if(res.ok){
-      const d=await res.json();
-      if(d.status===200&&d.data?.length){
-        const sorted=[...d.data].sort((a,b)=>a.date.localeCompare(b.date));
-        // filter out zero-price records
-        const valid=sorted.filter(r=>parseFloat(r.close)>0);
-        if(valid.length){
-          const latest=valid[valid.length-1];
-          return{price:parseFloat(latest.close),data:valid,dataset:'TaiwanStockPrice'};
-        }
-      }
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:8192,
+        tools:[{
+          type:'web_search_20250305',
+          name:'web_search'
+        }],
+        messages:[{
+          role:'user',
+          content:`請幫我從 FinMind API 抓取台股 ${code} 從 ${startStr} 到 ${todayStr} 的每日收盤價。
+
+使用以下 API（直接用 fetch 或 web_search 呼叫）：
+https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${code}&start_date=${startStr}&token=${finmindToken}
+
+請回傳以下純 JSON 格式，不要任何其他文字或 markdown：
+{"status":"ok","data":[{"date":"YYYY-MM-DD","close":數字},...]}`
+        }],
+        system:'你是一個資料助理。當用戶要求抓取 FinMind API 資料時，使用 web_search 工具直接呼叫該 API URL，然後解析回傳的 JSON，最後只輸出用戶指定格式的純 JSON，不加任何說明文字、markdown 或 code block。'
+      })
+    });
+    if(!res.ok){
+      const errText=await res.text();
+      console.warn('Claude API error:',res.status,errText.slice(0,200));
+      return null;
     }
-  }catch(e){console.warn('FinMind TaiwanStockPrice error:',e);}
+    const msg=await res.json();
+    // find text block in response
+    const textBlock=msg.content?.find(b=>b.type==='text');
+    const text=textBlock?.text||'';
+    console.log('Claude response preview:',text.slice(0,300));
+    // extract JSON
+    const jsonMatch=text.match(/\{[\s\S]*\}/);
+    if(jsonMatch){
+      try{
+        const parsed=JSON.parse(jsonMatch[0]);
+        if(parsed.status==='ok'&&parsed.data?.length){
+          const valid=parsed.data
+            .filter(r=>r.date&&parseFloat(r.close)>0)
+            .sort((a,b)=>a.date.localeCompare(b.date));
+          if(valid.length){
+            const latest=valid[valid.length-1];
+            return{price:parseFloat(latest.close),data:valid,dataset:'FinMind'};
+          }
+        }
+      }catch(parseErr){console.warn('JSON parse error:',parseErr);}
+    }
+  }catch(e){console.warn('fetchETFPrice error:',e);}
   return null;
 }
 
