@@ -1427,7 +1427,7 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
 
   <!-- Overview panel -->
   <div id="inv-panel-overview" style="display:none">
-    <div style="padding:0 18px">
+    <div style="padding:0 18px 20px">
       <!-- allocation -->
       <div class="chart-card">
         <div class="chart-card-head"><div class="chart-title">資產配置</div><div class="chart-sub">投資本金分布</div></div>
@@ -1711,7 +1711,24 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
     <div class="sheet-handle"></div>
     <div class="sheet-title" id="etf-record-title">ETF 走勢</div>
     <div id="etf-record-stats"></div>
-    <div id="etf-trend-wrap" style="display:none;position:relative;height:180px;margin-bottom:12px">
+    <!-- chart tabs -->
+    <div id="etf-chart-tabs" style="display:none;margin-bottom:6px">
+      <!-- type tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;scrollbar-width:none">
+        <button class="cf-tab on" id="etf-tab-nav" onclick="etfChartTab('nav')" style="padding:5px 12px;font-size:12px;white-space:nowrap">淨值走勢</button>
+        <button class="cf-tab" id="etf-tab-cost" onclick="etfChartTab('cost')" style="padding:5px 12px;font-size:12px;white-space:nowrap">成本 vs 市值</button>
+        <button class="cf-tab" id="etf-tab-return" onclick="etfChartTab('return')" style="padding:5px 12px;font-size:12px;white-space:nowrap">月報酬率</button>
+      </div>
+      <!-- time range pills -->
+      <div style="display:flex;gap:5px;margin-bottom:10px">
+        <button onclick="etfSetRange(1)" id="etf-range-1" style="flex:1;padding:5px 0;border-radius:99px;border:1px solid var(--green-soft);background:var(--green-soft);color:white;font-family:inherit;font-size:11.5px;cursor:pointer">1M</button>
+        <button onclick="etfSetRange(3)" id="etf-range-3" style="flex:1;padding:5px 0;border-radius:99px;border:1px solid var(--fog);background:none;color:var(--stone);font-family:inherit;font-size:11.5px;cursor:pointer">3M</button>
+        <button onclick="etfSetRange(6)" id="etf-range-6" style="flex:1;padding:5px 0;border-radius:99px;border:1px solid var(--fog);background:none;color:var(--stone);font-family:inherit;font-size:11.5px;cursor:pointer">6M</button>
+        <button onclick="etfSetRange(12)" id="etf-range-12" style="flex:1;padding:5px 0;border-radius:99px;border:1px solid var(--fog);background:none;color:var(--stone);font-family:inherit;font-size:11.5px;cursor:pointer">1Y</button>
+        <button onclick="etfSetRange(0)" id="etf-range-0" style="flex:1;padding:5px 0;border-radius:99px;border:1px solid var(--fog);background:none;color:var(--stone);font-family:inherit;font-size:11.5px;cursor:pointer">全部</button>
+      </div>
+    </div>
+    <div id="etf-trend-wrap" style="display:none;position:relative;height:200px;margin-bottom:12px">
       <canvas id="etf-trend-chart"></canvas>
     </div>
     <div style="font-size:11.5px;color:var(--stone);margin-bottom:10px" id="etf-fetch-status">正在取得最新淨值...</div>
@@ -2263,14 +2280,24 @@ async function fetchETFPrice(code){
   const today=new Date();
   const start=new Date(today); start.setMonth(start.getMonth()-6);
   const startStr=start.toISOString().slice(0,10);
-  try{
-    const res=await fetch(`https://api.finmindtrade.com/api/v4/data?dataset=TaiwanETFNetAssetValue&data_id=${code}&start_date=${startStr}&token=${token}`);
-    const d=await res.json();
-    if(d.status===200&&d.data?.length){
-      const latest=d.data[d.data.length-1];
-      return{price:parseFloat(latest.net_asset_value)||parseFloat(latest.close)||0, data:d.data};
-    }
-  }catch(e){console.warn('FinMind fetch error:',e);}
+  // Try TaiwanStockPrice (works for ETFs listed on exchange)
+  const datasets=['TaiwanStockPrice','TaiwanETFNetAssetValue'];
+  for(const dataset of datasets){
+    try{
+      const url=`https://api.finmindtrade.com/api/v4/data?dataset=${dataset}&data_id=${code}&start_date=${startStr}&token=${token}`;
+      const res=await fetch(url,{
+        headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'}
+      });
+      if(!res.ok) continue;
+      const d=await res.json();
+      if(d.status===200&&d.data?.length){
+        const sorted=d.data.sort((a,b)=>a.date.localeCompare(b.date));
+        const latest=sorted[sorted.length-1];
+        const price=parseFloat(latest.close)||parseFloat(latest.net_asset_value)||0;
+        if(price>0) return{price, data:sorted, dataset};
+      }
+    }catch(e){console.warn(`FinMind ${dataset} error:`,e);}
+  }
   return null;
 }
 
@@ -2480,7 +2507,17 @@ function renderInvestOverview(){
   const total=items.reduce((s,i)=>s+i.val,0);
   const el=document.getElementById('inv-alloc-total');if(el)el.textContent=fmt(total);
   const legend=document.getElementById('inv-alloc-legend');
-  if(legend)legend.innerHTML=items.map((it,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${INV_COLORS[i%INV_COLORS.length]}"></div><div class="legend-name" style="font-size:12px">${it.name}</div><div class="legend-pct">${total>0?Math.round(it.val/total*100):0}%</div><div class="legend-amt" style="font-size:12px">${fmt(it.val)}</div></div>`).join('');
+  if(legend)legend.innerHTML=items.map((it,i)=>{
+    const pct=total>0?Math.round(it.val/total*100):0;
+    return`<div style="display:flex;align-items:center;gap:7px;padding:3px 0">
+      <div style="width:9px;height:9px;border-radius:3px;background:${INV_COLORS[i%INV_COLORS.length]};flex-shrink:0"></div>
+      <div style="flex:1;min-width:0;overflow:hidden">
+        <div style="font-size:12px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${it.name}</div>
+      </div>
+      <div style="font-size:11.5px;color:var(--stone);white-space:nowrap;flex-shrink:0">${pct}%</div>
+      <div style="font-size:11.5px;color:var(--ink-deep);white-space:nowrap;font-weight:500;flex-shrink:0">${fmt(it.val)}</div>
+    </div>`;
+  }).join('');
   const ctx=document.getElementById('inv-alloc-chart')?.getContext('2d');
   if(ctx&&items.length){
     if(charts.invAlloc)charts.invAlloc.destroy();
@@ -2493,12 +2530,19 @@ function renderInvestOverview(){
     else{
       const sorted=[...D.deposits].sort((a,b)=>a.end.localeCompare(b.end));
       const today=new Date();
-      timeline.innerHTML='<div style="padding:0 0 8px">'+sorted.map(d=>{
+      timeline.innerHTML='<div style="padding:4px 0 4px">'+sorted.map((d,idx)=>{
         const daysLeft=Math.max(0,Math.ceil((new Date(d.end)-today)/(1000*60*60*24)));
         const color=daysLeft<30?'var(--red-soft)':daysLeft<90?'var(--amber)':'var(--green-soft)';
-        return`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--fog);align-items:center">
-          <div style="flex:1"><div style="font-size:13px;font-weight:500">${d.bank}</div><div style="font-size:11px;color:var(--stone)">${d.end} 到期 · NT$${(d.principal/10000).toFixed(0)}萬 @ ${d.rate}%</div></div>
-          <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:200;color:${color};text-align:right">${daysLeft>0?daysLeft+'天':'到期'}</div>
+        return`<div style="display:flex;align-items:center;padding:12px 0;${idx>0?'border-top:1px solid var(--fog)':''}">
+          <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;margin-right:12px"></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13.5px;font-weight:500;margin-bottom:3px">${d.bank}</div>
+            <div style="font-size:11.5px;color:var(--stone)">${d.end} 到期 · NT$${(d.principal/10000).toFixed(0)}萬 @ ${d.rate}%</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;margin-left:12px">
+            <div style="font-family:'Outfit',sans-serif;font-size:19px;font-weight:200;color:${color};line-height:1.1">${daysLeft>0?daysLeft:'到期'}</div>
+            ${daysLeft>0?'<div style="font-size:10px;color:var(--stone)">天</div>':''}
+          </div>
         </div>`;
       }).join('')+'</div>';
     }
@@ -2533,33 +2577,24 @@ function openETFRecord(id){
       </div>
     </div>`;
 
-  // draw chart if history exists
+  // store current ETF for chart tabs
+  window._currentChartETF = etf;
+
+  // show chart tabs + draw default chart
+  const tabsWrap=document.getElementById('etf-chart-tabs');
   const chartWrap=document.getElementById('etf-trend-wrap');
   if(etf.history&&etf.history.length>=2){
+    if(tabsWrap) tabsWrap.style.display='block';
     chartWrap.style.display='block';
-    const sorted=[...etf.history].sort((a,b)=>a.date.localeCompare(b.date));
-    const labels=sorted.map(h=>h.date.slice(0,7));
-    const navs=sorted.map(h=>h.nav||0);
-    // cumulative cost per month
-    const costs=sorted.map((_,i)=>etf.monthly*(i+1));
-    const ctx=document.getElementById('etf-trend-chart').getContext('2d');
-    if(window._etfTrendChart) window._etfTrendChart.destroy();
-    const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-    const tc=isDark?'#7a7268':'#968e7e';
-    window._etfTrendChart=new Chart(ctx,{
-      type:'line',
-      data:{labels,datasets:[
-        {label:'每股淨值(NT$)',data:navs,borderColor:'#4e7a68',backgroundColor:'rgba(78,122,104,.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#4e7a68',borderWidth:2,yAxisID:'y'},
-        {label:'累積成本(NT$)',data:costs,borderColor:'rgba(196,154,60,.7)',backgroundColor:'transparent',fill:false,tension:.1,pointRadius:0,borderWidth:1.5,borderDash:[5,4],yAxisID:'y2'}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:true,labels:{color:tc,font:{size:10},boxWidth:10}}},
-        scales:{
-          y:{position:'left',grid:{color:'rgba(0,0,0,.04)'},ticks:{color:tc,font:{size:9},callback:v=>'$'+v}},
-          y2:{position:'right',grid:{display:false},ticks:{color:tc,font:{size:9},callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v}}
-        }}
+    // reset tab + range state
+    ['nav','cost','return'].forEach(t=>{
+      const b=document.getElementById('etf-tab-'+t);
+      if(b) b.className='cf-tab'+(t==='nav'?' on':'');
     });
+    _etfChartRange=1; // default to 1M on open
+    etfSetRange(1);   // update pill styles + draw chart
   } else {
+    if(tabsWrap) tabsWrap.style.display='none';
     chartWrap.style.display='none';
   }
 
@@ -2581,23 +2616,129 @@ async function autoFetchETFNav(etf){
   const statusEl=document.getElementById('etf-fetch-status');
   if(statusEl)statusEl.textContent='自動抓取淨值中...';
   const result=await fetchETFPrice(etf.code);
-  if(result&&result.price){
+  if(result&&result.price&&result.data){
     etf.currentNav=result.price;
-    if(statusEl)statusEl.textContent=`已取得最新淨值 NT$${result.price.toFixed(2)}`;
-    // update today's record
-    const today=new Date().toISOString().slice(0,7);
-    const existing=etf.history.findIndex(h=>h.date===today);
-    const units=result.price>0?etf.monthly/result.price:0;
-    if(existing>=0){etf.history[existing]={date:today,nav:result.price,units};}
-    else{etf.history.push({date:today,nav:result.price,units});}
+    if(statusEl)statusEl.textContent=`已取得最新淨值 NT$${result.price.toFixed(2)} · 來源：${result.dataset||'FinMind'}`;
+
+    // ── Save historical data from API ──
+    // Reduce to monthly: take last record of each month
+    const byMonth={};
+    result.data.forEach(row=>{
+      const mo=row.date.slice(0,7); // YYYY-MM
+      const price=parseFloat(row.close)||parseFloat(row.net_asset_value)||0;
+      if(price>0) byMonth[mo]={date:mo,nav:price};
+    });
+
+    // Merge with existing history (don't overwrite manually entered records)
+    const existingMonths=new Set(etf.history.map(h=>h.date));
+    Object.values(byMonth).forEach(rec=>{
+      const units=etf.monthly>0&&rec.nav>0?etf.monthly/rec.nav:0;
+      if(existingMonths.has(rec.date)){
+        // update nav if from API (might be more accurate)
+        const idx=etf.history.findIndex(h=>h.date===rec.date);
+        if(idx>=0) etf.history[idx]={...etf.history[idx],nav:rec.nav,units};
+      } else {
+        etf.history.push({date:rec.date,nav:rec.nav,units});
+        existingMonths.add(rec.date);
+      }
+    });
+
+    // Sort history by date
+    etf.history.sort((a,b)=>a.date.localeCompare(b.date));
+
     save(D);renderETFList();
-    openETFRecord(etf.id); // re-render modal with new data
+    openETFRecord(etf.id); // re-render modal with chart
   } else {
     if(statusEl)statusEl.textContent='無法自動取得，請手動輸入';
   }
 }
 
 let currentETFId=null;
+
+let _etfChartRange=1; // default 1 month
+
+function etfSetRange(months){
+  _etfChartRange=months;
+  // update pill styles
+  [1,3,6,12,0].forEach(m=>{
+    const btn=document.getElementById('etf-range-'+m);
+    if(!btn)return;
+    const active=m===months;
+    btn.style.background=active?'var(--green-soft)':'none';
+    btn.style.color=active?'white':'var(--stone)';
+    btn.style.borderColor=active?'var(--green-soft)':'var(--fog)';
+  });
+  if(window._currentChartETF){
+    const activeTab=document.querySelector('[id^="etf-tab-"].on')?.id?.replace('etf-tab-','') || 'nav';
+    etfDrawChart(window._currentChartETF, activeTab);
+  }
+}
+
+function etfChartTab(tab){
+  ['nav','cost','return'].forEach(t=>{
+    const b=document.getElementById('etf-tab-'+t);
+    if(b) b.className='cf-tab'+(t===tab?' on':'');
+  });
+  if(window._currentChartETF) etfDrawChart(window._currentChartETF, tab);
+}
+
+function etfDrawChart(etf, mode){
+  // filter by time range
+  let allSorted=[...etf.history].sort((a,b)=>a.date.localeCompare(b.date));
+  let sorted=allSorted;
+  if(_etfChartRange>0){
+    const cutoff=new Date();
+    cutoff.setMonth(cutoff.getMonth()-_etfChartRange);
+    const cutoffStr=cutoff.toISOString().slice(0,7);
+    sorted=allSorted.filter(h=>h.date>=cutoffStr);
+    if(!sorted.length) sorted=allSorted; // fallback to all if no data in range
+  }
+  const labels=sorted.map(h=>h.date);
+  const navs=sorted.map(h=>h.nav||0);
+  // costs: cumulative from start of investment (not just filtered range)
+  const startMonth=etf.start?etf.start.slice(0,7):'';
+  const costs=sorted.map(h=>{
+    // count months from start to this record
+    const monthIdx=allSorted.findIndex(x=>x.date===h.date);
+    return etf.monthly*Math.max(1,monthIdx+1);
+  });
+  const marketVals=sorted.map((h,i)=>{
+    const totalUnits=allSorted.slice(0,allSorted.findIndex(x=>x.date===h.date)+1).reduce((s,x)=>s+(x.units||0),0);
+    return h.nav&&totalUnits?Math.round(h.nav*totalUnits):costs[i];
+  });
+  const monthlyReturns=navs.map((nav,i)=>i===0?0:Math.round((nav-navs[i-1])/navs[i-1]*1000)/10);
+
+  const ctx=document.getElementById('etf-trend-chart').getContext('2d');
+  if(window._etfTrendChart) window._etfTrendChart.destroy();
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const tc=isDark?'#7a7268':'#968e7e';
+  const gc=isDark?'rgba(255,255,255,.04)':'rgba(60,53,41,.05)';
+  const baseOpts={responsive:true,maintainAspectRatio:false,
+    scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:6}}}};
+
+  if(mode==='nav'){
+    window._etfTrendChart=new Chart(ctx,{type:'line',data:{labels,datasets:[
+      {label:'每股淨值',data:navs,borderColor:'#4e7a68',backgroundColor:'rgba(78,122,104,.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#4e7a68',borderWidth:2}
+    ]},options:{...baseOpts,scales:{...baseOpts.scales,y:{grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>'NT$'+v}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' NT$'+c.raw.toFixed(2)}}}}});
+
+  } else if(mode==='cost'){
+    window._etfTrendChart=new Chart(ctx,{type:'line',data:{labels,datasets:[
+      {label:'市值估算',data:marketVals,borderColor:'#4e7a68',backgroundColor:'rgba(78,122,104,.1)',fill:true,tension:.4,pointRadius:3,borderWidth:2},
+      {label:'累積成本',data:costs,borderColor:'rgba(196,154,60,.7)',backgroundColor:'transparent',fill:false,tension:.1,pointRadius:0,borderWidth:1.5,borderDash:[5,4]}
+    ]},options:{...baseOpts,scales:{...baseOpts.scales,y:{grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>v>=10000?`${(v/10000).toFixed(1)}萬`:v}}},
+      plugins:{legend:{display:true,labels:{color:tc,font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: NT$${c.raw.toLocaleString()}`}}}}});
+
+  } else if(mode==='return'){
+    window._etfTrendChart=new Chart(ctx,{type:'bar',data:{labels:labels.slice(1),datasets:[
+      {label:'月報酬率',data:monthlyReturns.slice(1),
+        backgroundColor:monthlyReturns.slice(1).map(v=>v>=0?'rgba(78,122,104,.6)':'rgba(196,104,96,.6)'),
+        borderColor:monthlyReturns.slice(1).map(v=>v>=0?'#4e7a68':'#c46860'),
+        borderWidth:1.2,borderRadius:4,borderSkipped:false}
+    ]},options:{...baseOpts,scales:{...baseOpts.scales,y:{grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>v+'%'}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw>=0?'+':''}${c.raw}%`}}}}});
+  }
+}
 function openETFRecordById(id){currentETFId=id;openETFRecord(id);}
 function manualInputETFNav(id){
   const etf=D.etfs.find(e=>e.id===id);if(!etf)return;
