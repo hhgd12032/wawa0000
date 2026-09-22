@@ -2278,26 +2278,27 @@ function invTab(t){
 async function fetchETFPrice(code){
   const token=D.settings.finmindToken||FINMIND_DEFAULT_TOKEN;
   const today=new Date();
-  const start=new Date(today); start.setMonth(start.getMonth()-6);
+  const start=new Date(today); start.setFullYear(start.getFullYear()-1);
   const startStr=start.toISOString().slice(0,10);
-  // Try TaiwanStockPrice (works for ETFs listed on exchange)
-  const datasets=['TaiwanStockPrice','TaiwanETFNetAssetValue'];
-  for(const dataset of datasets){
-    try{
-      const url=`https://api.finmindtrade.com/api/v4/data?dataset=${dataset}&data_id=${code}&start_date=${startStr}&token=${token}`;
-      const res=await fetch(url,{
-        headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'}
-      });
-      if(!res.ok) continue;
+  const BASE='https://api.finmindtrade.com/api/v4/data';
+  const headers={'Authorization':`Bearer ${token}`};
+  // TaiwanStockPrice is the correct dataset for ETFs (confirmed from official docs)
+  const params=new URLSearchParams({dataset:'TaiwanStockPrice',data_id:code,start_date:startStr,token});
+  try{
+    const res=await fetch(`${BASE}?${params}`,{headers});
+    if(res.ok){
       const d=await res.json();
       if(d.status===200&&d.data?.length){
-        const sorted=d.data.sort((a,b)=>a.date.localeCompare(b.date));
-        const latest=sorted[sorted.length-1];
-        const price=parseFloat(latest.close)||parseFloat(latest.net_asset_value)||0;
-        if(price>0) return{price, data:sorted, dataset};
+        const sorted=[...d.data].sort((a,b)=>a.date.localeCompare(b.date));
+        // filter out zero-price records
+        const valid=sorted.filter(r=>parseFloat(r.close)>0);
+        if(valid.length){
+          const latest=valid[valid.length-1];
+          return{price:parseFloat(latest.close),data:valid,dataset:'TaiwanStockPrice'};
+        }
       }
-    }catch(e){console.warn(`FinMind ${dataset} error:`,e);}
-  }
+    }
+  }catch(e){console.warn('FinMind TaiwanStockPrice error:',e);}
   return null;
 }
 
