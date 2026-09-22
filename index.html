@@ -854,10 +854,18 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
   <div class="topbar">
     <div><div class="topbar-title">收支管理</div><div class="topbar-sub">訂閱 · 被動收入 · 每日記錄</div></div>
   </div>
-  <!-- ── Search bar (top) ── -->
-  <div class="search-bar">
+  <!-- ── Global Search bar (top) ── -->
+  <div class="search-bar" style="margin-bottom:6px">
     <svg class="ic-sm"><use href="#ic-search"/></svg>
-    <input type="text" id="rec-search" placeholder="搜尋記錄..." oninput="renderRecords()">
+    <input type="text" id="rec-search" placeholder="搜尋所有記錄（跨月跨年）..." oninput="onSearchInput()">
+    <button id="search-clear-btn" onclick="clearSearch()" style="display:none;background:none;border:none;cursor:pointer;padding:0;color:var(--stone);line-height:1">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <!-- global search results (replaces month-filtered list when active) -->
+  <div id="global-search-results" style="display:none;padding:0 18px;margin-bottom:8px">
+    <div style="font-size:11.5px;color:var(--stone);margin-bottom:8px" id="search-result-label"></div>
+    <div id="search-result-list"></div>
   </div>
 
   <!-- hidden selectors synced by cfNavMonth -->
@@ -1917,6 +1925,79 @@ let filterVal='all';
 let sortMode='date'; // 'date' | 'cat'
 let cfSelectedYear=new Date().getFullYear();
 let cfSelectedMonth=new Date().getMonth()+1; // 1-12
+function onSearchInput(){
+  const q=(document.getElementById('rec-search')?.value||'').trim();
+  const clearBtn=document.getElementById('search-clear-btn');
+  if(clearBtn)clearBtn.style.display=q?'block':'none';
+
+  if(q){
+    // global search mode — show results across all months/years
+    renderGlobalSearch(q);
+  } else {
+    // back to month view
+    const globalResults=document.getElementById('global-search-results');
+    const cfMain=document.getElementById('cf-panel-rec');
+    const cfNav=document.querySelector('[id="cf-prev-btn"]')?.closest('div');
+    const cfSummary=document.querySelector('.cf-summary');
+    const filterRow=document.getElementById('filter-row');
+    if(globalResults)globalResults.style.display='none';
+    renderRecords();
+  }
+}
+
+function clearSearch(){
+  const inp=document.getElementById('rec-search');
+  if(inp){inp.value='';inp.focus();}
+  const clearBtn=document.getElementById('search-clear-btn');
+  if(clearBtn)clearBtn.style.display='none';
+  const globalResults=document.getElementById('global-search-results');
+  if(globalResults)globalResults.style.display='none';
+  renderRecords();
+}
+
+function renderGlobalSearch(q){
+  const lower=q.toLowerCase();
+  const results=D.records.filter(r=>
+    r.name?.toLowerCase().includes(lower)||
+    (r.note||'').toLowerCase().includes(lower)||
+    r.date?.includes(q)||
+    (CAT_LABELS[r.cat]||'').includes(q)
+  ).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+
+  const globalDiv=document.getElementById('global-search-results');
+  const label=document.getElementById('search-result-label');
+  const list=document.getElementById('search-result-list');
+  if(!globalDiv)return;
+
+  if(!results.length){
+    globalDiv.style.display='block';
+    label.textContent='找不到「'+q+'」的記錄';
+    list.innerHTML=`<div class="empty"><div class="empty-text">試試其他關鍵字</div></div>`;
+    return;
+  }
+
+  // group by month
+  const byMonth={};
+  results.forEach(r=>{
+    const mo=r.date.slice(0,7);
+    if(!byMonth[mo])byMonth[mo]=[];
+    byMonth[mo].push(r);
+  });
+
+  const totalInc=results.filter(r=>r.type==='income').reduce((s,r)=>s+r.amount,0);
+  const totalExp=results.filter(r=>r.type==='expense').reduce((s,r)=>s+r.amount,0);
+  label.innerHTML=`共 <b>${results.length}</b> 筆 · 收入 <span style="color:var(--green-soft)">${fmt(totalInc)}</span> · 支出 <span style="color:var(--red-soft)">${fmt(totalExp)}</span>`;
+
+  list.innerHTML=Object.keys(byMonth).sort().reverse().map(mo=>{
+    const [yr, m]=mo.split('-');
+    const MONTH_ZH=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+    const header=`<div style="font-size:11px;font-weight:600;color:var(--stone);letter-spacing:.5px;padding:8px 0 5px">${yr} 年 ${MONTH_ZH[parseInt(m)-1]}</div>`;
+    return header+byMonth[mo].map(r=>txHTML(r,true)).join('');
+  }).join('');
+
+  globalDiv.style.display='block';
+}
+
 function setSort(mode){
   sortMode=mode;
   document.getElementById('sort-date-btn').className='filter-chip'+(mode==='date'?' on':'');
