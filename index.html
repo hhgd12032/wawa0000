@@ -356,7 +356,7 @@ select.form-input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
 .invest-hero{margin:4px 18px 14px;background:var(--green);border-radius:24px;padding:20px 20px 18px;color:white;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(42,66,56,.2)}
 .invest-hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(100deg,transparent 0,transparent 3px,rgba(255,255,255,.015) 3px,rgba(255,255,255,.015) 4px);pointer-events:none}
 .etf-card{background:var(--paper);border:1px solid rgba(78,122,104,.18);border-radius:var(--r);margin:0 18px 12px;overflow:hidden;box-shadow:var(--sh-xs)}
-.etf-card-head{background:linear-gradient(135deg,#2a4238,#3a5c4e);padding:14px 16px;color:white}
+.etf-card-head{background:var(--paper);border-bottom:1px solid var(--fog);padding:14px 16px;color:var(--ink-deep)}
 .etf-card-body{padding:14px 16px}
 .etf-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
 .etf-stat{text-align:center;background:var(--fog);border-radius:10px;padding:8px 4px}
@@ -1369,7 +1369,16 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
         </div>
         <div class="form-group"><label class="form-label">每月扣款日</label>
           <select class="form-input" id="etf-debit-day">
-            ${Array.from({length:28},(_,i)=>`<option value="${i+1}">${i+1} 號</option>`).join('')}
+            <option value="1">1 號</option><option value="2">2 號</option><option value="3">3 號</option>
+            <option value="4">4 號</option><option value="5">5 號</option><option value="6">6 號</option>
+            <option value="7">7 號</option><option value="8">8 號</option><option value="9">9 號</option>
+            <option value="10">10 號</option><option value="11">11 號</option><option value="12">12 號</option>
+            <option value="13">13 號</option><option value="14">14 號</option><option value="15">15 號</option>
+            <option value="16">16 號</option><option value="17">17 號</option><option value="18">18 號</option>
+            <option value="19">19 號</option><option value="20">20 號</option><option value="21">21 號</option>
+            <option value="22">22 號</option><option value="23">23 號</option><option value="24">24 號</option>
+            <option value="25">25 號</option><option value="26">26 號</option><option value="27">27 號</option>
+            <option value="28">28 號</option>
           </select>
         </div>
         <div class="form-group"><label class="form-label">開始日期</label>
@@ -1693,6 +1702,21 @@ html[data-theme='dark'] .strip-dot.on{background:var(--green-soft)}
     <div class="sheet-title" id="day-detail-title">6 月 1 日</div>
     <div id="day-detail-summary" style="display:flex;gap:10px;margin-bottom:16px"></div>
     <div id="day-detail-list"></div>
+  </div>
+</div>
+
+<!-- ETF Record Modal -->
+<div class="modal-overlay" id="modal-etf-record">
+  <div class="modal-sheet" style="max-height:85vh;overflow-y:auto">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="etf-record-title">ETF 走勢</div>
+    <div id="etf-record-stats"></div>
+    <div id="etf-trend-wrap" style="display:none;position:relative;height:180px;margin-bottom:12px">
+      <canvas id="etf-trend-chart"></canvas>
+    </div>
+    <div style="font-size:11.5px;color:var(--stone);margin-bottom:10px" id="etf-fetch-status">正在取得最新淨值...</div>
+    <div id="etf-history-table" style="margin-bottom:12px"></div>
+    <button onclick="manualInputETFNav(currentETFId)" style="width:100%;padding:10px;background:var(--fog);border:none;border-radius:12px;font-family:inherit;font-size:13px;color:var(--stone);cursor:pointer">手動輸入淨值</button>
   </div>
 </div>
 
@@ -2330,8 +2354,8 @@ function renderETFList(){
           <span>目標進度 ${progress.toFixed(1)}%</span>
           <span>還差 ${fmt(Math.max(0,etf.goal-s.principal))}</span>
         </div>`:''}
-        <button onclick="openETFRecord(${etf.id})" style="margin-top:10px;width:100%;padding:8px;background:var(--green-pale);color:var(--green-soft);border:1px solid var(--green-mist);border-radius:10px;font-family:inherit;font-size:12.5px;cursor:pointer">
-          📊 更新淨值 / 查看走勢
+        <button onclick="currentETFId=${etf.id};openETFRecord(${etf.id})" style="margin-top:10px;width:100%;padding:8px;background:var(--green-pale);color:var(--green-soft);border:1px solid var(--green-mist);border-radius:10px;font-family:inherit;font-size:12.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px">
+          <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><polyline points='22 12 18 12 15 21 9 3 6 12 2 12'/></svg> 同步淨值 / 查看走勢
         </button>
       </div>
     </div>`;
@@ -2378,13 +2402,13 @@ function renderDepositList(){
     const totalDays=Math.ceil((endDate-new Date(dep.start))/(1000*60*60*24));
     const elapsed=Math.max(0,Math.ceil((today-new Date(dep.start))/(1000*60*60*24)));
     const progress=Math.min(elapsed/totalDays*100,100);
-    const interest=Math.round(dep.principal*dep.rate/100);
+    const interest=Math.round(dep.principal*dep.rate/100); // 年利率 × 本金（一年期）
     const isExpired=daysLeft===0;
     const urgentColor=daysLeft<30?'var(--red-soft)':daysLeft<90?'var(--amber)':'var(--green-soft)';
     return`<div class="dep-card">
       <div style="display:flex;align-items:flex-start;justify-content:space-between">
         <div>
-          <div style="font-size:14px;font-weight:500;margin-bottom:2px">🏦 ${dep.bank}</div>
+          <div style="font-size:14px;font-weight:500;margin-bottom:2px">${dep.bank}</div>
           <div style="font-size:11.5px;color:var(--stone)">年利率 ${dep.rate}% · 本金 ${fmt(dep.principal)}</div>
         </div>
         <div style="display:flex;gap:4px">
@@ -2432,10 +2456,8 @@ function renderInvestHero(){
   const totalPrincipal=D.etfs.reduce((s,e)=>s+calcETFStats(e).principal,0)
     +D.deposits.reduce((s,d)=>s+d.principal,0);
   const etfPnL=D.etfs.reduce((s,e)=>s+calcETFStats(e).pnl,0);
-  const depInterest=D.deposits.reduce((s,d)=>{
-    const days=Math.max(0,Math.ceil((new Date()-new Date(d.start))/(1000*60*60*24)));
-    return s+Math.round(d.principal*d.rate/100*days/365);
-  },0);
+  // 帳面損益 = 所有定存預計利息加總（本金 × 年利率）
+  const depInterest=D.deposits.reduce((s,d)=>s+Math.round(d.principal*d.rate/100),0);
   const totalPnL=etfPnL+depInterest;
   const roi=totalPrincipal>0?(totalPnL/totalPrincipal*100):0;
   const totalVal=totalPrincipal+totalPnL;
@@ -2475,7 +2497,7 @@ function renderInvestOverview(){
         const daysLeft=Math.max(0,Math.ceil((new Date(d.end)-today)/(1000*60*60*24)));
         const color=daysLeft<30?'var(--red-soft)':daysLeft<90?'var(--amber)':'var(--green-soft)';
         return`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--fog);align-items:center">
-          <div style="flex:1"><div style="font-size:13px;font-weight:500">🏦 ${d.bank}</div><div style="font-size:11px;color:var(--stone)">${d.end} 到期 · NT$${(d.principal/10000).toFixed(0)}萬 @ ${d.rate}%</div></div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500">${d.bank}</div><div style="font-size:11px;color:var(--stone)">${d.end} 到期 · NT$${(d.principal/10000).toFixed(0)}萬 @ ${d.rate}%</div></div>
           <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:200;color:${color};text-align:right">${daysLeft>0?daysLeft+'天':'到期'}</div>
         </div>`;
       }).join('')+'</div>';
@@ -2483,18 +2505,111 @@ function renderInvestOverview(){
   }
 }
 
-// ── ETF nav record modal (simplified) ──
+// ── ETF record + chart modal ──
 function openETFRecord(id){
   const etf=D.etfs.find(e=>e.id===id);if(!etf)return;
-  const nav=prompt(`輸入 ${etf.name} (${etf.code}) 最新淨值（NT$）:`);
+  // Build modal content
+  const s=calcETFStats(etf);
+  const histRows=etf.history.slice(-6).reverse().map(h=>
+    `<tr><td style="padding:6px 8px;font-size:12px;color:var(--stone)">${h.date}</td>
+     <td style="padding:6px 8px;font-size:12px;text-align:right">NT$${h.nav?.toFixed(2)||'—'}</td>
+     <td style="padding:6px 8px;font-size:12px;text-align:right;color:var(--green-soft)">${h.units?.toFixed(2)||'—'} 股</td></tr>`
+  ).join('');
+
+  document.getElementById('etf-record-title').textContent=`${etf.name} (${etf.code})`;
+  document.getElementById('etf-record-stats').innerHTML=`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <div style="flex:1;background:var(--fog);border-radius:10px;padding:9px 10px;text-align:center;min-width:80px">
+        <div style="font-size:9.5px;color:var(--stone);margin-bottom:2px">累積本金</div>
+        <div style="font-size:13px;font-weight:500">${fmt(s.principal)}</div>
+      </div>
+      <div style="flex:1;background:var(--fog);border-radius:10px;padding:9px 10px;text-align:center;min-width:80px">
+        <div style="font-size:9.5px;color:var(--stone);margin-bottom:2px">最新淨值</div>
+        <div style="font-size:13px;font-weight:500">${etf.currentNav?'NT$'+etf.currentNav.toFixed(2):'—'}</div>
+      </div>
+      <div style="flex:1;background:${s.pnl>=0?'var(--green-pale)':'var(--red-pale)'};border-radius:10px;padding:9px 10px;text-align:center;min-width:80px">
+        <div style="font-size:9.5px;color:var(--stone);margin-bottom:2px">帳面損益</div>
+        <div style="font-size:13px;font-weight:600;color:${s.pnl>=0?'var(--green-soft)':'var(--red-soft)'}">${s.pnl>=0?'+':''}${fmt(s.pnl)}</div>
+      </div>
+    </div>`;
+
+  // draw chart if history exists
+  const chartWrap=document.getElementById('etf-trend-wrap');
+  if(etf.history&&etf.history.length>=2){
+    chartWrap.style.display='block';
+    const sorted=[...etf.history].sort((a,b)=>a.date.localeCompare(b.date));
+    const labels=sorted.map(h=>h.date.slice(0,7));
+    const navs=sorted.map(h=>h.nav||0);
+    // cumulative cost per month
+    const costs=sorted.map((_,i)=>etf.monthly*(i+1));
+    const ctx=document.getElementById('etf-trend-chart').getContext('2d');
+    if(window._etfTrendChart) window._etfTrendChart.destroy();
+    const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+    const tc=isDark?'#7a7268':'#968e7e';
+    window._etfTrendChart=new Chart(ctx,{
+      type:'line',
+      data:{labels,datasets:[
+        {label:'每股淨值(NT$)',data:navs,borderColor:'#4e7a68',backgroundColor:'rgba(78,122,104,.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#4e7a68',borderWidth:2,yAxisID:'y'},
+        {label:'累積成本(NT$)',data:costs,borderColor:'rgba(196,154,60,.7)',backgroundColor:'transparent',fill:false,tension:.1,pointRadius:0,borderWidth:1.5,borderDash:[5,4],yAxisID:'y2'}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,labels:{color:tc,font:{size:10},boxWidth:10}}},
+        scales:{
+          y:{position:'left',grid:{color:'rgba(0,0,0,.04)'},ticks:{color:tc,font:{size:9},callback:v=>'$'+v}},
+          y2:{position:'right',grid:{display:false},ticks:{color:tc,font:{size:9},callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v}}
+        }}
+    });
+  } else {
+    chartWrap.style.display='none';
+  }
+
+  // history table
+  document.getElementById('etf-history-table').innerHTML=histRows
+    ?`<table style="width:100%;border-collapse:collapse"><thead><tr>
+       <th style="text-align:left;font-size:11px;color:var(--stone);padding:4px 8px;font-weight:400">日期</th>
+       <th style="text-align:right;font-size:11px;color:var(--stone);padding:4px 8px;font-weight:400">淨值</th>
+       <th style="text-align:right;font-size:11px;color:var(--stone);padding:4px 8px;font-weight:400">買進股數</th>
+     </tr></thead><tbody>${histRows}</tbody></table>`
+    :'<div style="font-size:12px;color:var(--stone);text-align:center;padding:12px 0">還沒有記錄，點下方按鈕新增</div>';
+
+  openModal('modal-etf-record');
+  // auto-fetch FinMind
+  autoFetchETFNav(etf);
+}
+
+async function autoFetchETFNav(etf){
+  const statusEl=document.getElementById('etf-fetch-status');
+  if(statusEl)statusEl.textContent='自動抓取淨值中...';
+  const result=await fetchETFPrice(etf.code);
+  if(result&&result.price){
+    etf.currentNav=result.price;
+    if(statusEl)statusEl.textContent=`已取得最新淨值 NT$${result.price.toFixed(2)}`;
+    // update today's record
+    const today=new Date().toISOString().slice(0,7);
+    const existing=etf.history.findIndex(h=>h.date===today);
+    const units=result.price>0?etf.monthly/result.price:0;
+    if(existing>=0){etf.history[existing]={date:today,nav:result.price,units};}
+    else{etf.history.push({date:today,nav:result.price,units});}
+    save(D);renderETFList();
+    openETFRecord(etf.id); // re-render modal with new data
+  } else {
+    if(statusEl)statusEl.textContent='無法自動取得，請手動輸入';
+  }
+}
+
+let currentETFId=null;
+function openETFRecordById(id){currentETFId=id;openETFRecord(id);}
+function manualInputETFNav(id){
+  const etf=D.etfs.find(e=>e.id===id);if(!etf)return;
+  const nav=prompt(`手動輸入 ${etf.name} (${etf.code}) 本月淨值（NT$）:`);
   if(!nav||isNaN(parseFloat(nav)))return;
   etf.currentNav=parseFloat(nav);
   const today=new Date().toISOString().slice(0,7);
   const existing=etf.history.findIndex(h=>h.date===today);
-  const monthlyUnits=etf.monthly/parseFloat(nav);
-  if(existing>=0){etf.history[existing]={date:today,nav:parseFloat(nav),units:monthlyUnits};}
-  else{etf.history.push({date:today,nav:parseFloat(nav),units:monthlyUnits});}
-  save(D);renderETFList();
+  const units=parseFloat(nav)>0?etf.monthly/parseFloat(nav):0;
+  if(existing>=0){etf.history[existing]={date:today,nav:parseFloat(nav),units};}
+  else{etf.history.push({date:today,nav:parseFloat(nav),units});}
+  save(D);closeModal('modal-etf-record');renderETFList();
 }
 
 function openEditETF(id){
@@ -2607,17 +2722,24 @@ function renderCCList(){
   if(!D.ccRecords.length){
     el.innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic-xl"><use href="#ic-wallet"/></svg></div><div class="empty-text">每月輸入帳單金額供參考</div></div>`;return;
   }
-  // group by month
+  // group by month — show latest, collapse older
   const byMonth={};
   D.ccRecords.forEach(r=>{if(!byMonth[r.month])byMonth[r.month]=[];byMonth[r.month].push(r);});
   const sorted=Object.keys(byMonth).sort().reverse();
-  el.innerHTML=sorted.map(m=>{
+  const latestM=sorted[0];
+  const olderMs=sorted.slice(1);
+
+  const renderCCMonth=(m)=>{
     const items=byMonth[m];
     const total=items.reduce((s,r)=>s+r.amount,0);
-    return `<div style="padding:0 0 4px">
-      <div style="font-size:11px;color:var(--stone);font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:8px 0 6px">${m}</div>
+    return`<div style="padding:0 0 4px">
+      <div style="font-size:11px;color:var(--stone);font-weight:600;letter-spacing:.5px;padding:8px 0 6px;display:flex;justify-content:space-between">
+        <span>${m}</span><span style="color:var(--green-soft)">${fmt(total)}</span>
+      </div>
       ${items.map(r=>`<div class="sub-item" style="margin-bottom:6px">
-        <div class="sub-item-icon" style="font-size:18px;display:flex;align-items:center;justify-content:center">💳</div>
+        <div class="sub-item-icon" style="display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
         <div class="sub-item-left">
           <div class="sub-item-name">${r.card}</div>
           <div class="sub-item-meta">${r.note||'信用卡帳單'}</div>
@@ -2625,12 +2747,25 @@ function renderCCList(){
         <div class="sub-item-amt">${fmt(r.amount)}</div>
         <div class="tx-actions">
           <button class="icon-btn" onclick="openEditCC(${r.id})"><svg class="ic-sm"><use href="#ic-edit"/></svg></button>
-        <button class="icon-btn del" onclick="delCC(${r.id})"><svg class="ic-sm"><use href="#ic-close"/></svg></button>
+          <button class="icon-btn del" onclick="delCC(${r.id})"><svg class="ic-sm"><use href="#ic-close"/></svg></button>
         </div>
       </div>`).join('')}
-      <div style="text-align:right;font-size:12px;color:var(--stone);padding:4px 4px 8px">本月合計 ${fmt(total)}</div>
     </div>`;
-  }).join('<div style="height:1px;background:var(--fog);margin:4px 0"></div>');
+  };
+
+  let ccHtml=latestM?renderCCMonth(latestM):'';
+  if(olderMs.length){
+    ccHtml+=`<details style="margin-top:2px">
+      <summary style="font-size:12px;color:var(--stone);cursor:pointer;padding:7px 4px;list-style:none;display:flex;align-items:center;gap:5px;user-select:none">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        查看過去 ${olderMs.length} 個月記錄
+      </summary>
+      <div style="margin-top:4px">
+      ${olderMs.map(m=>'<div style="height:1px;background:var(--fog);margin:2px 0"></div>'+renderCCMonth(m)).join('')}
+      </div>
+    </details>`;
+  }
+  el.innerHTML=ccHtml;
 }
 
 function openEditCC(id){
